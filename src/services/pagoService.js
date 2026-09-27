@@ -159,8 +159,12 @@ async function iniciar(pedido) {
 // pedidoEsperado: si viene de la URL de retorno, el pago tiene que ser de ese pedido
 async function sincronizar(pagoId, pedidoEsperado = null) {
   if (modo() === "demo" || !/^\d{1,20}$/.test(String(pagoId))) return null;
-
   const pago = await llamar("GET", `/v1/payments/${pagoId}`);
+  return aplicarPago(pago, pedidoEsperado);
+}
+
+// Registra en el pedido un pago que informó Mercado Pago
+async function aplicarPago(pago, pedidoEsperado = null) {
   const numero = Number(pago.external_reference);
   if (!numero || (pedidoEsperado && numero !== Number(pedidoEsperado))) return null;
 
@@ -185,6 +189,38 @@ async function sincronizar(pagoId, pedidoEsperado = null) {
     await avisarAlAdmin(resultado, estado);
   }
   return resultado;
+}
+
+// Le pregunta a Mercado Pago por los pagos de un pedido (sin esperar al cliente
+// ni al webhook). Si hay uno aprobado se toma ese; si no, el más reciente.
+async function sincronizarPedido(numero) {
+  if (modo() === "demo") return null;
+  const r = await llamar("GET", `/v1/payments/search?external_reference=${Number(numero)}&sort=date_created&criteria=desc&limit=20`);
+  const pagos = (r.results || []).filter((p) => String(p.external_reference) === String(numero));
+  const elegido = pagos.find((p) => p.status === "approved") || pagos[0];
+  return elegido ? aplicarPago(elegido, numero) : null;
+}
+
+// Revisa los pedidos con tarjeta que siguen sin pagar (en localhost Mercado Pago
+// no puede avisar por webhook, y el cliente puede cerrar la página sin volver)
+async function revisarSinPagar() {
+  if (modo() === "demo") return 0;
+  const numeros = await pedidoService.sinPagarRecientes(CONFIG.venceHoras + 1);
+  let actualizados = 0;
+  for (const numero of numeros) {
+    try {
+      const r = await sincronizarPedido(numero);
+      if (r?.cambio) actualizados++;
+    } catch (error) {
+      console.error(`No se pudo consultar el pago del pedido #${numero}:`, error.message);
+    }
+  }
+  return actualizados;
+}
+
+// Igual que revisarSinPagar pero sin demorar más que "ms" (para las páginas)
+function revisarSinPagarRapido(ms = 4000) {
+  return Promise.race([revisarSinPagar().catch(() => 0), new Promise((r) => setTimeout(() => r(0), ms))]);
 }
 
 async function avisarAlAdmin(resultado, estado) {
@@ -260,14 +296,21 @@ function datosTransferencia() {
   };
 }
 
-// Cada media hora cancela los pedidos con tarjeta que no se pagaron a tiempo
+// Cada 2 minutos pregunta por los pagos pendientes; cada media hora cancela
+// los pedidos con tarjeta que no se pagaron a tiempo (antes de cancelar, vuelve
+// a preguntar, así no se cancela uno que ya se pagó)
 function vencerPeriodicamente() {
+  const revisar = () =>
+    revisarSinPagar()
+      .then((n) => n && console.log(`💳 Pagos confirmados con Mercado Pago: ${n}`))
+      .catch((error) => console.error("No se pudieron revisar los pagos:", error.message));
   const vencer = () =>
-    pedidoService
-      .vencerImpagos(CONFIG.venceHoras)
+    revisar()
+      .then(() => pedidoService.vencerImpagos(CONFIG.venceHoras))
       .then((ids) => ids.length && console.log(`⏱  Pedidos sin pagar cancelados: ${ids.join(", ")}`))
       .catch((error) => console.error("No se pudieron vencer los pedidos impagos:", error.message));
   vencer();
+  setInterval(revisar, 2 * 60 * 1000).unref();
   setInterval(vencer, 30 * 60 * 1000).unref();
 }
 
@@ -277,6 +320,8 @@ module.exports = {
   venceHoras: () => CONFIG.venceHoras,
   iniciar,
   sincronizar,
+  sincronizarPedido,
+  revisarSinPagarRapido,
   simular,
   firmaValida,
   pagoDeLaNotificacion,

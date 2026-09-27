@@ -7,7 +7,9 @@
     const s = q.toString();
     return '/admin/pedidos' + (s ? '?' + s : '');
   };
-  const nombresEstado = { pendiente: 'Pendiente', pagado: 'Pagado', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const nombresEstado = { pendiente: 'Pendiente', pagado: 'Pagado', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado', sin_pagar: 'Sin pagar' };
+  // Transferencia esperando que el admin confirme que se acreditó
+  const esperaTransferencia = (p) => p.medioPago === 'transferencia' && p.estado === 'pendiente' && p.pagoEstado !== 'aprobado';
   const nombresPago = { pendiente: 'pago pendiente', aprobado: 'pago aprobado', rechazado: 'pago rechazado', reembolsado: 'reembolsado' };
 %>
 
@@ -24,7 +26,20 @@
         <% estados.forEach(e => { %>
           <a href="<%= url({ estado: e }) %>" class="<%= filtros.estado === e ? 'activo' : '' %>"><%= nombresEstado[e] %> <small data-conteo="<%= e %>"><%= conteo[e] %></small></a>
         <% }) %>
+        <a href="<%= url({ estado: 'sin_pagar' }) %>" class="segmentado__aparte <%= filtros.estado === 'sin_pagar' ? 'activo' : '' %>" title="Compras con tarjeta que el cliente no terminó de pagar">Sin pagar <small data-conteo="sin_pagar"><%= conteo.sin_pagar %></small></a>
       </nav>
+
+      <% if (filtros.estado === 'sin_pagar') { %>
+        <p class="aviso-pedidos">
+          Compras con tarjeta que el cliente <strong>no terminó de pagar</strong> en Mercado Pago. No tenés que hacer nada:
+          si las paga pasan solas a <strong>Pagado</strong>, y si no, se cancelan solas y el stock vuelve.
+        </p>
+      <% } else if (filtros.estado === 'pendiente') { %>
+        <p class="aviso-pedidos">
+          Pedidos que esperan tu confirmación: <strong>transferencias</strong> que tenés que verificar en tu cuenta.
+          Cuando se acredite, tocá <strong>Confirmar transferencia</strong> y el cliente lo ve como pagado.
+        </p>
+      <% } %>
 
       <form class="filtros-admin" action="/admin/pedidos" method="GET" role="search" id="filtrosPedidos">
         <% if (filtros.estado) { %><input type="hidden" name="estado" value="<%= filtros.estado %>"><% } %>
@@ -50,7 +65,7 @@
                     <strong><%= p.cliente %></strong>
                     <small><%= formatoFecha(p.fecha, true) %> · <%= p.items.reduce((a, i) => a + i.cantidad, 0) %> u. · <%= p.medioPago %> <span class="cobro cobro--<%= p.pagoEstado %>" data-cobro><%= nombresPago[p.pagoEstado] %></span> · <%= p.entrega === 'retiro' ? 'retiro' : 'envío' %></small>
                   </span>
-                  <span class="pedido-fila__estado estado estado--<%= p.estado %>" data-estado-tag><%= nombresEstado[p.estado] %></span>
+                  <span class="pedido-fila__estado estado estado--<%= p.estado %>" data-estado-tag><%= esperaTransferencia(p) ? 'Verificar pago' : nombresEstado[p.estado] %></span>
                   <span class="pedido-fila__total">
                     <strong><%= formatoPrecio(p.total) %></strong>
                     <small data-ganancia-texto><%= p.estado === 'cancelado' ? 'cancelado · no suma' : 'ganancia ' + formatoCompacto(p.ganancia) %></small>
@@ -102,6 +117,10 @@
                       <div class="pedido-fila__ganancia"><dt>Ganancia</dt><dd><%= formatoPrecio(p.ganancia) %></dd></div>
                     </dl>
 
+                    <% if (esperaTransferencia(p)) { %>
+                      <button type="button" class="btn btn--solido btn--chico pedido-fila__confirmar" data-confirmar-transferencia
+                              data-total="<%= formatoPrecio(p.total) %>">Confirmar transferencia</button>
+                    <% } %>
                     <label class="pedido-fila__cambiar">
                       <span>Cambiar estado</span>
                       <select class="campo__control" data-cambiar-estado>

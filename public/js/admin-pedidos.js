@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fila.classList.add("guardando");
       try {
         const r = await api(`/admin/pedidos/${numero}/estado`, "PATCH", { estado: nuevo });
+        $("[data-confirmar-transferencia]", fila)?.remove();
         const tag = $("[data-estado-tag]", fila);
         tag.className = `pedido-fila__estado estado estado--${r.estado}`;
         tag.textContent = select.options[select.selectedIndex].text;
@@ -94,4 +95,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+  // ---------- Confirmar transferencia ----------
+  // Atajo para marcar como pagada una transferencia que ya se acreditó:
+  // el cliente recién ahí ve su pedido como pagado
+  $$("[data-confirmar-transferencia]").forEach((boton) =>
+    boton.addEventListener("click", async () => {
+      const fila = boton.closest(".pedido-fila");
+      const ok = await confirmar({
+        titulo: `¿Confirmás la transferencia del pedido #${fila.dataset.numero}?`,
+        texto: `Hacelo cuando veas acreditados ${boton.dataset.total} en tu cuenta. El cliente va a ver el pedido como pagado.`,
+        boton: "Sí, se acreditó",
+      });
+      if (!ok) return;
+      const select = $("[data-cambiar-estado]", fila);
+      select.value = "pagado";
+      select.dispatchEvent(new Event("change"));
+    })
+  );
 });

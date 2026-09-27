@@ -32,8 +32,18 @@ async function buscar(req, res) {
 
 module.exports = {
   async detalle(req, res) {
-    const pedido = await buscar(req, res);
+    let pedido = await buscar(req, res);
     if (!pedido) return;
+    // Si todavía figura sin pagar, se pregunta a Mercado Pago (puede haber pagado
+    // y cerrado la página sin volver a la tienda)
+    if (sePuedePagar(pedido) && pagos.modo() !== "demo") {
+      try {
+        const r = await pagos.sincronizarPedido(pedido.numero);
+        if (r) pedido = await pedidos.obtener(pedido.numero);
+      } catch (error) {
+        console.error(`No se pudo consultar el pago del pedido #${pedido.numero}:`, error.message);
+      }
+    }
     const motivo = req.session.motivoPago?.numero === pedido.numero ? req.session.motivoPago.texto : null;
     delete req.session.motivoPago;
     res.render("mi-pedido", {

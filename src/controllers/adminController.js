@@ -3,6 +3,7 @@ const path = require("path");
 const { validationResult } = require("express-validator");
 const productoService = require("../services/productoService");
 const pedidoService = require("../services/pedidoService");
+const pagoService = require("../services/pagoService");
 
 const CARPETA_PUBLICA = path.join(__dirname, "../../public");
 
@@ -198,6 +199,9 @@ module.exports = {
   // ── Pedidos ────────────────────────────────────────────────
   async pedidos(req, res) {
     const { estado = "", q = "" } = req.query;
+    // Antes de listar, se pregunta a Mercado Pago por las compras con tarjeta sin
+    // confirmar: las que ya se pagaron pasan solas a "Pagado"
+    await pagoService.revisarSinPagarRapido();
     const [lista, conteo] = await Promise.all([pedidoService.listar({ estado, q }), pedidoService.conteoPorEstado()]);
     res.render(
       "admin/pedidos",
@@ -209,7 +213,8 @@ module.exports = {
         filtros: { estado, q },
         estados: pedidoService.ESTADOS,
         conteo,
-        total: Object.values(conteo).reduce((a, b) => a + b, 0),
+        // "Todos" no incluye las compras con tarjeta sin pagar (tienen su pestaña)
+        total: Object.entries(conteo).reduce((a, [e, n]) => (e === "sin_pagar" ? a : a + n), 0),
       })
     );
   },

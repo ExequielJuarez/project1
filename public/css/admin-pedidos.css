@@ -122,6 +122,30 @@ details[open] .pedido-fila__flecha {
   color: var(--gris-600);
 }
 
+/* Pestaña "Sin pagar": separada de los estados que maneja el admin */
+.segmentado__aparte {
+  border-left: 1px dashed var(--gris-400) !important;
+}
+
+/* Explicación de las pestañas Pendiente y Sin pagar */
+.aviso-pedidos {
+  margin: -4px 0 16px;
+  padding: 12px 14px;
+  border: 1px dashed var(--gris-400);
+  background: var(--blanco);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--gris-600);
+}
+
+.aviso-pedidos strong {
+  color: var(--negro);
+}
+
+.pedido-fila__confirmar {
+  align-self: flex-start;
+}
+
 /* Estado del cobro (en la línea de cada pedido) */
 .cobro {
   padding: 1px 6px;

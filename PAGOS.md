@@ -6,8 +6,9 @@ Cabal, Maestro…), dinero en cuenta o cuotas sin tarjeta. Los datos de la tarje
 **nunca pasan por este servidor**. La plata entra a tu cuenta de Mercado Pago y desde
 ahí la podés pasar a tu banco o a otra billetera (por ejemplo, Naranja X).
 
-La transferencia bancaria sigue disponible, con 10% de descuento. El pedido queda
-pendiente hasta que el admin lo marca como **Pagado** en Admin → Pedidos.
+La transferencia bancaria sigue disponible, con 10% de descuento. El pedido queda en
+**Admin → Pedidos → Pendiente** ("Verificar pago") hasta que el admin ve la plata en su
+cuenta y toca **Confirmar transferencia**. Recién ahí el cliente lo ve como pagado.
 
 ## Cómo activarlo
 
@@ -60,7 +61,8 @@ aprobado, rechazado o en proceso, y no se cobra nada.
 
 | Momento | Qué pasa |
 |---|---|
-| El cliente confirma el pago | Se crea el pedido **pendiente**, se descuenta el stock y va a Mercado Pago |
+| El cliente confirma el pago | Se crea el pedido, se descuenta el stock y va a Mercado Pago. Mientras no paga, figura en **Admin → Pedidos → Sin pagar** (no en Pendiente: no es tarea del admin) |
+| Paga pero no vuelve a la tienda | Cada 2 minutos, y cada vez que se abre el panel de pedidos o la página del pedido, la tienda **le pregunta a Mercado Pago** por los pedidos sin pagar. Los que se pagaron pasan solos a **Pagado** |
 | Vuelve de Mercado Pago o llega el webhook | Se **consulta el pago a Mercado Pago** (nunca se cree lo que dice la URL). Si está aprobado, cubre el total y es en pesos, el pedido pasa a **Pagado** y el admin recibe la notificación "Pago aprobado" |
 | Pago rechazado | El cliente ve el motivo y puede reintentar desde la página del pedido o desde Mis pedidos |
 | No paga en `PAGO_VENCE_HORAS` (48 h) | El pedido se cancela solo y el stock vuelve |
