@@ -3,10 +3,6 @@ const express = require("express");
 const path = require("path");
 const methodOverride = require("method-override");
 const session = require("express-session");
-const cron = require("node-cron"); // ← AGREGAR
-
-const db = require("./model/database/models");
-const alertaService = require("./data/alertaService"); // ← AGREGAR
 
 const app = express();
 
@@ -40,36 +36,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/reset", (req, res) => {
-  req.session.destroy();
-  res.send("Sesión destruida. Ahora vuelve a /InicioSesion");
-});
-
 app.use("/", indexRouter);
 
-db.sequelize
-  .authenticate()
-  .then(() => {
-    console.log("✅ Conexión a la base de datos MySQL establecida con éxito.");
-
-    db.sequelize.sync({ force: false });
-
-    // ── GENERAR ALERTAS AL ARRANCAR ──────────────────────────
-    console.log("🔔 Generando alertas iniciales...");
-    alertaService.generarAlertasLicencias();
-    alertaService.generarAlertasVehiculos();
-
-    // ── CRON: TODOS LOS DÍAS A LAS 6AM ───────────────────────
-    cron.schedule("0 6 * * *", () => {
-      console.log("🔔 Generando alertas automáticas diarias...");
-      alertaService.generarAlertasLicencias();
-      alertaService.generarAlertasVehiculos();
-    });
-
-    app.listen(puerto, () => {
-      console.log(`🚀 Servidor Express corriendo en el puerto ${puerto}`);
-    });
-  })
-  .catch((error) => {
-    console.error("❌ Error al conectar con la base de datos:", error);
-  });
+app.listen(puerto, () => {
+  console.log(`🚀 Servidor Express corriendo en el puerto ${puerto}`);
+});
