@@ -320,6 +320,22 @@ INSERT INTO pedidos (id, usuario_id, cliente, email, telefono, entrega, calle, a
   (1079, 1, 'Cliente Demo', 'demo@tienda.com', '11 48544601', 'domicilio', 'Av. Siempre Viva', '823', NULL, '1405', 'CABA', 'Ciudad Autónoma de Buenos Aires', 'tarjeta', 'pagado', 289000, 0, 0, 289000, 165000, 124000, NOW() - INTERVAL 184 MINUTE),
   (1080, NULL, 'Valentina López', 'valentina.lopez@mail.com', '11 48552520', 'retiro', NULL, NULL, NULL, NULL, NULL, NULL, 'transferencia', 'pendiente', 55000, 5500, 0, 49500, 30000, 19500, NOW() - INTERVAL 253 MINUTE);
 
+-- Cobro: los pedidos pagados/enviados/entregados tienen el pago aprobado
+UPDATE pedidos SET pago_estado = 'aprobado', pagado_en = creado_en
+WHERE estado IN ('pagado', 'enviado', 'entregado');
+UPDATE pedidos
+SET pago_detalle = ELT(1 + MOD(id, 4), 'Visa terminada en 4242 · 3 cuotas', 'Mastercard terminada en 5100 · 1 cuota',
+                       'Naranja terminada en 6019 · 6 cuotas', 'Dinero en cuenta de Mercado Pago'),
+    pago_id = CONCAT('demo-', id)
+WHERE medio_pago = 'tarjeta' AND pago_estado = 'aprobado';
+UPDATE pedidos SET pago_detalle = 'Transferencia acreditada'
+WHERE medio_pago = 'transferencia' AND pago_estado = 'aprobado';
+
+-- Dirección guardada del cliente demo (se usa para completar el checkout)
+UPDATE usuarios SET dni = '30111222', calle = 'Av. Siempre Viva', altura = '2837', codigo_postal = '1405',
+       ciudad = 'CABA', provincia = 'Ciudad Autónoma de Buenos Aires'
+WHERE email = 'demo@tienda.com';
+
 UPDATE pedidos SET actualizado_en = creado_en;
 
 -- ── Renglones de los pedidos (102) ─────────────────────────

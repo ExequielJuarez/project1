@@ -11,6 +11,11 @@ const loginValidator = require("../validations/loginValidator");
 const registroValidator = require("../validations/registroValidator");
 const soloInvitados = require("../middlewares/soloInvitados");
 const favoritosController = require("../controllers/favoritosController");
+const pagosController = require("../controllers/pagosController");
+const cuentaController = require("../controllers/cuentaController");
+const soloLogueados = require("../middlewares/soloLogueados");
+const perfilValidator = require("../validations/perfilValidator");
+const claveValidator = require("../validations/claveValidator");
 
 // ── INICIO (presentación de la marca, sin precios) ─────────
 // Los textos y fotos se editan desde Admin → Inicio
@@ -99,7 +104,24 @@ router.delete("/favoritos", favoritosController.vaciar);
 // ── CHECKOUT ───────────────────────────────────────────────
 router.get("/checkout/datos", checkoutController.ver);
 router.post("/checkout/datos", checkoutValidator, checkoutController.guardar);
+router.get("/checkout/pago", checkoutController.verPago);
 router.post("/checkout/confirmar", checkoutController.confirmar);
+
+// ── PAGOS (Mercado Pago) Y DETALLE DE UN PEDIDO ────────────
+router.get("/pedido/:numero", pagosController.detalle);
+router.post("/pedido/:numero/pagar", pagosController.pagar);
+router.post("/pedido/:numero/cancelar", pagosController.cancelar);
+router.get("/pagos/retorno", pagosController.retorno);
+router.post("/pagos/webhook", pagosController.webhook);
+router.get("/pagos/demo/:numero", pagosController.verDemo);
+router.post("/pagos/demo/:numero", pagosController.confirmarDemo);
+
+// ── MI CUENTA ──────────────────────────────────────────────
+router.get("/mi-cuenta", soloLogueados, (req, res) => res.redirect("/mi-cuenta/pedidos"));
+router.get("/mi-cuenta/pedidos", soloLogueados, cuentaController.pedidos);
+router.get("/mi-cuenta/datos", soloLogueados, cuentaController.verDatos);
+router.post("/mi-cuenta/datos", soloLogueados, perfilValidator, cuentaController.guardarDatos);
+router.post("/mi-cuenta/clave", soloLogueados, claveValidator, cuentaController.cambiarClave);
 
 // ── USUARIOS ───────────────────────────────────────────────
 router.get("/login", soloInvitados, usuarioController.verLogin);

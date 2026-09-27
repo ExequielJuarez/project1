@@ -31,6 +31,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "pendiente",
       },
+      // Cobro: Mercado Pago (tarjetas) o transferencia (la confirma el admin)
+      pagoEstado: {
+        type: DataTypes.ENUM("pendiente", "aprobado", "rechazado", "reembolsado"),
+        allowNull: false,
+        defaultValue: "pendiente",
+      },
+      pagoId: DataTypes.STRING(40),
+      pagoDetalle: DataTypes.STRING(120),
+      pagadoEn: DataTypes.DATE,
       subtotal: dinero(),
       descuento: dinero(),
       envio: dinero(),
@@ -55,6 +64,7 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Pedido.ESTADOS = ["pendiente", "pagado", "enviado", "entregado", "cancelado"];
+  Pedido.ESTADOS_PAGO = ["pendiente", "aprobado", "rechazado", "reembolsado"];
 
   Pedido.associate = (db) => {
     Pedido.belongsTo(db.Usuario, { as: "usuario", foreignKey: "usuarioId" });

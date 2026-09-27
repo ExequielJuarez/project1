@@ -2,6 +2,8 @@ const { validationResult } = require("express-validator");
 const carrito = require("../services/carritoService");
 const pedidos = require("../services/pedidoService");
 const notificaciones = require("../services/notificacionService");
+const pagos = require("../services/pagoService");
+const usuarios = require("../services/usuarioService");
 const provincias = require("../data/provincias");
 
 const CAMPOS = [
@@ -10,21 +12,31 @@ const CAMPOS = [
   "facturacion", "cuit", "razonSocial", "newsletter",
 ];
 
-function datosIniciales(req, resumen) {
+async function datosIniciales(req, resumen) {
   const guardados = req.session.checkout?.datos || {};
-  // Si inició sesión, completamos el contacto con sus datos
+  // Si inició sesión, completamos con los datos de su cuenta (Mis datos)
   const u = req.session.usuarioLogueado;
-  const deCuenta = u
-    ? { email: u.email, nombre: u.nombre, apellido: u.apellido, telefono: u.telefono || "" }
+  const p = u ? await usuarios.perfil(u.id) : null;
+  const deCuenta = p
+    ? {
+        email: p.email, nombre: p.nombre, apellido: p.apellido, telefono: p.telefono || "", dni: p.dni,
+        calle: p.calle, numero: p.numero, piso: p.piso, ciudad: p.ciudad, provincia: p.provincia,
+        ...(p.codigoPostal ? { codigoPostal: p.codigoPostal } : {}),
+      }
     : {};
   return {
-    ...deCuenta,
     entrega: resumen.entrega,
     facturacion: "consumidor",
     codigoPostal: resumen.codigoPostal || "",
     provincia: "",
+    ...deCuenta,
     ...guardados,
   };
+}
+
+// Los pedidos que se hicieron en esta sesión se pueden ver sin cuenta
+function recordarPedido(req, numero) {
+  req.session.pedidosRecientes = [numero, ...(req.session.pedidosRecientes || [])].slice(0, 10);
 }
 
 function render(res, { req, resumen, datos, errores = {}, status = 200 }) {
@@ -35,7 +47,6 @@ function render(res, { req, resumen, datos, errores = {}, status = 200 }) {
     datos,
     errores,
     provincias,
-    guardado: req.query.guardado === "1" && !Object.keys(errores).length,
   });
 }
 
@@ -43,7 +54,7 @@ module.exports = {
   async ver(req, res) {
     const resumen = await carrito.resumen(req.session);
     if (!resumen.items.length) return res.redirect("/carrito");
-    render(res, { req, resumen, datos: datosIniciales(req, resumen) });
+    render(res, { req, resumen, datos: await datosIniciales(req, resumen) });
   },
 
   async guardar(req, res) {
@@ -64,29 +75,66 @@ module.exports = {
     if (datos.entrega === "domicilio") carrito.fijarCodigoPostal(req.session, datos.codigoPostal);
 
     req.session.checkout = { datos };
-    res.redirect("/checkout/datos?guardado=1");
+    // Con sesión iniciada, la primera vez queda guardada la dirección en la cuenta
+    const u = req.session.usuarioLogueado;
+    if (u) await usuarios.guardarDireccionSiFalta(u.id, datos).catch((e) => console.error("No se guardó la dirección:", e.message));
+    res.redirect("/checkout/pago");
   },
 
-  // Confirma el pedido (en la maqueta todavía sin paso de pago real):
-  // lo guarda en la base, descuenta el stock y vacía el carrito
+  // Paso 3: elegir cómo pagar
+  async verPago(req, res) {
+    const resumen = await carrito.resumen(req.session);
+    const datos = req.session.checkout?.datos;
+    if (!resumen.items.length) return res.redirect("/carrito");
+    if (!datos) return res.redirect("/checkout/datos");
+    res.render("checkout-pago", {
+      titulo: "Pago",
+      estilo: ["checkout-datos", "checkout-pago"],
+      resumen,
+      datos,
+      modoPago: pagos.modo(),
+      pagoDePrueba: pagos.esTokenDePrueba(),
+      venceHoras: pagos.venceHoras(),
+    });
+  },
+
+  // Crea el pedido (descuenta el stock y vacía el carrito) y lo manda a pagar:
+  // con tarjeta → Mercado Pago; con transferencia → página con los datos
   async confirmar(req, res) {
+    if (["tarjeta", "transferencia"].includes(req.body.medio)) carrito.fijarMedioPago(req.session, req.body.medio);
     const resumen = await carrito.resumen(req.session);
     const datos = req.session.checkout?.datos;
     if (!resumen.items.length) return res.redirect("/carrito");
     if (!datos) return res.redirect("/checkout/datos");
 
+    let pedido;
     try {
-      const pedido = await pedidos.crearDesdeCarrito(resumen, datos, req.session.usuarioLogueado);
-      // Aviso a los admins (si falla, la compra igual queda hecha)
-      notificaciones.nuevoPedido(pedido).catch((e) => console.error("No se pudo notificar la compra:", e.message));
-      carrito.vaciar(req.session);
-      delete req.session.checkout;
-      req.session.flash = `¡Gracias! Tu pedido #${pedido.numero} quedó confirmado.`;
-      res.redirect("/");
+      pedido = await pedidos.crearDesdeCarrito(resumen, datos, req.session.usuarioLogueado);
     } catch (error) {
       if (!error.sinStock) throw error;
       req.session.flash = `${error.message}. Revisá tu carrito.`;
-      res.redirect("/carrito");
+      return res.redirect("/carrito");
+    }
+
+    // Aviso a los admins (si falla, la compra igual queda hecha)
+    notificaciones.nuevoPedido(pedido).catch((e) => console.error("No se pudo notificar la compra:", e.message));
+    carrito.vaciar(req.session);
+    delete req.session.checkout;
+    recordarPedido(req, pedido.numero);
+
+    if (pedido.medioPago === "transferencia") {
+      req.session.flash = `¡Gracias! Tu pedido #${pedido.numero} quedó reservado. Te pasamos los datos para transferir.`;
+      return res.redirect(`/pedido/${pedido.numero}`);
+    }
+
+    try {
+      res.redirect(await pagos.iniciar(pedido));
+    } catch (error) {
+      console.error(`No se pudo iniciar el pago del pedido #${pedido.numero}:`, error.message);
+      req.session.flash = "Tu pedido quedó guardado, pero no pudimos conectar con Mercado Pago. Probá pagar de nuevo en un momento.";
+      res.redirect(`/pedido/${pedido.numero}`);
     }
   },
+
+  recordarPedido,
 };

@@ -7,7 +7,6 @@
   const hayErrores = Object.keys(errores).length > 0;
   const esRetiro = d.entrega === "retiro";
   const esFacturaA = d.facturacion === "facturaA";
-  const textoEnvio = (valor) => valor === null ? "A calcular" : valor === 0 ? "Gratis" : formatoPrecio(valor);
 %>
 
   <!-- ═════════════ ENCABEZADO ═════════════ -->
@@ -29,82 +28,10 @@
   <!-- ═════════════ CHECKOUT ═════════════ -->
   <main class="checkout contenedor">
 
-    <!-- Resumen del pedido (desplegable en celular, fijo al costado en PC) -->
-    <aside class="pedido" id="pedido" aria-label="Resumen del pedido">
-      <button type="button" class="pedido__toggle" id="pedidoToggle" aria-expanded="false" aria-controls="pedidoCuerpo">
-        <span class="pedido__toggle-texto">
-          <span class="pedido__toggle-abrir">Ver resumen</span>
-          <span class="pedido__toggle-cerrar">Ocultar resumen</span>
-          <small>(<%= r.cantidad %> <%= r.cantidad === 1 ? 'producto' : 'productos' %>)</small>
-        </span>
-        <strong data-valor="total"><%= formatoPrecio(r.total) %></strong>
-      </button>
-
-      <div class="pedido__cuerpo" id="pedidoCuerpo">
-        <h2 class="pedido__titulo">Tu pedido</h2>
-
-        <ul class="pedido__items">
-          <% r.items.forEach((item, n) => { %>
-            <li class="pedido__item">
-              <span class="pedido__imagen <%= n % 3 === 1 ? 'pedido__imagen--oscura' : '' %>">
-                (IMG)
-                <span class="pedido__cantidad"><%= item.cantidad %></span>
-              </span>
-              <span class="pedido__info">
-                <span class="pedido__nombre"><%= item.producto.nombre %></span>
-                <% if (item.color) { %><small>Color: <%= item.color %></small><% } %>
-              </span>
-              <span class="pedido__precio"><%= formatoPrecio(item.subtotal) %></span>
-            </li>
-          <% }) %>
-        </ul>
-
-        <dl class="pedido__totales">
-          <div class="pedido__fila">
-            <dt>Subtotal</dt>
-            <dd><%= formatoPrecio(r.subtotal) %></dd>
-          </div>
-          <% if (r.cupon) { %>
-            <div class="pedido__fila">
-              <dt>Cupón <small><%= r.cupon.codigo %></small></dt>
-              <dd>-<%= formatoPrecio(r.descuentoCupon) %></dd>
-            </div>
-          <% } %>
-          <% if (r.descuentoPago) { %>
-            <div class="pedido__fila">
-              <dt>Descuento transferencia</dt>
-              <dd>-<%= formatoPrecio(r.descuentoPago) %></dd>
-            </div>
-          <% } %>
-          <div class="pedido__fila">
-            <dt>Envío</dt>
-            <dd data-valor="envio"><%= textoEnvio(r.envio) %></dd>
-          </div>
-          <div class="pedido__fila pedido__fila--total">
-            <dt>Total</dt>
-            <dd data-valor="total"><%= formatoPrecio(r.total) %></dd>
-          </div>
-        </dl>
-
-        <p class="pedido__pago">
-          Pagás con <strong><%= r.medioPago === 'transferencia' ? 'transferencia' : 'tarjeta en ' + r.cuotas + ' cuotas sin interés' %></strong>
-          · <a href="/carrito">Editar</a>
-        </p>
-      </div>
-    </aside>
+    <%- include('partials/resumen-pedido', { r: resumen, editarPago: '/carrito' }) %>
 
     <!-- Formulario -->
     <form class="checkout-form" id="formDatos" action="/checkout/datos" method="POST" novalidate>
-
-      <% if (guardado) { %>
-        <div class="aviso aviso--ok aviso--confirmar" role="status">
-          <div>
-            <strong>¡Datos guardados!</strong>
-            El paso de pago va a estar en la próxima vista. Mientras tanto podés confirmar el pedido (demo, sin cobro).
-          </div>
-          <button type="submit" form="formConfirmar" class="btn aviso__boton">Confirmar pedido</button>
-        </div>
-      <% } %>
 
       <% if (hayErrores) { %>
         <div class="aviso aviso--error" role="alert" id="resumenErrores" tabindex="-1">
@@ -221,10 +148,6 @@
       </p>
     </form>
   </main>
-
-  <% if (guardado) { %>
-    <form action="/checkout/confirmar" method="POST" id="formConfirmar" hidden></form>
-  <% } %>
 
   <%- include('partials/footer') %>
   <script src="/js/checkout-datos.js"></script>

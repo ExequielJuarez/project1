@@ -228,6 +228,7 @@ module.exports = {
     res.json({
       ok: true,
       estado: pedido.estado,
+      pagoEstado: pedido.pagoEstado,
       ganancia: pedido.ganancia,
       stockMovido, // + unidades devueltas al stock, − unidades descontadas
       pendientes: await pedidoService.pendientes(),

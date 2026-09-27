@@ -18,6 +18,14 @@ module.exports = (sequelize, DataTypes) => {
       googleId: { type: DataTypes.STRING(64), unique: true },
       rol: { type: DataTypes.ENUM("cliente", "admin"), allowNull: false, defaultValue: "cliente" },
       newsletter: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+      // Datos guardados para completar el checkout (Mi cuenta → Mis datos)
+      dni: DataTypes.STRING(8),
+      calle: DataTypes.STRING(90),
+      altura: DataTypes.STRING(10),
+      piso: DataTypes.STRING(20),
+      codigoPostal: DataTypes.CHAR(4),
+      ciudad: DataTypes.STRING(80),
+      provincia: DataTypes.STRING(60),
     },
     {
       tableName: "usuarios",

@@ -91,7 +91,17 @@ async function cambiarEstado(id, estado) {
       }
     }
 
-    await pedido.update({ estado }, { transaction: t });
+    const cambios = { estado };
+    // Si el admin lo marca como pagado (o más adelante) y el cobro no estaba
+    // registrado —por ejemplo una transferencia—, queda aprobado a mano
+    if (["pagado", "enviado", "entregado"].includes(estado) && pedido.pagoEstado !== "aprobado") {
+      Object.assign(cambios, {
+        pagoEstado: "aprobado",
+        pagadoEn: new Date(),
+        pagoDetalle: pedido.pagoDetalle || (pedido.medioPago === "transferencia" ? "Transferencia acreditada" : "Pago confirmado a mano"),
+      });
+    }
+    await pedido.update(cambios, { transaction: t });
     return { pedido: plano(pedido), stockMovido };
   });
 }
@@ -137,7 +147,9 @@ async function crearDesdeCarrito(resumen, datos, usuario) {
         razonSocial: datos.facturacion === "facturaA" ? datos.razonSocial : null,
         medioPago: resumen.medioPago,
         cuponCodigo: resumen.cupon?.codigo || null,
-        estado: "pagado",
+        // Queda pendiente hasta que se acredita el pago (Mercado Pago o transferencia)
+        estado: "pendiente",
+        pagoEstado: "pendiente",
         subtotal: resumen.subtotal,
         descuento,
         envio: resumen.envio || 0,
@@ -157,6 +169,97 @@ async function crearDesdeCarrito(resumen, datos, usuario) {
     );
     return plano(pedido);
   });
+}
+
+// ── Pedidos de un cliente ───────────────────────────────────
+async function obtener(id) {
+  const pedido = await db.Pedido.findByPk(id, {
+    include: [
+      {
+        association: "items",
+        include: [{ association: "producto", attributes: ["id"], include: [{ association: "imagenes", attributes: ["ruta", "orden"] }] }],
+      },
+    ],
+    order: [["items", "id", "ASC"]],
+  });
+  return pedido ? conImagenes(plano(pedido)) : null;
+}
+
+// Primera foto de cada producto (si el producto todavía existe)
+function conImagenes(pedido) {
+  pedido.items = pedido.items.map((i) => {
+    const fotos = (i.producto?.imagenes || []).slice().sort((a, b) => a.orden - b.orden);
+    return { ...i, imagen: fotos[0]?.ruta || null };
+  });
+  return pedido;
+}
+
+async function delUsuario(usuarioId) {
+  const filas = await db.Pedido.findAll({
+    where: { usuarioId },
+    include: [
+      {
+        association: "items",
+        include: [{ association: "producto", attributes: ["id"], include: [{ association: "imagenes", attributes: ["ruta", "orden"] }] }],
+      },
+    ],
+    order: [["creado_en", "DESC"], ["id", "DESC"]],
+  });
+  return filas.map((f) => conImagenes(plano(f)));
+}
+
+// Registra el resultado de un cobro (lo llama pagoService con lo que
+// informa Mercado Pago). Es idempotente: se puede llamar varias veces
+// con el mismo pago. Devuelve { pedido, cambio, aviso } o null.
+async function registrarPago(id, { estado, pagoId = null, detalle = null, fecha = null }) {
+  if (!db.Pedido.ESTADOS_PAGO.includes(estado)) return null;
+
+  const resultado = await db.sequelize.transaction(async (t) => {
+    const pedido = await db.Pedido.findByPk(id, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!pedido) return null;
+    // Un pago aprobado no se pisa con un intento rechazado posterior
+    if (pedido.pagoEstado === "aprobado" && estado !== "aprobado" && estado !== "reembolsado") {
+      return { pedido: plano(pedido), cambio: false };
+    }
+    const cambio = pedido.pagoEstado !== estado || (pagoId && pedido.pagoId !== String(pagoId));
+    await pedido.update(
+      {
+        pagoEstado: estado,
+        pagoId: pagoId ? String(pagoId) : pedido.pagoId,
+        pagoDetalle: detalle || pedido.pagoDetalle,
+        pagadoEn: estado === "aprobado" ? pedido.pagadoEn || fecha || new Date() : pedido.pagadoEn,
+        // Pagado: el pedido pasa a "pagado" (si todavía estaba pendiente)
+        ...(estado === "aprobado" && pedido.estado === "pendiente" ? { estado: "pagado" } : {}),
+      },
+      { transaction: t }
+    );
+    return { pedido: plano(pedido), cambio };
+  });
+  if (!resultado) return null;
+
+  // Pagó un pedido que ya se había cancelado (por ejemplo, venció): se intenta
+  // reactivar; si no hay stock queda cancelado y se avisa al admin
+  if (estado === "aprobado" && resultado.pedido.estado === "cancelado") {
+    try {
+      const r = await cambiarEstado(id, "pagado");
+      resultado.pedido = r.pedido;
+    } catch (error) {
+      resultado.aviso = error.mensaje || "Se pagó un pedido cancelado";
+    }
+  }
+  return resultado;
+}
+
+// Cancela los pedidos con tarjeta que no se pagaron a tiempo y devuelve su stock
+async function vencerImpagos(horas) {
+  const limite = new Date(Date.now() - horas * 3600 * 1000);
+  const vencidos = await db.Pedido.findAll({
+    where: { medioPago: "tarjeta", estado: "pendiente", pagoEstado: { [Op.ne]: "aprobado" }, creado_en: { [Op.lt]: limite } },
+    attributes: ["id"],
+    raw: true,
+  });
+  for (const { id } of vencidos) await cambiarEstado(id, "cancelado");
+  return vencidos.map((v) => v.id);
 }
 
 // ── Métricas del panel ──────────────────────────────────────
@@ -258,6 +361,10 @@ module.exports = {
   pendientes,
   cambiarEstado,
   crearDesdeCarrito,
+  obtener,
+  delUsuario,
+  registrarPago,
+  vencerImpagos,
   metricas,
   ventasDeProducto,
 };

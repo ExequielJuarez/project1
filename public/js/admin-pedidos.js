@@ -62,6 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const tag = $("[data-estado-tag]", fila);
         tag.className = `pedido-fila__estado estado estado--${r.estado}`;
         tag.textContent = select.options[select.selectedIndex].text;
+        // Marcar como pagado también registra el cobro (por ejemplo, una transferencia)
+        const NOMBRES_PAGO = { pendiente: "pago pendiente", aprobado: "pago aprobado", rechazado: "pago rechazado", reembolsado: "reembolsado" };
+        const cobro = $("[data-cobro]", fila);
+        cobro.className = `cobro cobro--${r.pagoEstado}`;
+        cobro.textContent = NOMBRES_PAGO[r.pagoEstado];
+        $("[data-cobro-texto]", fila).textContent = NOMBRES_PAGO[r.pagoEstado];
         $("[data-ganancia-texto]", fila).textContent =
           r.estado === "cancelado" ? "cancelado · no suma" : `ganancia ${compacto(r.ganancia)}`;
 

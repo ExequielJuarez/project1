@@ -34,6 +34,8 @@ app.use(
 app.locals.formatoPrecio = (n) =>
   "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 app.locals.descuentoTransferencia = 0.1;
+// Estado de un pedido explicado para el cliente (Mis pedidos)
+Object.assign(app.locals, require("./helpers/situacionPedido"));
 // Textos editables del inicio: *palabra* → cursiva (ya escapado)
 app.locals.textoRico = require("./services/inicioService").textoRico;
 // $4,7 M · $865 mil · $950 (para tarjetas y ejes del panel)
@@ -82,11 +84,19 @@ app.use((err, req, res, next) => {
 // Arranca solo si hay conexión con la base de datos
 db.sequelize
   .authenticate()
-  // Crea la tabla del inicio editable si la base es anterior a ese cambio
-  .then(() => db.ContenidoInicio.sync())
+  // Si la base es de una versión anterior, agrega lo que falte (no borra nada)
+  .then(() => require("./model/database/actualizar")())
   .then(() => {
     console.log(`✅ Conectado a la base de datos "${db.sequelize.config.database}"`);
     app.listen(puerto, () => console.log(`🚀 Servidor Express corriendo en el puerto ${puerto}`));
+    // Pagos: modo y vencimiento de los pedidos con tarjeta que no se pagaron
+    const pagos = require("./services/pagoService");
+    console.log(
+      pagos.modo() === "demo"
+        ? "💳 Pagos en MODO DEMO (no se cobra). Configurá MP_ACCESS_TOKEN en .env para cobrar con Mercado Pago."
+        : `💳 Pagos con Mercado Pago${pagos.esTokenDePrueba() ? " (credenciales de PRUEBA)" : ""}`
+    );
+    pagos.vencerPeriodicamente();
   })
   .catch((error) => {
     console.error("❌ No se pudo conectar con la base de datos:", error.message);

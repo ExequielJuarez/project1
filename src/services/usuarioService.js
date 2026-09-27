@@ -57,4 +57,83 @@ async function desdeGoogle({ googleId, email, nombre, apellido }) {
   return crear({ nombre, apellido, email, googleId });
 }
 
-module.exports = { publico, buscarPorId, buscarPorEmail, verificar, crear, desdeGoogle };
+// ── Mi cuenta ───────────────────────────────────────────────
+// Datos completos para la vista "Mis datos" y para completar el checkout
+async function perfil(id) {
+  const usuario = await db.Usuario.scope("conPassword").findByPk(id);
+  if (!usuario) return null;
+  const x = usuario.get({ plain: true });
+  return {
+    ...publico(usuario),
+    dni: x.dni || "",
+    calle: x.calle || "",
+    numero: x.altura || "",
+    piso: x.piso || "",
+    codigoPostal: x.codigoPostal || "",
+    ciudad: x.ciudad || "",
+    provincia: x.provincia || "",
+    tieneClave: Boolean(x.password),
+    tieneDireccion: Boolean(x.calle && x.codigoPostal),
+  };
+}
+
+async function actualizarPerfil(id, datos) {
+  const usuario = await db.Usuario.findByPk(id);
+  const vacio = (v) => (v === undefined ? undefined : String(v).trim() || null);
+  await usuario.update({
+    nombre: String(datos.nombre).trim(),
+    apellido: String(datos.apellido).trim(),
+    email: datos.email,
+    telefono: vacio(datos.telefono),
+    dni: vacio(datos.dni),
+    calle: vacio(datos.calle),
+    altura: vacio(datos.numero),
+    piso: vacio(datos.piso),
+    codigoPostal: vacio(datos.codigoPostal),
+    ciudad: vacio(datos.ciudad),
+    provincia: vacio(datos.provincia),
+  });
+  return publico(usuario);
+}
+
+// Guarda DNI y dirección del checkout si la cuenta todavía no tenía
+async function guardarDireccionSiFalta(id, datos) {
+  const usuario = await db.Usuario.findByPk(id);
+  if (!usuario) return;
+  const cambios = {};
+  if (!usuario.dni && datos.dni) cambios.dni = datos.dni;
+  if (!usuario.telefono && datos.telefono) cambios.telefono = datos.telefono;
+  if (!usuario.calle && datos.entrega === "domicilio" && datos.calle) {
+    Object.assign(cambios, {
+      calle: datos.calle,
+      altura: datos.numero,
+      piso: datos.piso || null,
+      codigoPostal: datos.codigoPostal,
+      ciudad: datos.ciudad,
+      provincia: datos.provincia,
+    });
+  }
+  if (Object.keys(cambios).length) await usuario.update(cambios);
+}
+
+// Cambia (o crea, en cuentas de Google) la contraseña. Devuelve false si la actual no coincide.
+async function cambiarClave(id, actual, nueva) {
+  const usuario = await db.Usuario.scope("conPassword").findByPk(id);
+  if (!usuario) return false;
+  if (usuario.password && !(await bcrypt.compare(String(actual || ""), usuario.password))) return false;
+  await usuario.update({ password: await bcrypt.hash(nueva, 10) });
+  return true;
+}
+
+module.exports = {
+  publico,
+  buscarPorId,
+  buscarPorEmail,
+  verificar,
+  crear,
+  desdeGoogle,
+  perfil,
+  actualizarPerfil,
+  guardarDireccionSiFalta,
+  cambiarClave,
+};

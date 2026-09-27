@@ -36,12 +36,13 @@ No borran datos.
 | `001-varias-imagenes.sql` | Crea `producto_imagenes`, pasa ahí la imagen de cada producto y quita `productos.imagen` |
 | `002-notificaciones.sql` | Crea `notificaciones` (avisos de compras nuevas para el admin) |
 | `003-contenido-inicio.sql` | Crea `contenido_inicio` (textos e imágenes del inicio editables desde el panel). La app también la crea sola al arrancar |
+| `004-pagos-y-cuenta.sql` | Agrega a `pedidos` el estado del cobro (Mercado Pago) y a `usuarios` el DNI y la dirección guardada. La app también las agrega sola al arrancar |
 
 ## Tablas
 
 | Tabla | Para qué | Relaciones |
 |---|---|---|
-| `usuarios` | Clientes y administradores (`rol`). `password` es un hash bcrypt, NULL en cuentas solo de Google (`google_id`) | — |
+| `usuarios` | Clientes y administradores (`rol`). Guarda DNI y dirección para completar el checkout. `password` es un hash bcrypt, NULL en cuentas solo de Google (`google_id`) | — |
 | `categorias` | Categorías del catálogo | — |
 | `colores` | Colores (valor para filtros, nombre y hex) | — |
 | `productos` | Catálogo: precio, **costo** (para la ganancia), stock, etiqueta, textos | → `categorias`, → `colores` |
@@ -49,7 +50,7 @@ No borran datos.
 | `especificaciones` | Ficha técnica de cada producto (clave / valor) | → `productos` (se borra con el producto) |
 | `favoritos` | Productos guardados por cada usuario | → `usuarios`, → `productos` |
 | `cupones` | Códigos de descuento (porcentaje, activo, vencimiento) | — |
-| `pedidos` | Compras: cliente, entrega, facturación, medio de pago, estado e importes (subtotal, descuento, envío, total, costo, ganancia). El `id` es el número de pedido (arranca en 1001) | → `usuarios` (NULL si compró como invitado) |
+| `pedidos` | Compras: cliente, entrega, facturación, medio de pago, estado, **cobro** (`pago_estado`, id y detalle del pago de Mercado Pago) e importes (subtotal, descuento, envío, total, costo, ganancia). El `id` es el número de pedido (arranca en 1001) | → `usuarios` (NULL si compró como invitado) |
 | `notificaciones` | Avisos para los admins: compra nueva o producto con poco stock. `leida` se comparte entre admins | → `pedidos`, → `productos` (quedan en NULL si se borran) |
 | `contenido_inicio` | Textos e imágenes de la página de inicio (Admin → Inicio). Una sola fila con el contenido en JSON | → `usuarios` (último que editó) |
 | `pedido_items` | Renglones de cada pedido. Copia nombre, precio y costo al comprar, así la ganancia histórica no cambia si después se edita el producto | → `pedidos`, → `productos` (NULL si el producto se borró) |

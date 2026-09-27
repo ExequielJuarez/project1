@@ -46,6 +46,14 @@ CREATE TABLE usuarios (
   google_id       VARCHAR(64)  NULL,
   rol             ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente',
   newsletter      TINYINT(1)   NOT NULL DEFAULT 0,
+  -- Datos guardados para completar el checkout (Mi cuenta → Mis datos)
+  dni             VARCHAR(8)   NULL,
+  calle           VARCHAR(90)  NULL,
+  altura          VARCHAR(10)  NULL,
+  piso            VARCHAR(20)  NULL,
+  codigo_postal   CHAR(4)      NULL,
+  ciudad          VARCHAR(80)  NULL,
+  provincia       VARCHAR(60)  NULL,
   creado_en       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -193,6 +201,11 @@ CREATE TABLE pedidos (
   medio_pago      ENUM('tarjeta', 'transferencia') NOT NULL DEFAULT 'tarjeta',
   cupon_codigo    VARCHAR(30)    NULL,
   estado          ENUM('pendiente', 'pagado', 'enviado', 'entregado', 'cancelado') NOT NULL DEFAULT 'pendiente',
+  -- Cobro (Mercado Pago para tarjetas; transferencia la confirma el admin)
+  pago_estado     ENUM('pendiente', 'aprobado', 'rechazado', 'reembolsado') NOT NULL DEFAULT 'pendiente',
+  pago_id         VARCHAR(40)    NULL COMMENT 'id del pago en Mercado Pago',
+  pago_detalle    VARCHAR(120)   NULL COMMENT 'ej: Visa terminada en 4242 · 3 cuotas',
+  pagado_en       DATETIME       NULL,
   subtotal        DECIMAL(12, 2) NOT NULL DEFAULT 0,
   descuento       DECIMAL(12, 2) NOT NULL DEFAULT 0,
   envio           DECIMAL(12, 2) NOT NULL DEFAULT 0,
@@ -204,6 +217,7 @@ CREATE TABLE pedidos (
   PRIMARY KEY (id),
   KEY idx_pedidos_usuario (usuario_id),
   KEY idx_pedidos_estado (estado),
+  KEY idx_pedidos_pago (pago_id),
   KEY idx_pedidos_fecha (creado_en),
   CONSTRAINT fk_pedidos_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     ON UPDATE CASCADE ON DELETE SET NULL

@@ -158,6 +158,18 @@
   color: var(--gris-600);
 }
 
+.pedido__imagen img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pedido__fila[hidden] {
+  display: none;
+}
+
 .pedido__imagen--oscura {
   background:
     repeating-linear-gradient(45deg, transparent 0 8px, rgba(255, 255, 255, 0.05) 8px 9px),
@@ -592,35 +604,3 @@
   }
 }
 
-/* Aviso con botón para confirmar el pedido (demo) */
-.aviso--confirmar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.aviso__boton {
-  align-self: flex-start;
-  height: 44px;
-  background: var(--blanco);
-  border-color: var(--blanco);
-  color: var(--negro);
-}
-
-.aviso__boton:hover {
-  background: transparent;
-  color: var(--blanco);
-}
-
-@media (min-width: 768px) {
-  .aviso--confirmar {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .aviso__boton {
-    flex: none;
-    align-self: center;
-  }
-}

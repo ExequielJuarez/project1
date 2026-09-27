@@ -52,9 +52,9 @@
             <% if (usuarioLocal.rol === 'admin') { %>
               <a href="/admin" class="cuenta__link cuenta__link--admin">Panel de administración →</a>
             <% } %>
+            <a href="/mi-cuenta/pedidos" class="cuenta__link">Mis pedidos</a>
+            <a href="/mi-cuenta/datos" class="cuenta__link">Mis datos</a>
             <a href="/favoritos" class="cuenta__link">Mis favoritos</a>
-            <a href="#" class="cuenta__link" data-proximamente>Mis pedidos</a>
-            <a href="#" class="cuenta__link" data-proximamente>Mis datos</a>
             <form action="/logout" method="POST">
               <button type="submit" class="cuenta__salir">Cerrar sesión</button>
             </form>

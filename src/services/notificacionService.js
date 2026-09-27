@@ -36,7 +36,9 @@ async function nuevoPedido(pedido) {
   await crear({
     tipo: "pedido",
     titulo: `Nueva compra #${pedido.numero}`,
-    mensaje: `${pedido.cliente} · ${pesos(pedido.total)} · ${unidades} ${unidades === 1 ? "unidad" : "unidades"}`,
+    mensaje: `${pedido.cliente} · ${pesos(pedido.total)} · ${unidades} ${unidades === 1 ? "unidad" : "unidades"} · ${
+      pedido.medioPago === "transferencia" ? "espera transferencia" : "pagando con tarjeta"
+    }`,
     url: `/admin/pedidos?q=${pedido.numero}`,
     pedidoId: pedido.numero,
   });
@@ -52,6 +54,17 @@ async function nuevoPedido(pedido) {
       productoId: p.id,
     });
   }
+}
+
+// Cuando Mercado Pago confirma el cobro de un pedido
+async function pagoAprobado(pedido) {
+  await crear({
+    tipo: "pedido",
+    titulo: `Pago aprobado #${pedido.numero}`,
+    mensaje: `${pedido.cliente} · ${pesos(pedido.total)}${pedido.pagoDetalle ? ` · ${pedido.pagoDetalle}` : ""}`,
+    url: `/admin/pedidos?q=${pedido.numero}`,
+    pedidoId: pedido.numero,
+  });
 }
 
 async function listar(limite = 15) {
@@ -74,4 +87,4 @@ async function marcarLeidas(id = null) {
   return cantidad;
 }
 
-module.exports = { eventos, crear, nuevoPedido, listar, noLeidas, marcarLeidas };
+module.exports = { eventos, crear, nuevoPedido, pagoAprobado, listar, noLeidas, marcarLeidas };

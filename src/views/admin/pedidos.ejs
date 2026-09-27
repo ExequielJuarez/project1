@@ -8,6 +8,7 @@
     return '/admin/pedidos' + (s ? '?' + s : '');
   };
   const nombresEstado = { pendiente: 'Pendiente', pagado: 'Pagado', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const nombresPago = { pendiente: 'pago pendiente', aprobado: 'pago aprobado', rechazado: 'pago rechazado', reembolsado: 'reembolsado' };
 %>
 
       <div class="admin-cabecera">
@@ -47,7 +48,7 @@
                   <span class="pedido-fila__numero">#<%= p.numero %></span>
                   <span class="pedido-fila__cliente">
                     <strong><%= p.cliente %></strong>
-                    <small><%= formatoFecha(p.fecha, true) %> · <%= p.items.reduce((a, i) => a + i.cantidad, 0) %> u. · <%= p.medioPago %> · <%= p.entrega === 'retiro' ? 'retiro' : 'envío' %></small>
+                    <small><%= formatoFecha(p.fecha, true) %> · <%= p.items.reduce((a, i) => a + i.cantidad, 0) %> u. · <%= p.medioPago %> <span class="cobro cobro--<%= p.pagoEstado %>" data-cobro><%= nombresPago[p.pagoEstado] %></span> · <%= p.entrega === 'retiro' ? 'retiro' : 'envío' %></small>
                   </span>
                   <span class="pedido-fila__estado estado estado--<%= p.estado %>" data-estado-tag><%= nombresEstado[p.estado] %></span>
                   <span class="pedido-fila__total">
@@ -58,6 +59,26 @@
                 </summary>
 
                 <div class="pedido-fila__detalle">
+                  <div class="pedido-fila__datos">
+                    <div>
+                      <p class="pedido-fila__dato-titulo">Cliente</p>
+                      <p><%= p.email %><%= p.telefono ? ` · ${p.telefono}` : '' %><%= p.dni ? ` · DNI ${p.dni}` : '' %></p>
+                      <p><%= p.facturacion === 'facturaA' ? `Factura A · ${p.razonSocial} · ${p.cuit}` : 'Consumidor final' %></p>
+                    </div>
+                    <div>
+                      <p class="pedido-fila__dato-titulo"><%= p.entrega === 'retiro' ? 'Retira en el showroom' : 'Envío a' %></p>
+                      <% if (p.entrega !== 'retiro') { %>
+                        <p><%= p.calle %> <%= p.altura %><%= p.piso ? `, ${p.piso}` : '' %> · <%= p.ciudad %>, <%= p.provincia %> (<%= p.codigoPostal %>)</p>
+                      <% } %>
+                      <% if (p.notas) { %><p><em>“<%= p.notas %>”</em></p><% } %>
+                    </div>
+                    <div>
+                      <p class="pedido-fila__dato-titulo">Cobro · <span data-cobro-texto><%= nombresPago[p.pagoEstado] %></span></p>
+                      <p><%= p.medioPago === 'transferencia' ? 'Transferencia' : 'Tarjeta (Mercado Pago)' %><%= p.pagoDetalle ? ` · ${p.pagoDetalle}` : '' %></p>
+                      <% if (p.pagoId && !String(p.pagoId).startsWith('demo')) { %><p><small>Id del pago en Mercado Pago: <%= p.pagoId %></small></p><% } %>
+                    </div>
+                  </div>
+
                   <table class="tabla">
                     <thead><tr><th>Producto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Subtotal</th></tr></thead>
                     <tbody>
