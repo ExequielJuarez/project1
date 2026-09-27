@@ -27,6 +27,7 @@ TRUNCATE TABLE pedido_items;
 TRUNCATE TABLE pedidos;
 TRUNCATE TABLE favoritos;
 TRUNCATE TABLE especificaciones;
+TRUNCATE TABLE producto_imagenes;
 TRUNCATE TABLE productos;
 TRUNCATE TABLE colores;
 TRUNCATE TABLE categorias;
@@ -59,79 +60,82 @@ INSERT INTO colores (id, valor, nombre, hex, orden) VALUES
   (5, 'crudo', 'Crudo', '#d6d6d6', 5);
 
 -- ── Productos ───────────────────────────────────────────
-INSERT INTO productos (id, nombre, categoria_id, color_id, precio, costo, stock, etiqueta, imagen, resumen, descripcion, destacados) VALUES
-  (1, 'Producto Clásico Edición Cuero', 1, 1, 25000, 12500, 34, 'Nuevo', NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+INSERT INTO productos (id, nombre, categoria_id, color_id, precio, costo, stock, etiqueta, resumen, descripcion, destacados) VALUES
+  (1, 'Producto Clásico Edición Cuero', 1, 1, 25000, 12500, 34, 'Nuevo', 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (2, 'Producto Madera Boca Ancha con Detalle Metálico', 2, 4, 29500, 14000, 18, NULL, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (2, 'Producto Madera Boca Ancha con Detalle Metálico', 2, 4, 29500, 14000, 18, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (3, 'Producto Personalizado con Caja de Regalo', 6, 1, 38500, 19000, 9, 'Más vendido', NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (3, 'Producto Personalizado con Caja de Regalo', 6, 1, 38500, 19000, 9, 'Más vendido', 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (4, 'Producto Personalizado Grabado a Láser', 6, 2, 38990, 20500, 22, NULL, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (4, 'Producto Personalizado Grabado a Láser', 6, 2, 38990, 20500, 22, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (5, 'Producto Artesanal Terminación Mate', 1, 5, 21000, 9800, 41, NULL, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (5, 'Producto Artesanal Terminación Mate', 1, 5, 21000, 9800, 41, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (6, 'Producto Acero Inoxidable Térmico', 3, 3, 42000, 23500, 3, 'Nuevo', NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (6, 'Producto Acero Inoxidable Térmico', 3, 3, 42000, 23500, 3, 'Nuevo', 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (7, 'Producto Imperial Base Reforzada', 4, 1, 55000, 30000, 6, 'Exclusivo', NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (7, 'Producto Imperial Base Reforzada', 4, 1, 55000, 30000, 6, 'Exclusivo', 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (8, 'Combo Regalo Completo con Accesorios', 7, 2, 64900, 36000, 12, NULL, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (8, 'Combo Regalo Completo con Accesorios', 7, 2, 64900, 36000, 12, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (9, 'Producto Cerámica Esmaltada', 5, 2, 18500, 8200, 0, NULL, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (9, 'Producto Cerámica Esmaltada', 5, 2, 18500, 8200, 0, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (10, 'Producto Madera Torneada a Mano', 2, 4, 27300, 13100, 27, NULL, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (10, 'Producto Madera Torneada a Mano', 2, 4, 27300, 13100, 27, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (11, 'Producto Forrado en Cuero Crudo', 1, 5, 31200, 16500, 2, 'Últimas unidades', NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (11, 'Producto Forrado en Cuero Crudo', 1, 5, 31200, 16500, 2, 'Últimas unidades', 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo'),
-  (12, 'Set Empresarial Personalizado x10', 6, 3, 289000, 165000, 5, NULL, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
+  (12, 'Set Empresarial Personalizado x10', 6, 3, 289000, 165000, 5, NULL, 'Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.', 'Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.
 
 Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.', 'Material principal de primera calidad
 Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo');
+
+-- Los productos de prueba no traen fotos: se cargan desde el panel admin
+-- (se guardan en producto_imagenes).
 
 -- ── Ficha técnica de cada producto ──────────────────────
 INSERT INTO especificaciones (producto_id, clave, valor, orden) VALUES

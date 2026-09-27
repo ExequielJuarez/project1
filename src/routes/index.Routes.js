@@ -11,21 +11,43 @@ const registroValidator = require("../validations/registroValidator");
 const soloInvitados = require("../middlewares/soloInvitados");
 const favoritosController = require("../controllers/favoritosController");
 
-// ── CATÁLOGO DE PRODUCTOS ──────────────────────────────────
+// ── CATÁLOGO DE PRODUCTOS (y resultados de búsqueda con ?q=) ─
 router.get(["/", "/catalogo"], async (req, res) => {
+  const busqueda = String(req.query.q || "").trim().slice(0, 60);
   const [productos, colores, categorias] = await Promise.all([
-    productoService.listar(),
+    productoService.listar({ q: busqueda }),
     productoService.colores(),
     productoService.categorias(),
   ]);
 
   res.render("catalogo", {
-    titulo: "Catálogo",
+    titulo: busqueda ? `Resultados para “${busqueda}”` : "Catálogo",
     estilo: "catalogo",
     navActivo: "catalogo",
+    busqueda,
     productos,
     colores: colores.map((c) => ({ ...c, cantidad: productos.filter((p) => p.color === c.valor).length })),
     categorias: categorias.map((nombre) => ({ nombre, cantidad: productos.filter((p) => p.categoria === nombre).length })),
+  });
+});
+
+// Sugerencias mientras se escribe en el buscador (JSON)
+router.get("/buscar/sugerencias", async (req, res) => {
+  const q = String(req.query.q || "").trim().slice(0, 60);
+  if (q.length < 2) return res.json({ ok: true, total: 0, productos: [] });
+
+  const encontrados = await productoService.listar({ q });
+  res.json({
+    ok: true,
+    total: encontrados.length,
+    productos: encontrados.slice(0, 6).map((p) => ({
+      id: p.id,
+      nombre: p.nombre,
+      categoria: p.categoria,
+      precio: p.precio,
+      imagen: p.imagen,
+      sinStock: p.stock <= 0,
+    })),
   });
 });
 

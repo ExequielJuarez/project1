@@ -10,7 +10,6 @@ module.exports = (sequelize, DataTypes) => {
       costo: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0, validate: { min: 0 } },
       stock: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
       etiqueta: DataTypes.STRING(24),
-      imagen: DataTypes.STRING(255),
       resumen: DataTypes.STRING(255),
       descripcion: DataTypes.TEXT, // párrafos separados por una línea en blanco
       destacados: DataTypes.TEXT, // un punto por línea
@@ -22,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     Producto.belongsTo(db.Categoria, { as: "categoria", foreignKey: "categoriaId" });
     Producto.belongsTo(db.Color, { as: "color", foreignKey: "colorId" });
     Producto.hasMany(db.Especificacion, { as: "especificaciones", foreignKey: "productoId" });
+    Producto.hasMany(db.ProductoImagen, { as: "imagenes", foreignKey: "productoId" });
     Producto.hasMany(db.PedidoItem, { as: "ventas", foreignKey: "productoId" });
     Producto.belongsToMany(db.Usuario, {
       as: "guardadoPor",

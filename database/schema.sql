@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS pedido_items;
 DROP TABLE IF EXISTS pedidos;
 DROP TABLE IF EXISTS favoritos;
 DROP TABLE IF EXISTS especificaciones;
+DROP TABLE IF EXISTS producto_imagenes;
 DROP TABLE IF EXISTS productos;
 DROP TABLE IF EXISTS colores;
 DROP TABLE IF EXISTS categorias;
@@ -84,7 +85,6 @@ CREATE TABLE productos (
   costo           DECIMAL(12, 2)    NOT NULL DEFAULT 0,
   stock           INT UNSIGNED      NOT NULL DEFAULT 0,
   etiqueta        VARCHAR(24)       NULL COMMENT 'Nuevo, Más vendido, etc.',
-  imagen          VARCHAR(255)      NULL COMMENT 'ruta pública, ej: /img/productos/x.jpg',
   resumen         VARCHAR(255)      NULL,
   descripcion     TEXT              NULL COMMENT 'párrafos separados por una línea en blanco',
   destacados      TEXT              NULL COMMENT 'un punto destacado por línea',
@@ -99,6 +99,21 @@ CREATE TABLE productos (
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT ck_productos_precio CHECK (precio > 0),
   CONSTRAINT ck_productos_costo CHECK (costo >= 0 AND costo <= precio)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- producto_imagenes: fotos de cada producto (hasta 8).
+-- La de menor "orden" es la principal (la que sale en las tarjetas).
+-- ----------------------------------------------------------
+CREATE TABLE producto_imagenes (
+  id           INT UNSIGNED      NOT NULL AUTO_INCREMENT,
+  producto_id  INT UNSIGNED      NOT NULL,
+  ruta         VARCHAR(255)      NOT NULL COMMENT 'ruta pública, ej: /img/productos/x.jpg',
+  orden        SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  KEY idx_imagenes_producto (producto_id, orden),
+  CONSTRAINT fk_imagenes_producto FOREIGN KEY (producto_id) REFERENCES productos (id)
+    ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------

@@ -31,15 +31,35 @@ async function renderFormulario(res, req, { producto = null, datos, errores = {}
       errores,
       categorias,
       colores,
+      MAX_IMAGENES: productoService.MAX_IMAGENES,
     })
   );
 }
 
 function erroresDe(req) {
   const errores = validationResult(req).mapped();
-  if (req.errorImagen) errores.imagen = { msg: req.errorImagen };
+  if (req.errorImagen) errores.imagenes = { msg: req.errorImagen };
   return errores;
 }
+
+// Lo que mandó el formulario sobre las fotos
+function imagenesDelFormulario(req) {
+  return {
+    nuevas: req.files.map((f) => `/img/productos/${f.filename}`),
+    quitar: [].concat(req.body.quitarImagenes || []),
+    principal: req.body.principal || "",
+  };
+}
+
+async function validarCantidadImagenes(req, errores, productoId = null) {
+  const { nuevas, quitar } = imagenesDelFormulario(req);
+  const total = (await productoService.contarImagenes(productoId)) - quitar.length + nuevas.length;
+  if (total > productoService.MAX_IMAGENES && !errores.imagenes) {
+    errores.imagenes = { msg: `Cada producto puede tener hasta ${productoService.MAX_IMAGENES} imágenes` };
+  }
+}
+
+const borrarSubidas = (req) => req.files.forEach((f) => borrarImagen(`/img/productos/${f.filename}`));
 
 module.exports = {
   // ── Dashboard ──────────────────────────────────────────────
@@ -112,15 +132,13 @@ module.exports = {
 
   async crear(req, res) {
     const errores = erroresDe(req);
+    await validarCantidadImagenes(req, errores);
     if (Object.keys(errores).length) {
-      if (req.file) borrarImagen(`/img/productos/${req.file.filename}`);
+      borrarSubidas(req);
       return renderFormulario(res, req, { datos: req.body, errores, status: 422 });
     }
 
-    const producto = await productoService.crear({
-      ...req.body,
-      imagen: req.file ? `/img/productos/${req.file.filename}` : null,
-    });
+    const producto = await productoService.crear(req.body, imagenesDelFormulario(req));
     req.session.flash = `Producto "${producto.nombre}" creado.`;
     res.redirect(`/admin/productos/${producto.id}`);
   },
@@ -137,18 +155,14 @@ module.exports = {
     if (!producto) return res.redirect("/admin/productos");
 
     const errores = erroresDe(req);
+    await validarCantidadImagenes(req, errores, producto.id);
     if (Object.keys(errores).length) {
-      if (req.file) borrarImagen(`/img/productos/${req.file.filename}`);
-      return renderFormulario(res, req, { producto, datos: { ...req.body, imagen: producto.imagen }, errores, status: 422 });
+      borrarSubidas(req);
+      return renderFormulario(res, req, { producto, datos: { ...req.body, imagenes: producto.imagenes }, errores, status: 422 });
     }
 
-    const quitarImagen = req.body.quitarImagen === "1" && !req.file;
-    const actualizado = await productoService.actualizar(producto.id, {
-      ...req.body,
-      imagen: req.file ? `/img/productos/${req.file.filename}` : null,
-      quitarImagen,
-    });
-    if (producto.imagen && producto.imagen !== actualizado.imagen) borrarImagen(producto.imagen);
+    const { rutasBorradas } = await productoService.actualizar(producto.id, req.body, imagenesDelFormulario(req));
+    rutasBorradas.forEach(borrarImagen);
 
     req.session.flash = "Cambios guardados.";
     res.redirect(`/admin/productos/${producto.id}`);
@@ -158,7 +172,7 @@ module.exports = {
   async eliminar(req, res) {
     const producto = await productoService.eliminar(req.params.id);
     if (producto) {
-      borrarImagen(producto.imagen);
+      producto.imagenes.forEach((i) => borrarImagen(i.ruta));
       req.session.flash = `Producto "${producto.nombre}" eliminado.`;
     }
     res.redirect("/admin/productos");

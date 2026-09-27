@@ -19,13 +19,23 @@
       </div>
 
       <div class="ficha-admin">
-        <div class="ficha-admin__imagen">
-          <% if (p.imagen) { %>
-            <img src="<%= p.imagen %>" alt="<%= p.nombre %>">
-          <% } else { %>
-            <span>(IMAGEN)</span>
+        <div class="ficha-admin__fotos">
+          <div class="ficha-admin__imagen">
+            <% if (p.imagen) { %>
+              <img src="<%= p.imagen %>" alt="<%= p.nombre %>">
+            <% } else { %>
+              <span>(IMAGEN)</span>
+            <% } %>
+            <% if (p.etiqueta) { %><span class="ficha-admin__etiqueta"><%= p.etiqueta %></span><% } %>
+          </div>
+          <% if (p.imagenes.length > 1) { %>
+            <ul class="ficha-admin__miniaturas" aria-label="Todas las fotos">
+              <% p.imagenes.forEach((f, n) => { %>
+                <li><img src="<%= f.ruta %>" alt="Foto <%= n + 1 %>" loading="lazy"></li>
+              <% }) %>
+            </ul>
           <% } %>
-          <% if (p.etiqueta) { %><span class="ficha-admin__etiqueta"><%= p.etiqueta %></span><% } %>
+          <p class="ficha-admin__cantidad"><%= p.imagenes.length %> <%= p.imagenes.length === 1 ? 'foto' : 'fotos' %> · <a href="/admin/productos/<%= p.id %>/editar">Gestionar fotos</a></p>
         </div>
 
         <div class="ficha-admin__datos">

@@ -1,8 +1,8 @@
 // ==========================================================
 // BASE — Interacciones compartidas por todas las vistas
 // Menú, buscador, paneles laterales, acordeones, carrito
-// (vía API en sesión), favoritos (vía API), campos de
-// contraseña, menú de cuenta y aviso (toast).
+// (vía API en sesión), favoritos (vía API), buscador con
+// sugerencias, campos de contraseña, menú de cuenta y aviso (toast).
 // Expone window.Tienda para que cada vista lo reutilice.
 // ==========================================================
 
@@ -165,6 +165,109 @@
     } finally {
       boton.disabled = false;
     }
+  });
+
+  // ---------- Buscador con sugerencias ----------
+  const precio = (n) => "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const escapar = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  $$("[data-buscador]").forEach((form) => {
+    const input = $('input[name="q"]', form);
+    const caja = $(".sugerencias", form);
+    let espera;
+    let pedidoActual = 0;
+    let activo = -1;
+
+    const opciones = () => $$("[data-opcion]", caja);
+
+    function cerrar() {
+      caja.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      activo = -1;
+    }
+
+    function marcar(i) {
+      const lista = opciones();
+      if (!lista.length) return;
+      activo = (i + lista.length) % lista.length;
+      lista.forEach((o, n) => o.setAttribute("aria-selected", String(n === activo)));
+      lista[activo].scrollIntoView({ block: "nearest" });
+    }
+
+    // Resalta lo que coincide con la búsqueda
+    function resaltar(texto, q) {
+      const i = texto.toLowerCase().indexOf(q.toLowerCase());
+      if (i === -1) return escapar(texto);
+      return escapar(texto.slice(0, i)) + "<mark>" + escapar(texto.slice(i, i + q.length)) + "</mark>" + escapar(texto.slice(i + q.length));
+    }
+
+    function pintar({ productos, total }, q) {
+      const url = `/catalogo?q=${encodeURIComponent(q)}`;
+      caja.innerHTML = productos.length
+        ? productos
+            .map(
+              (p) => `
+          <a href="/producto/${p.id}" class="sugerencia" role="option" data-opcion aria-selected="false">
+            <span class="sugerencia__imagen">${p.imagen ? `<img src="${escapar(p.imagen)}" alt="">` : "IMG"}</span>
+            <span class="sugerencia__texto">
+              <span class="sugerencia__nombre">${resaltar(p.nombre, q)}</span>
+              <small>${resaltar(p.categoria, q)}${p.sinStock ? " · Sin stock" : ""}</small>
+            </span>
+            <span class="sugerencia__precio">${precio(p.precio)}</span>
+          </a>`
+            )
+            .join("") +
+          `<a href="${url}" class="sugerencia sugerencia--todos" role="option" data-opcion aria-selected="false">
+             Ver ${total === 1 ? "el resultado" : `los ${total} resultados`} →
+           </a>`
+        : `<p class="sugerencia sugerencia--vacia">No encontramos “${escapar(q)}”. Probá con otra palabra.</p>`;
+      caja.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      activo = -1;
+    }
+
+    input.addEventListener("input", () => {
+      clearTimeout(espera);
+      const q = input.value.trim();
+      if (q.length < 2) return cerrar();
+      espera = setTimeout(async () => {
+        const numero = ++pedidoActual;
+        try {
+          const r = await api(`/buscar/sugerencias?q=${encodeURIComponent(q)}`);
+          // Si mientras tanto se siguió escribiendo, esta respuesta ya no sirve
+          if (numero === pedidoActual && input.value.trim() === q) pintar(r, q);
+        } catch {
+          cerrar();
+        }
+      }, 250);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (caja.hidden) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        marcar(activo + 1);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        marcar(activo - 1);
+      } else if (e.key === "Enter" && activo >= 0) {
+        e.preventDefault();
+        opciones()[activo].click();
+      } else if (e.key === "Escape") {
+        cerrar();
+      }
+    });
+
+    input.addEventListener("focus", () => input.value.trim().length >= 2 && caja.innerHTML && (caja.hidden = false));
+    document.addEventListener("click", (e) => !form.contains(e.target) && cerrar());
+
+    // Búsqueda vacía: no hace falta ir al catálogo filtrado
+    form.addEventListener("submit", (e) => {
+      if (!input.value.trim()) {
+        e.preventDefault();
+        input.focus();
+      }
+    });
   });
 
   // ---------- Campos de contraseña ----------

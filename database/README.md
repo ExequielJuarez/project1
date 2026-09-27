@@ -23,6 +23,17 @@ También se pueden cargar a mano: primero `schema.sql`, después `datos-prueba.s
 | `schema.sql` | Estructura: tablas, claves, índices y restricciones |
 | `datos-prueba.sql` | Datos de prueba (usuarios, catálogo, cupones, 30 días de pedidos) |
 | `instalar.js` | Ejecuta los dos archivos usando los datos del `.env` |
+| `migraciones/` | Cambios para bases ya instaladas (no hace falta si instalás desde cero) |
+
+## Migraciones
+
+Si ya tenías la base instalada y después actualizás el proyecto, ejecutá en
+orden las migraciones nuevas de `migraciones/` (en Workbench: abrir el archivo y ⚡).
+No borran datos.
+
+| Archivo | Qué cambia |
+|---|---|
+| `001-varias-imagenes.sql` | Crea `producto_imagenes`, pasa ahí la imagen de cada producto y quita `productos.imagen` |
 
 ## Tablas
 
@@ -31,7 +42,8 @@ También se pueden cargar a mano: primero `schema.sql`, después `datos-prueba.s
 | `usuarios` | Clientes y administradores (`rol`). `password` es un hash bcrypt, NULL en cuentas solo de Google (`google_id`) | — |
 | `categorias` | Categorías del catálogo | — |
 | `colores` | Colores (valor para filtros, nombre y hex) | — |
-| `productos` | Catálogo: precio, **costo** (para la ganancia), stock, etiqueta, imagen, textos | → `categorias`, → `colores` |
+| `productos` | Catálogo: precio, **costo** (para la ganancia), stock, etiqueta, textos | → `categorias`, → `colores` |
+| `producto_imagenes` | Fotos de cada producto (hasta 8). La de menor `orden` es la principal | → `productos` (se borran con el producto) |
 | `especificaciones` | Ficha técnica de cada producto (clave / valor) | → `productos` (se borra con el producto) |
 | `favoritos` | Productos guardados por cada usuario | → `usuarios`, → `productos` |
 | `cupones` | Códigos de descuento (porcentaje, activo, vencimiento) | — |

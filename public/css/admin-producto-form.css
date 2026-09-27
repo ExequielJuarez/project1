@@ -60,13 +60,178 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Subida de imagen */
+/* ==========================================================
+   FOTOS DEL PRODUCTO
+   ========================================================== */
+.fotos-contador {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--gris-600);
+}
+
+.fotos-ayuda {
+  margin: -8px 0 14px;
+}
+
+.fotos-admin {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  list-style: none;
+}
+
+.fotos-admin:empty {
+  display: none;
+}
+
+.foto-admin {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--gris-100);
+  border: 1px solid var(--gris-200);
+  animation: aparecer 0.25s both;
+}
+
+.foto-admin img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--transicion), filter var(--transicion);
+}
+
+/* La principal lleva borde negro grueso */
+.foto-admin:has(.foto-admin__principal input:checked) {
+  border: 2px solid var(--negro);
+}
+
+/* Marcada para quitar: se apaga y queda tachada */
+.foto-admin.quitada img {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
+.foto-admin.quitada::after {
+  content: "Se quita al guardar";
+  position: absolute;
+  inset: auto 6px 42px;
+  padding: 4px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.foto-admin__principal,
+.foto-admin__quitar {
+  position: absolute;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.foto-admin__principal input,
+.foto-admin__quitar input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.foto-admin__principal {
+  left: 6px;
+  bottom: 6px;
+}
+
+.foto-admin__principal span,
+.foto-admin__quitar span,
+.foto-admin__sacar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 7px;
+  background: var(--blanco);
+  border: 1px solid var(--negro);
+}
+
+.foto-admin__principal span::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--negro);
+  border-radius: 50%;
+}
+
+.foto-admin__principal input:checked + span {
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+.foto-admin__principal input:checked + span::before {
+  background: var(--blanco);
+  border-color: var(--blanco);
+}
+
+.foto-admin__quitar {
+  right: 6px;
+  top: 6px;
+}
+
+.foto-admin__quitar input:checked + span {
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+.foto-admin__principal input:focus-visible + span,
+.foto-admin__quitar input:focus-visible + span {
+  outline: 2px solid var(--negro);
+  outline-offset: 2px;
+}
+
+/* Fotos nuevas (todavía no guardadas) */
+.foto-admin--nueva::before {
+  content: "Nueva";
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  z-index: 1;
+  padding: 3px 6px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.foto-admin__sacar {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.foto-admin__sacar:hover {
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+/* Zona para subir */
 .subida {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 16px;
   border: 1px dashed var(--gris-400);
   background: var(--hueso);
   cursor: pointer;
@@ -79,6 +244,11 @@
   background: var(--blanco);
 }
 
+.subida.llena {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .subida input {
   position: absolute;
   inset: 0;
@@ -86,32 +256,20 @@
   cursor: pointer;
 }
 
-.subida input:focus-visible + .subida__vista {
+.subida input:focus-visible ~ .subida__icono {
   outline: 2px solid var(--negro);
   outline-offset: 3px;
 }
 
-.subida__vista {
+.subida__icono {
   display: flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  background:
-    repeating-linear-gradient(135deg, transparent 0 8px, rgba(0, 0, 0, 0.05) 8px 9px),
-    var(--gris-100);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--gris-600);
-}
-
-.subida__vista img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--negro);
+  border-radius: 50%;
 }
 
 .subida__texto {
@@ -120,12 +278,6 @@
   gap: 4px;
   min-width: 0;
   font-size: 14px;
-}
-
-.subida__texto strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .subida__texto small {
@@ -264,6 +416,10 @@
    TABLET ≥ 768px
    ========================================================== */
 @media (min-width: 768px) {
+  .fotos-admin {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .campos-admin {
     grid-template-columns: 1fr 1fr;
   }

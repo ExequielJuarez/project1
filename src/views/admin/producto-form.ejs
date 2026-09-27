@@ -4,8 +4,10 @@
   const editando = Boolean(producto);
   const accion = editando ? `/admin/productos/${producto.id}?_method=PUT` : "/admin/productos";
   const d = datos;
-  const imagenActual = editando ? producto.imagen : null;
-  const errorImagen = errores.imagen ? errores.imagen.msg : "";
+  // Fotos que ya tiene el producto (la primera es la principal)
+  const fotos = editando ? producto.imagenes : [];
+  const imagenActual = fotos[0] ? fotos[0].ruta : null;
+  const errorImagenes = errores.imagenes ? errores.imagenes.msg : "";
 %>
 
       <div class="admin-cabecera">
@@ -73,31 +75,41 @@
           </section>
 
           <section class="panel">
-            <h2 class="panel__titulo">Imagen</h2>
-            <div class="campo <%= errorImagen ? 'campo--error' : '' %>">
-              <label class="subida" for="imagen">
-                <input type="file" id="imagen" name="imagen" accept="image/jpeg,image/png,image/webp" aria-describedby="imagen-ayuda imagen-error">
-                <span class="subida__vista" id="vistaImagen">
-                  <% if (imagenActual) { %>
-                    <img src="<%= imagenActual %>" alt="Imagen actual">
-                  <% } else { %>
-                    <span>(IMAGEN)</span>
-                  <% } %>
+            <div class="panel__cabecera">
+              <h2 class="panel__titulo">Imágenes</h2>
+              <span class="fotos-contador"><span id="cantidadFotos"><%= fotos.length %></span> / <%= MAX_IMAGENES %></span>
+            </div>
+            <p class="panel__bajada fotos-ayuda">La <strong>principal</strong> es la que aparece en el catálogo; el resto se ven en la ficha del producto.</p>
+
+            <div class="campo <%= errorImagenes ? 'campo--error' : '' %>">
+              <ul class="fotos-admin" id="fotosAdmin" data-max="<%= MAX_IMAGENES %>">
+                <% fotos.forEach((f, n) => { %>
+                  <li class="foto-admin" data-existente>
+                    <img src="<%= f.ruta %>" alt="Foto <%= n + 1 %>">
+                    <label class="foto-admin__principal">
+                      <input type="radio" name="principal" value="e-<%= f.id %>" <%= n === 0 ? 'checked' : '' %>>
+                      <span>Principal</span>
+                    </label>
+                    <label class="foto-admin__quitar" title="Quitar esta foto">
+                      <input type="checkbox" name="quitarImagenes" value="<%= f.id %>">
+                      <span>Quitar</span>
+                    </label>
+                  </li>
+                <% }) %>
+              </ul>
+
+              <label class="subida" for="imagenes" id="zonaSubida">
+                <input type="file" id="imagenes" name="imagenes" multiple accept="image/jpeg,image/png,image/webp" aria-describedby="imagenes-ayuda imagenes-error">
+                <span class="subida__icono" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </span>
                 <span class="subida__texto">
-                  <strong id="nombreArchivo"><%= imagenActual ? 'Cambiar imagen' : 'Elegí una imagen' %></strong>
-                  <small id="imagen-ayuda">JPG, PNG o WEBP · hasta 2 MB · ideal 1000 × 1250 px</small>
+                  <strong>Agregar fotos</strong>
+                  <small id="imagenes-ayuda">Elegí o arrastrá varias a la vez · JPG, PNG o WEBP · hasta 2 MB c/u · ideal 1000 × 1250 px</small>
                 </span>
               </label>
-              <p class="campo__error" id="imagen-error"><%= errorImagen %></p>
+              <p class="campo__error" id="imagenes-error"><%= errorImagenes %></p>
             </div>
-            <% if (imagenActual) { %>
-              <label class="check-simple">
-                <input type="checkbox" name="quitarImagen" value="1">
-                <span class="check-simple__caja"></span>
-                Quitar la imagen actual
-              </label>
-            <% } %>
           </section>
 
           <div class="form-producto__acciones">

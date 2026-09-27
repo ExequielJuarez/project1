@@ -6,10 +6,10 @@ const { Op } = require("sequelize");
 const db = require("../model/database/models");
 
 const STOCK_BAJO = 5;
+const MAX_IMAGENES = 8;
 
 // Valores por defecto para productos cargados sin ficha completa
 const POR_DEFECTO = {
-  imagenes: 6,
   cuotas: 6,
   resumen: "Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle.",
   descripcion: ["Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial."],
@@ -19,7 +19,11 @@ const POR_DEFECTO = {
 const incluir = [
   { association: "categoria", attributes: ["id", "nombre"] },
   { association: "color", attributes: ["id", "valor", "nombre", "hex"] },
+  { association: "imagenes", attributes: ["id", "ruta", "orden"] },
 ];
+
+// Las fotos siempre ordenadas: la principal primero
+const ordenImagenes = ["imagenes", "orden", "ASC"];
 
 function plano(p) {
   if (!p) return null;
@@ -39,8 +43,9 @@ function plano(p) {
     costo: x.costo,
     stock: x.stock,
     etiqueta: x.etiqueta,
-    imagen: x.imagen,
-    imagenes: POR_DEFECTO.imagenes,
+    // Lista de fotos [{ id, ruta }] y la principal suelta para tarjetas y carrito
+    imagenes: (x.imagenes || []).sort((a, b) => a.orden - b.orden || a.id - b.id).map(({ id, ruta }) => ({ id, ruta })),
+    imagen: (x.imagenes || []).sort((a, b) => a.orden - b.orden || a.id - b.id)[0]?.ruta || null,
     cuotas: POR_DEFECTO.cuotas,
     resumen: x.resumen || POR_DEFECTO.resumen,
     descripcion: parrafos(x.descripcion) || POR_DEFECTO.descripcion,
@@ -54,7 +59,12 @@ async function listar({ q = "", categoria = "", stock = "", orden = "" } = {}) {
   const where = {};
   const texto = q.trim();
   if (texto) {
-    where[Op.or] = [{ nombre: { [Op.like]: `%${texto}%` } }, ...(/^\d+$/.test(texto) ? [{ id: Number(texto) }] : [])];
+    // Busca en el nombre y en la categoría; un número busca también por código
+    where[Op.or] = [
+      { nombre: { [Op.like]: `%${texto}%` } },
+      { "$categoria.nombre$": { [Op.like]: `%${texto}%` } },
+      ...(/^\d+$/.test(texto) ? [{ id: Number(texto) }] : []),
+    ];
   }
   if (stock === "sin") where.stock = 0;
   if (stock === "bajo") where.stock = { [Op.between]: [1, STOCK_BAJO] };
@@ -71,20 +81,24 @@ async function listar({ q = "", categoria = "", stock = "", orden = "" } = {}) {
     include: [
       { ...incluir[0], ...(categoria ? { where: { nombre: categoria } } : {}) },
       incluir[1],
+      incluir[2],
     ],
-    order: ordenes[orden] || [["id", "ASC"]],
+    order: [...(ordenes[orden] || [["id", "ASC"]]), ordenImagenes],
   });
   return filas.map(plano);
 }
 
 async function obtener(id) {
-  const p = await db.Producto.findByPk(id, { include: [...incluir, { association: "especificaciones" }] });
+  const p = await db.Producto.findByPk(id, {
+    include: [...incluir, { association: "especificaciones" }],
+    order: [ordenImagenes],
+  });
   return plano(p);
 }
 
 async function porIds(ids) {
   if (!ids.length) return [];
-  const filas = await db.Producto.findAll({ where: { id: ids }, include: incluir });
+  const filas = await db.Producto.findAll({ where: { id: ids }, include: incluir, order: [ordenImagenes] });
   const mapa = new Map(filas.map((p) => [p.id, plano(p)]));
   return ids.map((id) => mapa.get(Number(id))).filter(Boolean);
 }
@@ -97,9 +111,8 @@ async function relacionados(id, cantidad = 4) {
     include: incluir,
     // Primero los de la misma categoría
     order: [[db.sequelize.literal(`categoria_id = ${Number(actual.categoriaId)}`), "DESC"], ["id", "ASC"]],
-    limit: cantidad,
   });
-  return filas.map(plano);
+  return filas.map(plano).slice(0, cantidad);
 }
 
 async function categorias() {
@@ -123,7 +136,7 @@ async function resumenStock() {
   const alertas = await db.Producto.findAll({
     where: { stock: { [Op.lte]: STOCK_BAJO } },
     include: incluir,
-    order: [["stock", "ASC"]],
+    order: [["stock", "ASC"], ordenImagenes],
   });
   const lista = alertas.map(plano);
   return {
@@ -157,19 +170,62 @@ async function datosParaGuardar(datos) {
   };
 }
 
-async function crear(datos) {
-  const producto = await db.Producto.create({ ...(await datosParaGuardar(datos)), imagen: datos.imagen || null });
-  return obtener(producto.id);
+// Guarda las fotos del producto.
+//   nuevas:    rutas de los archivos recién subidos (en el orden elegido)
+//   quitar:    ids de fotos existentes a borrar
+//   principal: "e-<id>" (una existente) o "n-<índice>" (una nueva)
+// Devuelve las rutas borradas para eliminar los archivos del disco.
+async function guardarImagenes(productoId, { nuevas = [], quitar = [], principal = "" } = {}, t) {
+  const existentes = await db.ProductoImagen.findAll({
+    where: { productoId },
+    order: [["orden", "ASC"], ["id", "ASC"]],
+    transaction: t,
+  });
+  const idsQuitar = new Set(quitar.map(Number));
+  const borradas = existentes.filter((i) => idsQuitar.has(i.id));
+  if (borradas.length) {
+    await db.ProductoImagen.destroy({ where: { id: borradas.map((i) => i.id) }, transaction: t });
+  }
+
+  const quedan = existentes.filter((i) => !idsQuitar.has(i.id));
+  const creadas = [];
+  for (const [n, ruta] of nuevas.entries()) {
+    creadas.push({ clave: `n-${n}`, fila: await db.ProductoImagen.create({ productoId, ruta, orden: 999 }, { transaction: t }) });
+  }
+
+  // Orden final: la principal primero, después el resto como estaban
+  const todas = [...quedan.map((fila) => ({ clave: `e-${fila.id}`, fila })), ...creadas];
+  const i = todas.findIndex((x) => x.clave === principal);
+  if (i > 0) todas.unshift(...todas.splice(i, 1));
+  for (const [orden, { fila }] of todas.entries()) {
+    if (fila.orden !== orden) await fila.update({ orden }, { transaction: t });
+  }
+
+  return borradas.map((i) => i.ruta);
 }
 
-async function actualizar(id, datos) {
+async function contarImagenes(productoId) {
+  return productoId ? db.ProductoImagen.count({ where: { productoId } }) : 0;
+}
+
+async function crear(datos, imagenes = {}) {
+  const id = await db.sequelize.transaction(async (t) => {
+    const producto = await db.Producto.create(await datosParaGuardar(datos), { transaction: t });
+    await guardarImagenes(producto.id, imagenes, t);
+    return producto.id;
+  });
+  return obtener(id);
+}
+
+// Devuelve { producto, rutasBorradas }
+async function actualizar(id, datos, imagenes = {}) {
   const producto = await db.Producto.findByPk(id);
   if (!producto) return null;
-  const cambios = await datosParaGuardar(datos);
-  if (datos.imagen) cambios.imagen = datos.imagen;
-  else if (datos.quitarImagen) cambios.imagen = null;
-  await producto.update(cambios);
-  return obtener(id);
+  const rutasBorradas = await db.sequelize.transaction(async (t) => {
+    await producto.update(await datosParaGuardar(datos), { transaction: t });
+    return guardarImagenes(producto.id, imagenes, t);
+  });
+  return { producto: await obtener(id), rutasBorradas };
 }
 
 async function eliminar(id) {
@@ -190,6 +246,8 @@ async function ajustarStock(id, { cambio, valor }) {
 
 module.exports = {
   STOCK_BAJO,
+  MAX_IMAGENES,
+  contarImagenes,
   listar,
   obtener,
   porIds,
