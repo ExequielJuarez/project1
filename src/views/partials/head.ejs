@@ -11,6 +11,9 @@
 
   <link rel="stylesheet" href="/css/base.css">
   <%# estilo puede ser un nombre o una lista: "login" o ["acceso", "login"] %>
+  <% if (locals.usuarioLocal && usuarioLocal.rol === 'admin') { %>
+    <link rel="stylesheet" href="/css/notificaciones.css">
+  <% } %>
   <% [].concat(locals.estilo || []).forEach(hoja => { %>
     <link rel="stylesheet" href="/css/<%= hoja %>.css">
   <% }) %>

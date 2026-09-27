@@ -219,6 +219,12 @@ body {
   font-size: 15px;
 }
 
+.admin-barra__acciones {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .admin-barra__menu {
   display: flex;
   align-items: center;
@@ -712,13 +718,25 @@ body {
     margin-left: 260px;
   }
 
-  .admin-barra,
   .admin-overlay {
+    display: none;
+  }
+
+  /* En PC la barra queda solo con la campanita y el avatar, a la derecha */
+  .admin-barra {
+    justify-content: flex-end;
+    padding: 0 48px;
+    background: var(--gris-100);
+    border-bottom: 0;
+  }
+
+  .admin-barra__menu,
+  .admin-barra > .admin-lateral__logo {
     display: none;
   }
 
   .admin-main {
     max-width: 1440px;
-    padding: 40px 48px 96px;
+    padding: 12px 48px 96px;
   }
 }

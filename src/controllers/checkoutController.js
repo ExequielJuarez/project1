@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const carrito = require("../services/carritoService");
 const pedidos = require("../services/pedidoService");
+const notificaciones = require("../services/notificacionService");
 const provincias = require("../data/provincias");
 
 const CAMPOS = [
@@ -76,6 +77,8 @@ module.exports = {
 
     try {
       const pedido = await pedidos.crearDesdeCarrito(resumen, datos, req.session.usuarioLogueado);
+      // Aviso a los admins (si falla, la compra igual queda hecha)
+      notificaciones.nuevoPedido(pedido).catch((e) => console.error("No se pudo notificar la compra:", e.message));
       carrito.vaciar(req.session);
       delete req.session.checkout;
       req.session.flash = `¡Gracias! Tu pedido #${pedido.numero} quedó confirmado.`;

@@ -38,6 +38,9 @@
       <button class="icono-btn header__buscar-movil" id="btnBuscarMovil" aria-label="Buscar">
         <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
+      <% if (locals.usuarioLocal && usuarioLocal.rol === 'admin') { %>
+        <%- include('notificaciones') %>
+      <% } %>
       <% if (locals.usuarioLocal) { %>
         <div class="cuenta" id="cuenta">
           <button class="icono-btn cuenta__btn" id="cuentaBtn" aria-label="Mi cuenta" aria-expanded="false" aria-controls="cuentaMenu">

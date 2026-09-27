@@ -23,6 +23,7 @@ SET NAMES utf8mb4;
 SET time_zone = '-03:00';
 
 SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE notificaciones;
 TRUNCATE TABLE pedido_items;
 TRUNCATE TABLE pedidos;
 TRUNCATE TABLE favoritos;
@@ -427,3 +428,14 @@ INSERT INTO pedido_items (pedido_id, producto_id, nombre, color, precio, costo, 
   (1080, 7, 'Producto Imperial Base Reforzada', 'Negro', 55000, 30000, 1);
 
 ALTER TABLE pedidos AUTO_INCREMENT = 1081;
+
+-- ── Notificaciones para el admin (las 2 compras más recientes, sin leer) ──
+INSERT INTO notificaciones (tipo, titulo, mensaje, url, pedido_id, leida, creado_en)
+SELECT 'pedido',
+       CONCAT('Nueva compra #', id),
+       CONCAT(cliente, ' · $', FORMAT(total, 2, 'es_AR')),
+       CONCAT('/admin/pedidos?q=', id),
+       id, 0, creado_en
+  FROM pedidos
+ ORDER BY creado_en DESC
+ LIMIT 2;

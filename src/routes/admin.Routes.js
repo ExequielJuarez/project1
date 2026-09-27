@@ -5,6 +5,7 @@ const soloAdmin = require("../middlewares/soloAdmin");
 const subirImagenes = require("../middlewares/subirImagenes");
 const productoValidator = require("../validations/productoValidator");
 const admin = require("../controllers/adminController");
+const notificaciones = require("../controllers/notificacionesController");
 
 // Todo el panel requiere un usuario con rol admin
 router.use(soloAdmin);
@@ -24,5 +25,10 @@ router.patch("/productos/:id/stock", admin.ajustarStock);
 // ── Pedidos ────────────────────────────────────────────────
 router.get("/pedidos", admin.pedidos);
 router.patch("/pedidos/:numero/estado", admin.cambiarEstado);
+
+// ── Notificaciones (las usa el panel y la tienda cuando entra un admin) ──
+router.get("/notificaciones", notificaciones.listar);
+router.post("/notificaciones/leidas", notificaciones.marcarLeidas);
+router.get("/notificaciones/stream", notificaciones.stream);
 
 module.exports = router;
