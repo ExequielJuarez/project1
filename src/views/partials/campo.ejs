@@ -1,7 +1,7 @@
 <%
   // Campo de formulario con etiqueta y mensaje de error.
   // Usa `datos` y `errores` de la vista que lo incluye.
-  const valor = (datos && datos[nombre]) || "";
+  const valor = (datos && datos[nombre]) ?? "";
   const error = errores && errores[nombre] ? errores[nombre].msg : "";
   const tipoCampo = locals.tipo || "text";
 %>

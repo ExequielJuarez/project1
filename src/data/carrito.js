@@ -31,9 +31,11 @@ function cantidadTotal(session) {
   return (session.carrito?.items || []).reduce((acc, i) => acc + i.cantidad, 0);
 }
 
+// Devuelve { ok: true } o { ok: false, mensaje } si no se puede agregar
 function agregar(session, { id, cantidad = 1, color = null }) {
   const producto = obtenerProducto(id);
-  if (!producto) return false;
+  if (!producto) return { ok: false, mensaje: "Producto no encontrado" };
+  if (producto.stock <= 0) return { ok: false, mensaje: "Este producto no tiene stock por ahora" };
 
   const carrito = obtener(session);
   const colorFinal = color || producto.colorInfo?.nombre || null;
@@ -51,7 +53,7 @@ function agregar(session, { id, cantidad = 1, color = null }) {
       cantidad: Math.min(suma, MAX_POR_ITEM, producto.stock),
     });
   }
-  return true;
+  return { ok: true };
 }
 
 function actualizar(session, clave, cantidad) {

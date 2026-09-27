@@ -80,6 +80,14 @@
   opacity: 0.55;
 }
 
+.foto__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .foto__zoom {
   position: absolute;
   right: 14px;
@@ -381,6 +389,19 @@
   border-radius: 50%;
   background: var(--negro);
   animation: latido 2s infinite;
+}
+
+.stock--agotado .stock__punto {
+  background: transparent;
+  border: 1px solid var(--negro);
+  animation: none;
+}
+
+.compra button[disabled],
+.compra__ahora[disabled],
+.barra-compra .btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 @keyframes latido {
@@ -688,6 +709,13 @@ body.con-barra .whatsapp {
     repeating-linear-gradient(45deg, transparent 0 16px, rgba(255, 255, 255, 0.05) 16px 17px),
     var(--gris-900);
   color: var(--blanco);
+}
+
+.visor__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--negro);
 }
 
 .visor__cerrar {

@@ -1,0 +1,28 @@
+const express = require("express");
+const router = express.Router();
+
+const soloAdmin = require("../middlewares/soloAdmin");
+const subirImagen = require("../middlewares/subirImagen");
+const productoValidator = require("../validations/productoValidator");
+const admin = require("../controllers/adminController");
+
+// Todo el panel requiere un usuario con rol admin
+router.use(soloAdmin);
+
+router.get("/", admin.dashboard);
+
+// ── Productos ──────────────────────────────────────────────
+router.get("/productos", admin.productos);
+router.get("/productos/nuevo", admin.nuevo);
+router.post("/productos", subirImagen, productoValidator, admin.crear);
+router.get("/productos/:id", admin.verProducto);
+router.get("/productos/:id/editar", admin.editar);
+router.put("/productos/:id", subirImagen, productoValidator, admin.actualizar);
+router.delete("/productos/:id", admin.eliminar);
+router.patch("/productos/:id/stock", admin.ajustarStock);
+
+// ── Pedidos ────────────────────────────────────────────────
+router.get("/pedidos", admin.pedidos);
+router.patch("/pedidos/:numero/estado", admin.cambiarEstado);
+
+module.exports = router;

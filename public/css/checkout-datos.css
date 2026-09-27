@@ -591,3 +591,36 @@
     border-bottom: 1px solid var(--gris-200);
   }
 }
+
+/* Aviso con botón para confirmar el pedido (demo) */
+.aviso--confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.aviso__boton {
+  align-self: flex-start;
+  height: 44px;
+  background: var(--blanco);
+  border-color: var(--blanco);
+  color: var(--negro);
+}
+
+.aviso__boton:hover {
+  background: transparent;
+  color: var(--blanco);
+}
+
+@media (min-width: 768px) {
+  .aviso--confirmar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .aviso__boton {
+    flex: none;
+    align-self: center;
+  }
+}

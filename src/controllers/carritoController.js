@@ -31,9 +31,8 @@ module.exports = {
 
   agregar(req, res) {
     const { id, cantidad, color } = req.body;
-    if (!carrito.agregar(req.session, { id, cantidad, color })) {
-      return res.status(404).json({ ok: false, mensaje: "Producto no encontrado" });
-    }
+    const resultado = carrito.agregar(req.session, { id, cantidad, color });
+    if (!resultado.ok) return res.status(400).json(resultado);
     responder(req, res);
   },
 

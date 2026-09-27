@@ -62,7 +62,11 @@
         <% r.items.forEach((item, n) => { %>
           <article class="item" data-clave="<%= item.clave %>" data-stock="<%= item.producto.stock %>">
             <a href="/producto/<%= item.id %>" class="item__imagen <%= n % 3 === 1 ? 'item__imagen--oscura' : '' %>">
-              <span>(IMAGEN)</span>
+              <% if (item.producto.imagen) { %>
+                <img src="<%= item.producto.imagen %>" alt="">
+              <% } else { %>
+                <span>(IMAGEN)</span>
+              <% } %>
             </a>
 
             <div class="item__info">

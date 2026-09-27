@@ -71,6 +71,7 @@ router.post("/carrito/entrega", carritoController.entrega);
 // ── CHECKOUT ───────────────────────────────────────────────
 router.get("/checkout/datos", checkoutController.ver);
 router.post("/checkout/datos", checkoutValidator, checkoutController.guardar);
+router.post("/checkout/confirmar", checkoutController.confirmar);
 
 // ── USUARIOS ───────────────────────────────────────────────
 router.get("/login", soloInvitados, usuarioController.verLogin);

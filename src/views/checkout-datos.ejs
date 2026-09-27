@@ -97,9 +97,12 @@
     <form class="checkout-form" id="formDatos" action="/checkout/datos" method="POST" novalidate>
 
       <% if (guardado) { %>
-        <div class="aviso aviso--ok" role="status">
-          <strong>¡Datos guardados!</strong>
-          El paso de pago va a estar en la próxima vista. Podés revisar o cambiar tus datos acá abajo.
+        <div class="aviso aviso--ok aviso--confirmar" role="status">
+          <div>
+            <strong>¡Datos guardados!</strong>
+            El paso de pago va a estar en la próxima vista. Mientras tanto podés confirmar el pedido (demo, sin cobro).
+          </div>
+          <button type="submit" form="formConfirmar" class="btn aviso__boton">Confirmar pedido</button>
         </div>
       <% } %>
 
@@ -218,6 +221,10 @@
       </p>
     </form>
   </main>
+
+  <% if (guardado) { %>
+    <form action="/checkout/confirmar" method="POST" id="formConfirmar" hidden></form>
+  <% } %>
 
   <%- include('partials/footer') %>
   <script src="/js/checkout-datos.js"></script>

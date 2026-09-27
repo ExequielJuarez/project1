@@ -6,6 +6,7 @@
   const precioTransferencia = p.precio * (1 - descuentoTransferencia);
   const valorCuota = p.precio / p.cuotas;
   const numero = (n) => String(n).padStart(2, "0");
+  const sinStock = p.stock <= 0;
 %>
 
   <!-- ═════════════ MIGAS DE PAN ═════════════ -->
@@ -30,7 +31,11 @@
         <div class="galeria__pista" id="galeriaPista">
           <% for (let n = 1; n <= p.imagenes; n++) { %>
             <button class="foto <%= n % 3 === 2 ? 'foto--oscura' : '' %>" data-indice="<%= n - 1 %>" aria-label="Ampliar imagen <%= n %>">
-              <span class="foto__texto">(IMAGEN <%= n %>)</span>
+              <% if (n === 1 && p.imagen) { %>
+                <img class="foto__img" src="<%= p.imagen %>" alt="<%= p.nombre %>">
+              <% } else { %>
+                <span class="foto__texto">(IMAGEN <%= n %>)</span>
+              <% } %>
               <span class="foto__zoom" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-4.5-4.5M11 8.5v5M8.5 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
               </span>
@@ -101,16 +106,20 @@
             <input type="number" id="cantidad" value="1" min="1" max="<%= p.stock %>" inputmode="numeric" aria-label="Cantidad">
             <button type="button" class="cantidad__btn" data-cantidad="1" aria-label="Sumar">+</button>
           </div>
-          <button class="btn btn--solido compra__agregar" id="btnAgregar">Agregar al carrito</button>
+          <button class="btn btn--solido compra__agregar" id="btnAgregar" <%= sinStock ? 'disabled' : '' %>><%= sinStock ? 'Sin stock' : 'Agregar al carrito' %></button>
           <button class="compra__fav tarjeta__fav" aria-label="Agregar a favoritos">
             <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
           </button>
         </div>
-        <button class="btn btn--linea compra__ahora">Comprar ahora</button>
+        <button class="btn btn--linea compra__ahora" <%= sinStock ? 'disabled' : '' %>>Comprar ahora</button>
 
-        <div class="stock">
+        <div class="stock <%= sinStock ? 'stock--agotado' : '' %>">
           <span class="stock__punto"></span>
-          En stock · quedan <strong><%= p.stock %></strong> unidades
+          <% if (sinStock) { %>
+            Sin stock por el momento
+          <% } else { %>
+            En stock · quedan <strong><%= p.stock %></strong> <%= p.stock === 1 ? 'unidad' : 'unidades' %>
+          <% } %>
         </div>
 
         <!-- Calculador de envío (demo) -->
@@ -220,7 +229,7 @@
       <p class="barra-compra__nombre"><%= p.nombre %></p>
       <p class="barra-compra__precio"><%= formatoPrecio(p.precio) %></p>
     </div>
-    <button class="btn btn--solido" id="btnAgregarBarra" tabindex="-1">Agregar</button>
+    <button class="btn btn--solido" id="btnAgregarBarra" tabindex="-1" <%= sinStock ? 'disabled' : '' %>><%= sinStock ? 'Sin stock' : 'Agregar' %></button>
   </div>
 
   <!-- Visor de fotos a pantalla completa -->

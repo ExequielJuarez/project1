@@ -8,6 +8,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const { $, $$ } = window.Tienda;
 
+  // Si el foco va al botón de enviar no validamos en el blur: el mensaje de error
+  // correría el botón y el clic se perdería. El submit valida todo igual.
+  const vaAEnviar = (e) => e.relatedTarget?.type === "submit";
+
   const form = $("#formRegistro");
   const password = $("#password");
   const confirmar = $("#confirmar");
@@ -71,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputs = Object.keys(reglas).map((nombre) => form.elements[nombre]);
 
   inputs.forEach((input) => {
-    input.addEventListener("blur", () => input.value && input.type !== "checkbox" && validar(input));
+    input.addEventListener("blur", (e) => input.value && input.type !== "checkbox" && !vaAEnviar(e) && validar(input));
     input.addEventListener("input", () => {
       if (input.closest(".campo").classList.contains("campo--error")) validar(input);
     });

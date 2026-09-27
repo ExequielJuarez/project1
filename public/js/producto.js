@@ -50,8 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function pintarVisor() {
     const esOscura = fotos[indiceVisor].classList.contains("foto--oscura");
-    visorFoto.classList.toggle("foto--oscura", esOscura);
-    $(".foto__texto", visorFoto).textContent = `(IMAGEN ${indiceVisor + 1})`;
+    const img = $("img", fotos[indiceVisor]);
+    visorFoto.classList.toggle("foto--oscura", esOscura && !img);
+    visorFoto.innerHTML = img
+      ? `<img src="${img.src}" alt="${img.alt}" class="visor__img">`
+      : `<span class="foto__texto">(IMAGEN ${indiceVisor + 1})</span>`;
     visorContador.textContent = `${numero(indiceVisor + 1)} / ${numero(total)}`;
   }
 
