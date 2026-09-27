@@ -1,131 +1,123 @@
 const fs = require("fs");
 const path = require("path");
 const { validationResult } = require("express-validator");
-const catalogo = require("../data/productosMock");
-const pedidos = require("../data/pedidosMock");
+const productoService = require("../services/productoService");
+const pedidoService = require("../services/pedidoService");
 
-const CARPETA_IMAGENES = path.join(__dirname, "../../public");
+const CARPETA_PUBLICA = path.join(__dirname, "../../public");
 
 // Borra una imagen subida (si existe) sin frenar la respuesta
 function borrarImagen(ruta) {
   if (!ruta || !ruta.startsWith("/img/productos/")) return;
-  fs.unlink(path.join(CARPETA_IMAGENES, ruta), () => {});
+  fs.unlink(path.join(CARPETA_PUBLICA, ruta), () => {});
 }
 
-// Datos comunes a todas las vistas del panel
-function base(req, extra) {
-  return {
-    usuario: req.session.usuarioLogueado,
-    totalProductos: catalogo.productos.length,
-    pedidosPendientes: pedidos.listar().filter((p) => ["pendiente", "pagado"].includes(p.estado)).length,
-    ...extra,
-  };
+// Datos comunes a todas las vistas del panel (menú lateral)
+async function base(req, extra) {
+  const [totalProductos, pedidosPendientes] = await Promise.all([productoService.total(), pedidoService.pendientes()]);
+  return { usuario: req.session.usuarioLogueado, totalProductos, pedidosPendientes, ...extra };
 }
 
-function resumenStock() {
-  const lista = catalogo.productos;
-  return {
-    unidades: lista.reduce((acc, p) => acc + p.stock, 0),
-    valorCosto: lista.reduce((acc, p) => acc + p.stock * p.costo, 0),
-    valorVenta: lista.reduce((acc, p) => acc + p.stock * p.precio, 0),
-    sinStock: lista.filter((p) => p.stock === 0),
-    bajo: lista.filter((p) => p.stock > 0 && p.stock <= catalogo.STOCK_BAJO),
-  };
+async function renderFormulario(res, req, { producto = null, datos, errores = {}, status = 200 }) {
+  const [categorias, colores] = await Promise.all([productoService.categorias(), productoService.colores()]);
+  res.status(status).render(
+    "admin/producto-form",
+    await base(req, {
+      titulo: producto ? `Editar · ${producto.nombre}` : "Nuevo producto",
+      estilo: ["admin", "admin-producto-form"],
+      seccion: "productos",
+      producto,
+      datos,
+      errores,
+      categorias,
+      colores,
+    })
+  );
 }
 
-function renderFormulario(res, req, { producto = null, datos, errores = {}, status = 200 }) {
-  res.status(status).render("admin/producto-form", base(req, {
-    titulo: producto ? `Editar · ${producto.nombre}` : "Nuevo producto",
-    estilo: ["admin", "admin-producto-form"],
-    seccion: "productos",
-    producto,
-    datos,
-    errores,
-    categorias: catalogo.categorias,
-    colores: catalogo.colores,
-  }));
+function erroresDe(req) {
+  const errores = validationResult(req).mapped();
+  if (req.errorImagen) errores.imagen = { msg: req.errorImagen };
+  return errores;
 }
 
 module.exports = {
   // ── Dashboard ──────────────────────────────────────────────
-  dashboard(req, res) {
+  async dashboard(req, res) {
     const dias = [7, 14, 30].includes(Number(req.query.dias)) ? Number(req.query.dias) : 14;
-    res.render("admin/dashboard", base(req, {
-      titulo: "Panel",
-      estilo: ["admin", "admin-dashboard"],
-      seccion: "dashboard",
-      m: pedidos.metricas(dias),
-      stock: resumenStock(),
-      ultimos: pedidos.listar().slice(0, 6),
-      STOCK_BAJO: catalogo.STOCK_BAJO,
-    }));
+    const [m, stock, ultimos] = await Promise.all([
+      pedidoService.metricas(dias),
+      productoService.resumenStock(),
+      pedidoService.listar({ limite: 6 }),
+    ]);
+    res.render(
+      "admin/dashboard",
+      await base(req, {
+        titulo: "Panel",
+        estilo: ["admin", "admin-dashboard"],
+        seccion: "dashboard",
+        m,
+        stock,
+        ultimos,
+        STOCK_BAJO: productoService.STOCK_BAJO,
+      })
+    );
   },
 
   // ── Productos: listado ─────────────────────────────────────
-  productos(req, res) {
+  async productos(req, res) {
     const { q = "", categoria = "", stock = "", orden = "nombre" } = req.query;
-    const texto = q.trim().toLowerCase();
-
-    let lista = catalogo.productos
-      .filter((p) => !texto || p.nombre.toLowerCase().includes(texto) || String(p.id) === texto)
-      .filter((p) => !categoria || p.categoria === categoria)
-      .filter((p) => {
-        if (stock === "sin") return p.stock === 0;
-        if (stock === "bajo") return p.stock > 0 && p.stock <= catalogo.STOCK_BAJO;
-        return true;
-      });
-
-    const ordenes = {
-      nombre: (a, b) => a.nombre.localeCompare(b.nombre, "es"),
-      "precio-desc": (a, b) => b.precio - a.precio,
-      "stock-asc": (a, b) => a.stock - b.stock,
-      "margen-desc": (a, b) => (b.precio - b.costo) / b.precio - (a.precio - a.costo) / a.precio,
-    };
-    lista = [...lista].sort(ordenes[orden] || ordenes.nombre);
-
-    res.render("admin/productos", base(req, {
-      titulo: "Productos",
-      estilo: ["admin", "admin-productos"],
-      seccion: "productos",
-      lista,
-      filtros: { q, categoria, stock, orden },
-      categorias: catalogo.categorias,
-      stockResumen: resumenStock(),
-      STOCK_BAJO: catalogo.STOCK_BAJO,
-    }));
+    const [lista, categorias, stockResumen] = await Promise.all([
+      productoService.listar({ q, categoria, stock, orden }),
+      productoService.categorias(),
+      productoService.resumenStock(),
+    ]);
+    res.render(
+      "admin/productos",
+      await base(req, {
+        titulo: "Productos",
+        estilo: ["admin", "admin-productos"],
+        seccion: "productos",
+        lista,
+        filtros: { q, categoria, stock, orden },
+        categorias,
+        stockResumen,
+        STOCK_BAJO: productoService.STOCK_BAJO,
+      })
+    );
   },
 
   // ── Productos: ver ─────────────────────────────────────────
-  verProducto(req, res) {
-    const producto = catalogo.productos.find((p) => p.id === Number(req.params.id));
+  async verProducto(req, res) {
+    const producto = await productoService.obtener(req.params.id);
     if (!producto) return res.redirect("/admin/productos");
-    res.render("admin/producto", base(req, {
-      titulo: producto.nombre,
-      estilo: ["admin", "admin-producto"],
-      seccion: "productos",
-      producto,
-      color: catalogo.colores.find((c) => c.valor === producto.color),
-      ventas: pedidos.ventasDeProducto(producto.id),
-      STOCK_BAJO: catalogo.STOCK_BAJO,
-    }));
+    res.render(
+      "admin/producto",
+      await base(req, {
+        titulo: producto.nombre,
+        estilo: ["admin", "admin-producto"],
+        seccion: "productos",
+        producto,
+        color: producto.colorInfo,
+        ventas: await pedidoService.ventasDeProducto(producto.id),
+        STOCK_BAJO: productoService.STOCK_BAJO,
+      })
+    );
   },
 
   // ── Productos: crear ───────────────────────────────────────
-  nuevo(req, res) {
-    renderFormulario(res, req, { datos: { categoria: "", color: "", stock: 0 } });
+  async nuevo(req, res) {
+    await renderFormulario(res, req, { datos: { categoria: "", color: "", stock: 0 } });
   },
 
-  crear(req, res) {
-    const resultado = validationResult(req);
-    const errores = resultado.mapped();
-    if (req.errorImagen) errores.imagen = { msg: req.errorImagen };
-
+  async crear(req, res) {
+    const errores = erroresDe(req);
     if (Object.keys(errores).length) {
       if (req.file) borrarImagen(`/img/productos/${req.file.filename}`);
       return renderFormulario(res, req, { datos: req.body, errores, status: 422 });
     }
 
-    const producto = catalogo.crearProducto({
+    const producto = await productoService.crear({
       ...req.body,
       imagen: req.file ? `/img/productos/${req.file.filename}` : null,
     });
@@ -134,41 +126,37 @@ module.exports = {
   },
 
   // ── Productos: editar ──────────────────────────────────────
-  editar(req, res) {
-    const producto = catalogo.productos.find((p) => p.id === Number(req.params.id));
+  async editar(req, res) {
+    const producto = await productoService.obtener(req.params.id);
     if (!producto) return res.redirect("/admin/productos");
-    renderFormulario(res, req, { producto, datos: { ...producto } });
+    await renderFormulario(res, req, { producto, datos: { ...producto } });
   },
 
-  actualizar(req, res) {
-    const producto = catalogo.productos.find((p) => p.id === Number(req.params.id));
+  async actualizar(req, res) {
+    const producto = await productoService.obtener(req.params.id);
     if (!producto) return res.redirect("/admin/productos");
 
-    const resultado = validationResult(req);
-    const errores = resultado.mapped();
-    if (req.errorImagen) errores.imagen = { msg: req.errorImagen };
-
+    const errores = erroresDe(req);
     if (Object.keys(errores).length) {
       if (req.file) borrarImagen(`/img/productos/${req.file.filename}`);
       return renderFormulario(res, req, { producto, datos: { ...req.body, imagen: producto.imagen }, errores, status: 422 });
     }
 
-    const imagenAnterior = producto.imagen;
-    const quitarImagen = req.body.quitarImagen === "1";
-    catalogo.actualizarProducto(producto.id, {
+    const quitarImagen = req.body.quitarImagen === "1" && !req.file;
+    const actualizado = await productoService.actualizar(producto.id, {
       ...req.body,
       imagen: req.file ? `/img/productos/${req.file.filename}` : null,
-      quitarImagen: quitarImagen && !req.file,
+      quitarImagen,
     });
-    if ((req.file || quitarImagen) && imagenAnterior !== producto.imagen) borrarImagen(imagenAnterior);
+    if (producto.imagen && producto.imagen !== actualizado.imagen) borrarImagen(producto.imagen);
 
     req.session.flash = "Cambios guardados.";
     res.redirect(`/admin/productos/${producto.id}`);
   },
 
   // ── Productos: borrar ──────────────────────────────────────
-  eliminar(req, res) {
-    const producto = catalogo.eliminarProducto(req.params.id);
+  async eliminar(req, res) {
+    const producto = await productoService.eliminar(req.params.id);
     if (producto) {
       borrarImagen(producto.imagen);
       req.session.flash = `Producto "${producto.nombre}" eliminado.`;
@@ -177,40 +165,43 @@ module.exports = {
   },
 
   // ── Productos: ajuste rápido de stock (JSON) ───────────────
-  ajustarStock(req, res) {
-    const producto = catalogo.productos.find((p) => p.id === Number(req.params.id));
-    if (!producto) return res.status(404).json({ ok: false, mensaje: "Producto no encontrado" });
-
+  async ajustarStock(req, res) {
     const { cambio, valor } = req.body;
+    let opciones;
     if (valor !== undefined) {
       const nuevo = parseInt(valor, 10);
       if (!Number.isInteger(nuevo) || nuevo < 0) return res.status(400).json({ ok: false, mensaje: "Stock inválido" });
-      producto.stock = nuevo;
+      opciones = { valor: nuevo };
     } else {
-      catalogo.ajustarStock(producto.id, parseInt(cambio, 10) || 0);
+      opciones = { cambio: parseInt(cambio, 10) || 0 };
     }
-    res.json({ ok: true, stock: producto.stock, stockBajo: catalogo.STOCK_BAJO, resumen: resumenStock() });
+
+    const stock = await productoService.ajustarStock(req.params.id, opciones);
+    if (stock === null) return res.status(404).json({ ok: false, mensaje: "Producto no encontrado" });
+    res.json({ ok: true, stock, stockBajo: productoService.STOCK_BAJO, resumen: await productoService.resumenStock() });
   },
 
   // ── Pedidos ────────────────────────────────────────────────
-  pedidos(req, res) {
+  async pedidos(req, res) {
     const { estado = "", q = "" } = req.query;
-    const todos = pedidos.listar();
-    const conteo = Object.fromEntries(pedidos.ESTADOS.map((e) => [e, todos.filter((p) => p.estado === e).length]));
-    res.render("admin/pedidos", base(req, {
-      titulo: "Pedidos",
-      estilo: ["admin", "admin-pedidos"],
-      seccion: "pedidos",
-      lista: pedidos.listar({ estado, q }),
-      filtros: { estado, q },
-      estados: pedidos.ESTADOS,
-      conteo,
-      total: todos.length,
-    }));
+    const [lista, conteo] = await Promise.all([pedidoService.listar({ estado, q }), pedidoService.conteoPorEstado()]);
+    res.render(
+      "admin/pedidos",
+      await base(req, {
+        titulo: "Pedidos",
+        estilo: ["admin", "admin-pedidos"],
+        seccion: "pedidos",
+        lista,
+        filtros: { estado, q },
+        estados: pedidoService.ESTADOS,
+        conteo,
+        total: Object.values(conteo).reduce((a, b) => a + b, 0),
+      })
+    );
   },
 
-  cambiarEstado(req, res) {
-    const pedido = pedidos.cambiarEstado(req.params.numero, req.body.estado);
+  async cambiarEstado(req, res) {
+    const pedido = await pedidoService.cambiarEstado(req.params.numero, req.body.estado);
     if (!pedido) return res.status(400).json({ ok: false, mensaje: "No se pudo cambiar el estado" });
     res.json({ ok: true, estado: pedido.estado });
   },

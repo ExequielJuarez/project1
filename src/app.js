@@ -8,8 +8,9 @@ const app = express();
 
 const indexRouter = require("./routes/index.Routes");
 const adminRouter = require("./routes/admin.Routes");
-const carrito = require("./data/carrito");
-const favoritos = require("./data/favoritos");
+const db = require("./model/database/models");
+const carritoService = require("./services/carritoService");
+const favoritoService = require("./services/favoritoService");
 
 const puerto = 3000;
 
@@ -53,10 +54,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.usuarioLocal = req.session.usuarioLogueado || null;
-  res.locals.cantidadCarrito = carrito.cantidadTotal(req.session);
-  res.locals.favoritosIds = favoritos.ids(req.session);
+  res.locals.cantidadCarrito = carritoService.cantidadTotal(req.session);
+  res.locals.favoritosIds = await favoritoService.ids(req.session);
 
   // Mensaje de un solo uso (se muestra como aviso y se borra)
   res.locals.flash = req.session.flash || null;
@@ -67,6 +68,25 @@ app.use((req, res, next) => {
 app.use("/admin", adminRouter);
 app.use("/", indexRouter);
 
-app.listen(puerto, () => {
-  console.log(`🚀 Servidor Express corriendo en el puerto ${puerto}`);
+// Error inesperado (por ejemplo, se cayó la base de datos)
+app.use((err, req, res, next) => {
+  console.error("❌", err);
+  if (req.accepts(["html", "json"]) === "json") {
+    return res.status(500).json({ ok: false, mensaje: "Error del servidor, probá de nuevo" });
+  }
+  res.status(500).send("<h1>Algo salió mal</h1><p>Probá de nuevo en unos minutos.</p>");
 });
+
+// Arranca solo si hay conexión con la base de datos
+db.sequelize
+  .authenticate()
+  .then(() => {
+    console.log(`✅ Conectado a la base de datos "${db.sequelize.config.database}"`);
+    app.listen(puerto, () => console.log(`🚀 Servidor Express corriendo en el puerto ${puerto}`));
+  })
+  .catch((error) => {
+    console.error("❌ No se pudo conectar con la base de datos:", error.message);
+    console.error("   Revisá DB_HOST, DB_USER, DB_PASSWORD y DB_NAME en el .env y que MySQL esté encendido.");
+    console.error("   Para crear las tablas y cargar datos de prueba: npm run db:instalar");
+    process.exit(1);
+  });

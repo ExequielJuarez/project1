@@ -1,28 +1,19 @@
-// Carrito guardado en la sesión del usuario.
-// Los precios siempre salen del catálogo (nunca del navegador).
+// Carrito guardado en la sesión del usuario (solo ids y cantidades).
+// Precios, stock y cupones salen siempre de la base de datos, nunca del navegador.
 
-const { obtenerProducto } = require("./productosMock");
+const { Op } = require("sequelize");
+const db = require("../model/database/models");
+const productoService = require("./productoService");
 
 const ENVIO_GRATIS_DESDE = 150000;
 const COSTO_ENVIO = 6500;
 const DESCUENTO_TRANSFERENCIA = 0.1;
 const MAX_POR_ITEM = 20;
-
-// Cupones de ejemplo para la maqueta
-const CUPONES = {
-  BIENVENIDA: { descripcion: "10% off en tu primera compra", porcentaje: 0.1 },
-  MAQUETA5: { descripcion: "5% off de prueba", porcentaje: 0.05 },
-};
+const CUOTAS = 6;
 
 function obtener(session) {
   if (!session.carrito) {
-    session.carrito = {
-      items: [],
-      cupon: null,
-      medioPago: "tarjeta",
-      entrega: "domicilio",
-      codigoPostal: null,
-    };
+    session.carrito = { items: [], cupon: null, medioPago: "tarjeta", entrega: "domicilio", codigoPostal: null };
   }
   return session.carrito;
 }
@@ -32,8 +23,8 @@ function cantidadTotal(session) {
 }
 
 // Devuelve { ok: true } o { ok: false, mensaje } si no se puede agregar
-function agregar(session, { id, cantidad = 1, color = null }) {
-  const producto = obtenerProducto(id);
+async function agregar(session, { id, cantidad = 1, color = null }) {
+  const producto = await productoService.obtener(id);
   if (!producto) return { ok: false, mensaje: "Producto no encontrado" };
   if (producto.stock <= 0) return { ok: false, mensaje: "Este producto no tiene stock por ahora" };
 
@@ -46,22 +37,17 @@ function agregar(session, { id, cantidad = 1, color = null }) {
   if (existente) {
     existente.cantidad = Math.min(existente.cantidad + suma, MAX_POR_ITEM, producto.stock);
   } else {
-    carrito.items.push({
-      clave,
-      id: producto.id,
-      color: colorFinal,
-      cantidad: Math.min(suma, MAX_POR_ITEM, producto.stock),
-    });
+    carrito.items.push({ clave, id: producto.id, color: colorFinal, cantidad: Math.min(suma, MAX_POR_ITEM, producto.stock) });
   }
   return { ok: true };
 }
 
-function actualizar(session, clave, cantidad) {
-  const carrito = obtener(session);
-  const item = carrito.items.find((i) => i.clave === clave);
+async function actualizar(session, clave, cantidad) {
+  const item = obtener(session).items.find((i) => i.clave === clave);
   if (!item) return false;
-  const producto = obtenerProducto(item.id);
-  item.cantidad = Math.min(Math.max(1, Number(cantidad) || 1), MAX_POR_ITEM, producto.stock);
+  const producto = await productoService.obtener(item.id);
+  if (!producto) return false;
+  item.cantidad = Math.min(Math.max(1, Number(cantidad) || 1), MAX_POR_ITEM, Math.max(1, producto.stock));
   return true;
 }
 
@@ -76,10 +62,23 @@ function vaciar(session) {
   carrito.cupon = null;
 }
 
-function aplicarCupon(session, codigo) {
-  const clave = String(codigo || "").trim().toUpperCase();
-  if (!CUPONES[clave]) return false;
-  obtener(session).cupon = clave;
+// Cupón activo y sin vencer
+async function buscarCupon(codigo) {
+  if (!codigo) return null;
+  return db.Cupon.findOne({
+    where: {
+      codigo: String(codigo).trim().toUpperCase(),
+      activo: true,
+      [Op.or]: [{ venceEn: null }, { venceEn: { [Op.gt]: new Date() } }],
+    },
+    raw: true,
+  });
+}
+
+async function aplicarCupon(session, codigo) {
+  const cupon = await buscarCupon(codigo);
+  if (!cupon) return false;
+  obtener(session).cupon = cupon.codigo;
   return true;
 }
 
@@ -101,32 +100,33 @@ function fijarCodigoPostal(session, cp) {
   return true;
 }
 
-// Arma todo lo que necesita la vista: items con datos del producto y totales
-function resumen(session) {
+// Arma todo lo que necesitan las vistas: items con datos del producto y totales
+async function resumen(session) {
   const carrito = obtener(session);
 
-  const items = carrito.items
-    .map((i) => {
-      const producto = obtenerProducto(i.id);
-      if (!producto) return null;
-      return { ...i, producto, subtotal: producto.precio * i.cantidad };
-    })
-    .filter(Boolean);
+  const productos = await productoService.porIds([...new Set(carrito.items.map((i) => i.id))]);
+  const porId = new Map(productos.map((p) => [p.id, p]));
+  // Si un producto se borró del catálogo, sale del carrito
+  carrito.items = carrito.items.filter((i) => porId.has(i.id));
+
+  const items = carrito.items.map((i) => {
+    const producto = porId.get(i.id);
+    return { ...i, producto, subtotal: producto.precio * i.cantidad };
+  });
 
   const subtotal = items.reduce((acc, i) => acc + i.subtotal, 0);
-  const cupon = carrito.cupon ? { codigo: carrito.cupon, ...CUPONES[carrito.cupon] } : null;
+  const cuponDb = await buscarCupon(carrito.cupon);
+  if (!cuponDb) carrito.cupon = null;
+  const cupon = cuponDb ? { codigo: cuponDb.codigo, descripcion: cuponDb.descripcion, porcentaje: Number(cuponDb.porcentaje) } : null;
   const descuentoCupon = cupon ? Math.round(subtotal * cupon.porcentaje) : 0;
-  const baseTransferencia = subtotal - descuentoCupon;
   const descuentoPago =
-    carrito.medioPago === "transferencia" ? Math.round(baseTransferencia * DESCUENTO_TRANSFERENCIA) : 0;
+    carrito.medioPago === "transferencia" ? Math.round((subtotal - descuentoCupon) * DESCUENTO_TRANSFERENCIA) : 0;
 
-  const envioGratis = subtotal >= ENVIO_GRATIS_DESDE;
   const entrega = carrito.entrega || "domicilio";
+  const envioGratis = subtotal >= ENVIO_GRATIS_DESDE;
   let envio = null; // null = todavía sin calcular
   if (envioGratis || entrega === "retiro") envio = 0;
   else if (carrito.codigoPostal) envio = COSTO_ENVIO;
-
-  const total = subtotal - descuentoCupon - descuentoPago + (envio || 0);
 
   return {
     items,
@@ -144,8 +144,8 @@ function resumen(session) {
     envioGratisDesde: ENVIO_GRATIS_DESDE,
     faltaEnvioGratis: Math.max(0, ENVIO_GRATIS_DESDE - subtotal),
     progresoEnvio: Math.min(100, Math.round((subtotal / ENVIO_GRATIS_DESDE) * 100)),
-    total,
-    cuotas: 6,
+    total: subtotal - descuentoCupon - descuentoPago + (envio || 0),
+    cuotas: CUOTAS,
   };
 }
 

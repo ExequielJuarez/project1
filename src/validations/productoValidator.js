@@ -1,10 +1,14 @@
 const { body } = require("express-validator");
-const { categorias, colores } = require("../data/productosMock");
+const productoService = require("../services/productoService");
 
 module.exports = [
   body("nombre").trim().isLength({ min: 3, max: 90 }).withMessage("El nombre debe tener entre 3 y 90 caracteres"),
-  body("categoria").isIn(categorias).withMessage("Elegí una categoría"),
-  body("color").isIn(colores.map((c) => c.valor)).withMessage("Elegí un color"),
+  body("categoria")
+    .custom(async (valor) => (await productoService.categorias()).includes(valor) || Promise.reject())
+    .withMessage("Elegí una categoría"),
+  body("color")
+    .custom(async (valor) => (await productoService.colores()).some((c) => c.valor === valor) || Promise.reject())
+    .withMessage("Elegí un color"),
   body("precio").isFloat({ min: 1 }).withMessage("Ingresá un precio mayor a 0"),
   body("costo")
     .isFloat({ min: 0 })

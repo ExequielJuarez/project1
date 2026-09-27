@@ -1,16 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
-const fs = require("fs");
-const multer = require("multer");
 
-const {
-  productos,
-  colores,
-  categorias,
-  obtenerProducto,
-  productosRelacionados,
-} = require("../data/productosMock");
+const productoService = require("../services/productoService");
 const carritoController = require("../controllers/carritoController");
 const checkoutController = require("../controllers/checkoutController");
 const checkoutValidator = require("../validations/checkoutValidator");
@@ -20,40 +11,40 @@ const registroValidator = require("../validations/registroValidator");
 const soloInvitados = require("../middlewares/soloInvitados");
 const favoritosController = require("../controllers/favoritosController");
 
-// ── MAQUETA: CATÁLOGO DE PRODUCTOS ─────────────────────────
-router.get(["/", "/catalogo"], (req, res) => {
-  const conteoColores = colores.map((c) => ({
-    ...c,
-    cantidad: productos.filter((p) => p.color === c.valor).length,
-  }));
-
-  const conteoCategorias = categorias.map((nombre) => ({
-    nombre,
-    cantidad: productos.filter((p) => p.categoria === nombre).length,
-  }));
+// ── CATÁLOGO DE PRODUCTOS ──────────────────────────────────
+router.get(["/", "/catalogo"], async (req, res) => {
+  const [productos, colores, categorias] = await Promise.all([
+    productoService.listar(),
+    productoService.colores(),
+    productoService.categorias(),
+  ]);
 
   res.render("catalogo", {
     titulo: "Catálogo",
     estilo: "catalogo",
     navActivo: "catalogo",
     productos,
-    colores: conteoColores,
-    categorias: conteoCategorias,
+    colores: colores.map((c) => ({ ...c, cantidad: productos.filter((p) => p.color === c.valor).length })),
+    categorias: categorias.map((nombre) => ({ nombre, cantidad: productos.filter((p) => p.categoria === nombre).length })),
   });
 });
 
-// ── MAQUETA: DETALLE DE PRODUCTO ───────────────────────────
-router.get("/producto/:id", (req, res) => {
-  const producto = obtenerProducto(req.params.id);
+// ── DETALLE DE PRODUCTO ────────────────────────────────────
+router.get("/producto/:id", async (req, res) => {
+  const producto = await productoService.obtener(req.params.id);
   if (!producto) return res.redirect("/catalogo");
 
+  const [colores, relacionados] = await Promise.all([
+    productoService.colores(),
+    productoService.relacionados(producto.id),
+  ]);
   res.render("producto", {
     titulo: producto.nombre,
     estilo: "producto",
     navActivo: "catalogo",
     producto,
     colores,
-    relacionados: productosRelacionados(producto.id),
+    relacionados,
   });
 });
 

@@ -1,0 +1,217 @@
+// Pedidos (tablas pedidos y pedido_items) y métricas del panel admin.
+
+const { Op } = require("sequelize");
+const db = require("../model/database/models");
+
+const ESTADOS = db.Pedido.ESTADOS;
+
+function plano(p) {
+  const x = p.get({ plain: true });
+  return { ...x, numero: x.id, fecha: x.creado_en, items: x.items || [] };
+}
+
+// ── Consultas ───────────────────────────────────────────────
+async function listar({ estado = "", q = "", limite } = {}) {
+  const where = {};
+  if (estado) where.estado = estado;
+  const texto = q.trim();
+  if (texto) {
+    where[Op.or] = [{ cliente: { [Op.like]: `%${texto}%` } }, ...(/^\d+$/.test(texto) ? [{ id: Number(texto) }] : [])];
+  }
+  const filas = await db.Pedido.findAll({
+    where,
+    include: [{ association: "items" }],
+    order: [["creado_en", "DESC"], ["id", "DESC"]],
+    ...(limite ? { limit: limite } : {}),
+  });
+  return filas.map(plano);
+}
+
+async function conteoPorEstado() {
+  const filas = await db.Pedido.findAll({
+    attributes: ["estado", [db.sequelize.fn("COUNT", db.sequelize.col("id")), "cantidad"]],
+    group: ["estado"],
+    raw: true,
+  });
+  const conteo = Object.fromEntries(ESTADOS.map((e) => [e, 0]));
+  filas.forEach((f) => (conteo[f.estado] = Number(f.cantidad)));
+  return conteo;
+}
+
+async function pendientes() {
+  return db.Pedido.count({ where: { estado: ["pendiente", "pagado"] } });
+}
+
+async function cambiarEstado(id, estado) {
+  if (!ESTADOS.includes(estado)) return null;
+  const pedido = await db.Pedido.findByPk(id);
+  if (!pedido) return null;
+  await pedido.update({ estado });
+  return pedido;
+}
+
+// ── Crear un pedido desde el carrito ────────────────────────
+// Todo en una transacción: si falta stock de algún producto no se guarda nada.
+async function crearDesdeCarrito(resumen, datos, usuario) {
+  return db.sequelize.transaction(async (t) => {
+    for (const i of resumen.items) {
+      // Descuenta solo si alcanza el stock (evita vender de más si dos compran a la vez)
+      const [, filas] = await db.sequelize.query(
+        "UPDATE productos SET stock = stock - :cantidad WHERE id = :id AND stock >= :cantidad",
+        { replacements: { id: i.id, cantidad: i.cantidad }, transaction: t, type: db.Sequelize.QueryTypes.UPDATE }
+      );
+      if (!filas) {
+        const error = new Error(`No hay stock suficiente de "${i.producto.nombre}"`);
+        error.sinStock = true;
+        throw error;
+      }
+    }
+
+    const costo = resumen.items.reduce((acc, i) => acc + i.producto.costo * i.cantidad, 0);
+    const descuento = resumen.descuentoCupon + resumen.descuentoPago;
+    const domicilio = datos.entrega === "domicilio";
+
+    const pedido = await db.Pedido.create(
+      {
+        usuarioId: usuario?.id || null,
+        cliente: `${datos.nombre} ${datos.apellido}`.trim(),
+        email: datos.email,
+        telefono: datos.telefono,
+        dni: datos.dni,
+        entrega: datos.entrega,
+        calle: domicilio ? datos.calle : null,
+        altura: domicilio ? datos.numero : null,
+        piso: domicilio ? datos.piso || null : null,
+        codigoPostal: domicilio ? datos.codigoPostal : null,
+        ciudad: domicilio ? datos.ciudad : null,
+        provincia: domicilio ? datos.provincia : null,
+        notas: datos.notas || null,
+        facturacion: datos.facturacion,
+        cuit: datos.facturacion === "facturaA" ? datos.cuit : null,
+        razonSocial: datos.facturacion === "facturaA" ? datos.razonSocial : null,
+        medioPago: resumen.medioPago,
+        cuponCodigo: resumen.cupon?.codigo || null,
+        estado: "pagado",
+        subtotal: resumen.subtotal,
+        descuento,
+        envio: resumen.envio || 0,
+        total: resumen.total,
+        costo,
+        ganancia: resumen.subtotal - descuento - costo,
+        items: resumen.items.map((i) => ({
+          productoId: i.id,
+          nombre: i.producto.nombre,
+          color: i.color,
+          precio: i.producto.precio,
+          costo: i.producto.costo,
+          cantidad: i.cantidad,
+        })),
+      },
+      { include: [{ association: "items" }], transaction: t }
+    );
+    return plano(pedido);
+  });
+}
+
+// ── Métricas del panel ──────────────────────────────────────
+const inicioDelDia = (fecha) => {
+  const f = new Date(fecha);
+  f.setHours(0, 0, 0, 0);
+  return f;
+};
+
+async function metricas(dias = 30) {
+  const desde = inicioDelDia(new Date());
+  desde.setDate(desde.getDate() - (dias - 1));
+  const antesDesde = new Date(desde);
+  antesDesde.setDate(desde.getDate() - dias);
+
+  const [validos, anteriores] = await Promise.all([
+    db.Pedido.findAll({
+      where: { creado_en: { [Op.gte]: desde }, estado: { [Op.ne]: "cancelado" } },
+      include: [{ association: "items" }],
+    }),
+    db.Pedido.findAll({
+      where: { creado_en: { [Op.gte]: antesDesde, [Op.lt]: desde }, estado: { [Op.ne]: "cancelado" } },
+      attributes: ["ganancia"],
+      raw: true,
+    }),
+  ]);
+  const pedidos = validos.map(plano);
+
+  // Serie diaria (todos los días, aunque no haya ventas)
+  const serie = Array.from({ length: dias }, (_, d) => {
+    const fecha = new Date(desde);
+    fecha.setDate(desde.getDate() + d);
+    return { fecha, ingresos: 0, costo: 0, ganancia: 0, pedidos: 0 };
+  });
+  pedidos.forEach((p) => {
+    const dia = serie[Math.round((inicioDelDia(p.fecha) - desde) / 86400000)];
+    if (!dia) return;
+    dia.ingresos += p.subtotal - p.descuento;
+    dia.costo += p.costo;
+    dia.ganancia += p.ganancia;
+    dia.pedidos += 1;
+  });
+
+  // Ranking de productos por ganancia
+  const porProducto = {};
+  pedidos.forEach((p) =>
+    p.items.forEach((i) => {
+      const clave = i.productoId || `borrado-${i.nombre}`;
+      const fila = (porProducto[clave] ||= { id: i.productoId, nombre: i.nombre, unidades: 0, ingresos: 0, ganancia: 0 });
+      fila.unidades += i.cantidad;
+      fila.ingresos += i.precio * i.cantidad;
+      fila.ganancia += (i.precio - i.costo) * i.cantidad;
+    })
+  );
+
+  const ingresos = serie.reduce((acc, d) => acc + d.ingresos, 0);
+  const ganancia = serie.reduce((acc, d) => acc + d.ganancia, 0);
+  const unidades = pedidos.reduce((acc, p) => acc + p.items.reduce((a, i) => a + i.cantidad, 0), 0);
+
+  return {
+    dias,
+    ingresos,
+    costo: ingresos - ganancia,
+    ganancia,
+    margen: ingresos ? ganancia / ingresos : 0,
+    pedidos: pedidos.length,
+    unidades,
+    ticketPromedio: pedidos.length ? ingresos / pedidos.length : 0,
+    gananciaAnterior: anteriores.length ? anteriores.reduce((acc, p) => acc + Number(p.ganancia), 0) : null,
+    serie,
+    topProductos: Object.values(porProducto).sort((a, b) => b.ganancia - a.ganancia).slice(0, 5),
+    pendientes: await pendientes(),
+  };
+}
+
+// Ventas de un producto (para la ficha del admin)
+async function ventasDeProducto(id) {
+  const filas = await db.PedidoItem.findAll({
+    where: { productoId: id },
+    include: [{ association: "pedido", attributes: ["id", "creado_en", "estado"], where: { estado: { [Op.ne]: "cancelado" } } }],
+    order: [[{ model: db.Pedido, as: "pedido" }, "creado_en", "DESC"]],
+  });
+  const ventas = filas.map((f) => {
+    const x = f.get({ plain: true });
+    return { ...x, numero: x.pedido.id, fecha: x.pedido.creado_en };
+  });
+  return {
+    unidades: ventas.reduce((acc, v) => acc + v.cantidad, 0),
+    ingresos: ventas.reduce((acc, v) => acc + v.precio * v.cantidad, 0),
+    ganancia: ventas.reduce((acc, v) => acc + (v.precio - v.costo) * v.cantidad, 0),
+    ultimas: ventas.slice(0, 6),
+  };
+}
+
+module.exports = {
+  ESTADOS,
+  listar,
+  conteoPorEstado,
+  pendientes,
+  cambiarEstado,
+  crearDesdeCarrito,
+  metricas,
+  ventasDeProducto,
+};

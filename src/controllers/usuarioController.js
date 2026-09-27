@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const { validationResult } = require("express-validator");
-const usuarios = require("../data/usuariosMock");
-const favoritosData = require("../data/favoritos");
+const usuarios = require("../services/usuarioService");
+const favoritoService = require("../services/favoritoService");
 
 const MAX_INTENTOS = 5;
 const BLOQUEO_MS = 60 * 1000;
@@ -25,13 +25,17 @@ function destinoSeguro(url) {
 // los favoritos de invitado pasan a la cuenta
 function iniciarSesion(req, res, usuario, { recordar = false, volver = "/", mensaje } = {}) {
   const { carrito, checkout, favoritos } = req.session;
-  req.session.regenerate((err) => {
+  req.session.regenerate(async (err) => {
     if (err) {
       req.session.flash = "No pudimos iniciar sesión, probá de nuevo.";
       return res.redirect("/login");
     }
     Object.assign(req.session, { carrito, checkout, favoritos, usuarioLogueado: usuario });
-    favoritosData.pasarACuenta(req.session, usuario.id);
+    try {
+      await favoritoService.pasarACuenta(req.session, usuario.id);
+    } catch (error) {
+      console.error("No se pudieron pasar los favoritos a la cuenta:", error.message);
+    }
     if (recordar) req.session.cookie.maxAge = RECORDAR_MS;
     req.session.flash = mensaje || `¡Hola, ${usuario.nombre}! Iniciaste sesión.`;
     req.session.save(() => res.redirect(destinoSeguro(volver)));
@@ -122,7 +126,14 @@ module.exports = {
       return renderRegistro(res, { req, datos, errores: resultado.mapped(), status: 422 });
     }
 
-    const usuario = await usuarios.crear({ nombre, apellido, email, telefono, password: req.body.password });
+    const usuario = await usuarios.crear({
+      nombre,
+      apellido,
+      email,
+      telefono,
+      password: req.body.password,
+      newsletter: datos.newsletter,
+    });
     iniciarSesion(req, res, usuario, {
       volver: req.body.volver,
       mensaje: `¡Bienvenido/a, ${usuario.nombre}! Tu cuenta está lista.`,

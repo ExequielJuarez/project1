@@ -1,34 +1,37 @@
-const favoritos = require("../data/favoritos");
-const carrito = require("../data/carrito");
+const favoritos = require("../services/favoritoService");
+const carrito = require("../services/carritoService");
 
 module.exports = {
-  ver(req, res) {
+  async ver(req, res) {
     res.render("favoritos", {
       titulo: "Favoritos",
       estilo: "favoritos",
-      productos: favoritos.productosFavoritos(req.session),
+      productos: await favoritos.productos(req.session),
     });
   },
 
-  alternar(req, res) {
-    const r = favoritos.alternar(req.session, req.params.id);
+  async alternar(req, res) {
+    const r = await favoritos.alternar(req.session, req.params.id);
     if (!r) return res.status(404).json({ ok: false, mensaje: "Producto no encontrado" });
     res.json({ ok: true, ...r });
   },
 
-  vaciar(req, res) {
-    favoritos.vaciar(req.session);
+  async vaciar(req, res) {
+    await favoritos.vaciar(req.session);
     res.json({ ok: true, cantidad: 0 });
   },
 
   // Agrega al carrito todos los favoritos que tengan stock
-  alCarrito(req, res) {
-    const lista = favoritos.productosFavoritos(req.session);
-    const agregados = lista.filter((p) => carrito.agregar(req.session, { id: p.id }).ok);
+  async alCarrito(req, res) {
+    const lista = await favoritos.productos(req.session);
+    let agregados = 0;
+    for (const p of lista) {
+      if ((await carrito.agregar(req.session, { id: p.id })).ok) agregados++;
+    }
     res.json({
       ok: true,
-      agregados: agregados.length,
-      sinStock: lista.length - agregados.length,
+      agregados,
+      sinStock: lista.length - agregados,
       cantidadCarrito: carrito.cantidadTotal(req.session),
     });
   },

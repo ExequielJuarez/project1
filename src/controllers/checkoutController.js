@@ -1,8 +1,7 @@
 const { validationResult } = require("express-validator");
-const carrito = require("../data/carrito");
+const carrito = require("../services/carritoService");
+const pedidos = require("../services/pedidoService");
 const provincias = require("../data/provincias");
-const pedidos = require("../data/pedidosMock");
-const { ajustarStock } = require("../data/productosMock");
 
 const CAMPOS = [
   "email", "nombre", "apellido", "telefono", "dni",
@@ -40,14 +39,14 @@ function render(res, { req, resumen, datos, errores = {}, status = 200 }) {
 }
 
 module.exports = {
-  ver(req, res) {
-    const resumen = carrito.resumen(req.session);
+  async ver(req, res) {
+    const resumen = await carrito.resumen(req.session);
     if (!resumen.items.length) return res.redirect("/carrito");
     render(res, { req, resumen, datos: datosIniciales(req, resumen) });
   },
 
-  guardar(req, res) {
-    const resumen = carrito.resumen(req.session);
+  async guardar(req, res) {
+    const resumen = await carrito.resumen(req.session);
     if (!resumen.items.length) return res.redirect("/carrito");
 
     // Solo guardamos los campos conocidos del formulario
@@ -68,26 +67,23 @@ module.exports = {
   },
 
   // Confirma el pedido (en la maqueta todavía sin paso de pago real):
-  // lo registra, descuenta el stock y vacía el carrito
-  confirmar(req, res) {
-    const resumen = carrito.resumen(req.session);
+  // lo guarda en la base, descuenta el stock y vacía el carrito
+  async confirmar(req, res) {
+    const resumen = await carrito.resumen(req.session);
     const datos = req.session.checkout?.datos;
     if (!resumen.items.length) return res.redirect("/carrito");
     if (!datos) return res.redirect("/checkout/datos");
 
-    // Última verificación de stock antes de confirmar
-    const faltante = resumen.items.find((i) => i.cantidad > i.producto.stock);
-    if (faltante) {
-      req.session.flash = `No hay stock suficiente de "${faltante.producto.nombre}". Revisá tu carrito.`;
-      return res.redirect("/carrito");
+    try {
+      const pedido = await pedidos.crearDesdeCarrito(resumen, datos, req.session.usuarioLogueado);
+      carrito.vaciar(req.session);
+      delete req.session.checkout;
+      req.session.flash = `¡Gracias! Tu pedido #${pedido.numero} quedó confirmado.`;
+      res.redirect("/");
+    } catch (error) {
+      if (!error.sinStock) throw error;
+      req.session.flash = `${error.message}. Revisá tu carrito.`;
+      res.redirect("/carrito");
     }
-
-    const pedido = pedidos.crearDesdeCarrito(resumen, datos, req.session.usuarioLogueado);
-    resumen.items.forEach((i) => ajustarStock(i.id, -i.cantidad));
-    carrito.vaciar(req.session);
-    delete req.session.checkout;
-
-    req.session.flash = `¡Gracias! Tu pedido #${pedido.numero} quedó confirmado.`;
-    res.redirect("/");
   },
 };

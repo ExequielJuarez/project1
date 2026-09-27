@@ -1,5 +1,5 @@
 const { body } = require("express-validator");
-const usuarios = require("../data/usuariosMock");
+const usuarios = require("../services/usuarioService");
 
 module.exports = [
   body("nombre").trim().isLength({ min: 2, max: 40 }).withMessage("Ingresá tu nombre"),
@@ -10,8 +10,8 @@ module.exports = [
     .isEmail()
     .withMessage("Ingresá un email válido")
     .bail()
-    .custom((email) => {
-      if (usuarios.buscarPorEmail(email)) throw new Error("Ya existe una cuenta con este email");
+    .custom(async (email) => {
+      if (await usuarios.buscarPorEmail(email)) throw new Error("Ya existe una cuenta con este email");
       return true;
     }),
   body("telefono")
