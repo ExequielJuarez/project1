@@ -340,42 +340,6 @@
   margin-top: 26px;
 }
 
-.cantidad {
-  display: flex;
-  align-items: center;
-  height: 50px;
-  border: 1px solid var(--negro);
-}
-
-.cantidad__btn {
-  width: 38px;
-  height: 100%;
-  font-size: 18px;
-  transition: background var(--transicion);
-}
-
-.cantidad__btn:hover {
-  background: var(--gris-100);
-}
-
-.cantidad input {
-  width: 36px;
-  height: 100%;
-  border: 0;
-  background: transparent;
-  text-align: center;
-  font-weight: 600;
-  outline: none;
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.cantidad input::-webkit-outer-spin-button,
-.cantidad input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
 .compra__agregar {
   height: 50px;
   padding: 0 10px;
@@ -627,59 +591,6 @@
 }
 
 /* ==========================================================
-   RELACIONADOS
-   ========================================================== */
-.relacionados {
-  padding-top: 56px;
-  padding-bottom: 64px;
-}
-
-.relacionados__cabecera {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.relacionados__titulo {
-  font-family: var(--fuente-titulos);
-  font-size: clamp(30px, 6vw, 44px);
-  font-weight: 500;
-  line-height: 1;
-}
-
-.relacionados__link {
-  flex: none;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-/* Carrusel horizontal en celular */
-.relacionados__grilla {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 68%;
-  gap: 14px;
-  margin: 0 calc(var(--gutter) * -1);
-  padding: 0 var(--gutter);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding: 0 var(--gutter);
-  scrollbar-width: none;
-}
-
-.relacionados__grilla::-webkit-scrollbar {
-  display: none;
-}
-
-.relacionados__grilla .tarjeta {
-  scroll-snap-align: start;
-}
-
-/* ==========================================================
    BARRA DE COMPRA FIJA
    ========================================================== */
 .barra-compra {
@@ -864,10 +775,6 @@ body.con-barra .whatsapp {
     padding-bottom: 80px;
   }
 
-  .relacionados__grilla {
-    grid-auto-columns: 40%;
-  }
-
   .visor__flecha--prev {
     left: 32px;
   }
@@ -936,21 +843,6 @@ body.con-barra .whatsapp {
     gap: 120px;
     padding-top: 110px;
     padding-bottom: 110px;
-  }
-
-  .relacionados {
-    padding-top: 88px;
-    padding-bottom: 96px;
-  }
-
-  .relacionados__grilla {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-columns: auto;
-    gap: 20px;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
   }
 
   .barra-compra {

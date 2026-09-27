@@ -117,10 +117,24 @@ document.addEventListener("DOMContentLoaded", () => {
   inputCantidad.addEventListener("change", () => fijarCantidad(Number(inputCantidad.value)));
 
   // ---------- Agregar / comprar ----------
-  const agregar = () => agregarAlCarrito(nombre, Number(inputCantidad.value));
-  $("#btnAgregar").addEventListener("click", agregar);
-  $("#btnAgregarBarra").addEventListener("click", agregar);
-  $(".compra__ahora").addEventListener("click", () => mostrarToast("Redirigiendo al checkout… (demo)"));
+  const datosCompra = (boton) => ({
+    id: producto.dataset.id,
+    nombre,
+    cantidad: Number(inputCantidad.value),
+    color: $('input[name="color"]:checked')?.value,
+    boton,
+  });
+
+  ["#btnAgregar", "#btnAgregarBarra"].forEach((sel) => {
+    const boton = $(sel);
+    boton.addEventListener("click", () => agregarAlCarrito(datosCompra(boton)));
+  });
+
+  // Comprar ahora: agrega y lleva directo al carrito
+  $(".compra__ahora").addEventListener("click", async (e) => {
+    const r = await agregarAlCarrito(datosCompra(e.currentTarget));
+    if (r) window.location.href = "/carrito";
+  });
 
   // ---------- Calculador de envío (demo) ----------
   const precio = Number(producto.dataset.precio);

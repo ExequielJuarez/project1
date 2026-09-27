@@ -11,6 +11,7 @@ const {
   obtenerProducto,
   productosRelacionados,
 } = require("../data/productosMock");
+const carritoController = require("../controllers/carritoController");
 
 // ── MAQUETA: CATÁLOGO DE PRODUCTOS ─────────────────────────
 router.get(["/", "/catalogo"], (req, res) => {
@@ -48,5 +49,16 @@ router.get("/producto/:id", (req, res) => {
     relacionados: productosRelacionados(producto.id),
   });
 });
+
+// ── CARRITO ────────────────────────────────────────────────
+router.get("/carrito", carritoController.ver);
+router.post("/carrito/agregar", carritoController.agregar);
+router.patch("/carrito/item/:clave", carritoController.actualizar);
+router.delete("/carrito/item/:clave", carritoController.quitar);
+router.delete("/carrito", carritoController.vaciar);
+router.post("/carrito/cupon", carritoController.cupon);
+router.delete("/carrito/cupon", carritoController.quitarCupon);
+router.post("/carrito/medio-pago", carritoController.medioPago);
+router.post("/carrito/envio", carritoController.envio);
 
 module.exports = router;

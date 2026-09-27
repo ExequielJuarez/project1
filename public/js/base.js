@@ -1,7 +1,7 @@
 // ==========================================================
 // BASE — Interacciones compartidas por todas las vistas
 // Menú, buscador, paneles laterales, acordeones, carrito
-// y favoritos de demostración, aviso (toast).
+// (vía API en sesión), favoritos de demostración y aviso (toast).
 // Expone window.Tienda para que cada vista lo reutilice.
 // ==========================================================
 
@@ -68,28 +68,64 @@
   const toast = $("#toast");
   let timerToast;
 
-  function mostrarToast(texto) {
+  // accion opcional: { texto, href } para mostrar un enlace dentro del aviso
+  function mostrarToast(texto, accion = null) {
     toast.textContent = texto;
+    if (accion) {
+      const link = document.createElement("a");
+      link.href = accion.href;
+      link.className = "toast__accion";
+      link.textContent = accion.texto;
+      toast.appendChild(link);
+    }
+    toast.classList.toggle("con-accion", Boolean(accion));
     toast.classList.add("visible");
     clearTimeout(timerToast);
-    timerToast = setTimeout(() => toast.classList.remove("visible"), 2200);
+    timerToast = setTimeout(() => toast.classList.remove("visible"), accion ? 3500 : 2200);
   }
 
-  // ---------- Carrito (demo) ----------
-  const contador = $("#contadorCarrito");
-  let totalCarrito = 0;
+  // ---------- Pedidos al servidor (JSON) ----------
+  async function api(url, metodo = "GET", datos = null) {
+    const respuesta = await fetch(url, {
+      method: metodo,
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: datos ? JSON.stringify(datos) : null,
+    });
+    const json = await respuesta.json().catch(() => ({}));
+    if (!respuesta.ok || !json.ok) throw new Error(json.mensaje || "Algo salió mal, probá de nuevo");
+    return json;
+  }
 
-  function agregarAlCarrito(nombre, cantidad = 1) {
-    totalCarrito += cantidad;
-    contador.textContent = totalCarrito;
+  // ---------- Carrito ----------
+  const contador = $("#contadorCarrito");
+
+  function actualizarContador(cantidad) {
+    contador.textContent = cantidad;
     contador.classList.add("pulso");
     setTimeout(() => contador.classList.remove("pulso"), 200);
-    mostrarToast(cantidad > 1 ? `Agregado: ${cantidad} × ${nombre}` : `Agregado: ${nombre}`);
+  }
+
+  async function agregarAlCarrito({ id, nombre, cantidad = 1, color = null, boton = null }) {
+    if (boton) boton.disabled = true;
+    try {
+      const r = await api("/carrito/agregar", "POST", { id, cantidad, color });
+      actualizarContador(r.cantidad);
+      mostrarToast(cantidad > 1 ? `Agregado: ${cantidad} × ${nombre}` : `Agregado: ${nombre}`, {
+        texto: "Ver carrito",
+        href: "/carrito",
+      });
+      return r;
+    } catch (error) {
+      mostrarToast(error.message);
+    } finally {
+      if (boton) boton.disabled = false;
+    }
   }
 
   $$("[data-agregar]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      agregarAlCarrito(btn.closest(".tarjeta").dataset.nombre);
+      const tarjeta = btn.closest(".tarjeta");
+      agregarAlCarrito({ id: tarjeta.dataset.id, nombre: tarjeta.dataset.nombre, boton: btn });
     });
   });
 
@@ -101,5 +137,5 @@
     });
   });
 
-  window.Tienda = { $, $$, abrirPanel, cerrarPaneles, mostrarToast, agregarAlCarrito };
+  window.Tienda = { $, $$, abrirPanel, cerrarPaneles, mostrarToast, api, actualizarContador, agregarAlCarrito };
 })();

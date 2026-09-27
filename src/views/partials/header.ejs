@@ -39,10 +39,10 @@
       <a href="#" class="icono-btn" aria-label="Mi cuenta">
         <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </a>
-      <button class="icono-btn carrito-btn" aria-label="Carrito">
+      <a href="/carrito" class="icono-btn carrito-btn" aria-label="Carrito">
         <svg viewBox="0 0 24 24" width="20" height="20"><path d="M5 8h14l-1.2 12H6.2L5 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 016 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="carrito-btn__contador" id="contadorCarrito">0</span>
-      </button>
+        <span class="carrito-btn__contador" id="contadorCarrito"><%= locals.cantidadCarrito || 0 %></span>
+      </a>
     </div>
   </div>
 
