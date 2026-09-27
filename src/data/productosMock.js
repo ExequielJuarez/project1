@@ -34,4 +34,47 @@ const categorias = [
   "Combos",
 ];
 
-module.exports = { productos, colores, categorias };
+// Datos genéricos para la vista de detalle. Cada producto puede
+// sobrescribir cualquiera de estos campos.
+const detalleBase = {
+  stock: 24,
+  imagenes: 6,
+  cuotas: 6,
+  resumen:
+    "Pieza hecha a mano, con materiales seleccionados y terminaciones cuidadas al detalle. Ninguna es igual a otra.",
+  descripcion: [
+    "Acá va la descripción principal del producto: qué es, para quién está pensado y qué lo hace especial. Dos o tres líneas alcanzan para contar la historia.",
+    "Cada pieza pasa por un proceso artesanal de selección, curado y terminación. Por eso pueden existir pequeñas diferencias de veta, tono o forma entre unidades.",
+  ],
+  destacados: [
+    "Material principal de primera calidad",
+    "Terminación interior protegida",
+    "Producto 100% artesanal",
+    "Incluye accesorio de regalo",
+  ],
+  especificaciones: [
+    ["Material", "(Material)"],
+    ["Diámetro", "9 cm"],
+    ["Altura", "10 cm"],
+    ["Capacidad", "240 ml"],
+    ["Apto lavavajillas", "No"],
+    ["Incluye", "Accesorio + caja"],
+    ["Origen", "Hecho en Argentina"],
+  ],
+};
+
+function obtenerProducto(id) {
+  const producto = productos.find((p) => p.id === Number(id));
+  if (!producto) return null;
+  const color = colores.find((c) => c.valor === producto.color);
+  return { ...detalleBase, ...producto, colorInfo: color };
+}
+
+function productosRelacionados(id, cantidad = 4) {
+  const actual = productos.find((p) => p.id === Number(id));
+  const misma = productos.filter((p) => p.id !== actual.id && p.categoria === actual.categoria);
+  const resto = productos.filter((p) => p.id !== actual.id && p.categoria !== actual.categoria);
+  return [...misma, ...resto].slice(0, cantidad);
+}
+
+module.exports = { productos, colores, categorias, obtenerProducto, productosRelacionados };

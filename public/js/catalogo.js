@@ -1,18 +1,11 @@
 // ==========================================================
-// CATÁLOGO — Interacciones de la maqueta
-// Menú, panel de filtros, acordeones, filtrado, orden,
-// cambio de vista y carrito de demostración.
+// CATÁLOGO — Interacciones propias de la vista (usa base.js)
+// Panel de filtros, filtrado, orden y cambio de vista.
 // ==========================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  const $ = (sel, ctx = document) => ctx.querySelector(sel);
-  const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+  const { $, $$, abrirPanel, cerrarPaneles } = window.Tienda;
 
-  const body = document.body;
-  const header = $("#header");
-  const overlay = $("#overlay");
-  const nav = $("#nav");
-  const btnMenu = $("#btnMenu");
   const filtros = $("#filtros");
   const grilla = $("#grilla");
   const tarjetas = $$(".tarjeta", grilla);
@@ -23,60 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const chipsActivos = $("#chipsActivos");
   const badgeFiltros = $("#badgeFiltros");
   const cantidadVisible = $("#cantidadVisible");
-  const esPC = window.matchMedia("(min-width: 1100px)");
 
-  // ---------- Paneles (menú y filtros) ----------
-  function cerrarPaneles() {
-    nav.classList.remove("abierto");
-    filtros.classList.remove("abierto");
-    overlay.classList.remove("visible");
-    header.classList.remove("menu-abierto");
-    btnMenu.setAttribute("aria-expanded", "false");
-    body.classList.remove("bloqueado");
-  }
-
-  function abrirPanel(panel) {
-    cerrarPaneles();
-    panel.classList.add("abierto");
-    overlay.classList.add("visible");
-    body.classList.add("bloqueado");
-  }
-
-  btnMenu.addEventListener("click", () => {
-    if (nav.classList.contains("abierto")) return cerrarPaneles();
-    abrirPanel(nav);
-    header.classList.add("menu-abierto");
-    btnMenu.setAttribute("aria-expanded", "true");
-  });
-
+  // ---------- Panel de filtros (celular / tablet) ----------
   $("#btnFiltros").addEventListener("click", () => abrirPanel(filtros));
   $("#btnCerrarFiltros").addEventListener("click", cerrarPaneles);
   $("#btnAplicar").addEventListener("click", cerrarPaneles);
-  overlay.addEventListener("click", cerrarPaneles);
-  document.addEventListener("keydown", (e) => e.key === "Escape" && cerrarPaneles());
-  esPC.addEventListener("change", cerrarPaneles);
-
-  // Buscador en celular
-  $("#btnBuscarMovil").addEventListener("click", () => {
-    const buscador = $("#buscadorMovil");
-    buscador.classList.toggle("abierto");
-    if (buscador.classList.contains("abierto")) $("input", buscador).focus();
-  });
-
-  // Sombra del header al hacer scroll
-  window.addEventListener(
-    "scroll",
-    () => header.classList.toggle("con-sombra", window.scrollY > 10),
-    { passive: true }
-  );
-
-  // ---------- Acordeones ----------
-  $$(".acordeon__titulo").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const abierto = btn.parentElement.classList.toggle("abierto");
-      btn.setAttribute("aria-expanded", String(abierto));
-    });
-  });
 
   // ---------- Filtrado ----------
   const formatoPrecio = (n) =>
@@ -189,37 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
       $$(".vista__btn").forEach((b) => b.classList.remove("activo"));
       btn.classList.add("activo");
       grilla.dataset.columnas = btn.dataset.columnas;
-    });
-  });
-
-  // ---------- Carrito y favoritos (demo) ----------
-  const contador = $("#contadorCarrito");
-  const toast = $("#toast");
-  let totalCarrito = 0;
-  let timerToast;
-
-  function mostrarToast(texto) {
-    toast.textContent = texto;
-    toast.classList.add("visible");
-    clearTimeout(timerToast);
-    timerToast = setTimeout(() => toast.classList.remove("visible"), 2200);
-  }
-
-  $$("[data-agregar]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const nombre = btn.closest(".tarjeta").dataset.nombre;
-      totalCarrito++;
-      contador.textContent = totalCarrito;
-      contador.classList.add("pulso");
-      setTimeout(() => contador.classList.remove("pulso"), 200);
-      mostrarToast(`Agregado: ${nombre}`);
-    });
-  });
-
-  $$(".tarjeta__fav").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const activo = btn.classList.toggle("activo");
-      mostrarToast(activo ? "Guardado en favoritos" : "Quitado de favoritos");
     });
   });
 });

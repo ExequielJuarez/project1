@@ -4,7 +4,13 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 
-const { productos, colores, categorias } = require("../data/productosMock");
+const {
+  productos,
+  colores,
+  categorias,
+  obtenerProducto,
+  productosRelacionados,
+} = require("../data/productosMock");
 
 // ── MAQUETA: CATÁLOGO DE PRODUCTOS ─────────────────────────
 router.get(["/", "/catalogo"], (req, res) => {
@@ -20,10 +26,26 @@ router.get(["/", "/catalogo"], (req, res) => {
 
   res.render("catalogo", {
     titulo: "Catálogo",
+    estilo: "catalogo",
+    navActivo: "catalogo",
     productos,
     colores: conteoColores,
     categorias: conteoCategorias,
-    descuentoTransferencia: 0.1,
+  });
+});
+
+// ── MAQUETA: DETALLE DE PRODUCTO ───────────────────────────
+router.get("/producto/:id", (req, res) => {
+  const producto = obtenerProducto(req.params.id);
+  if (!producto) return res.redirect("/catalogo");
+
+  res.render("producto", {
+    titulo: producto.nombre,
+    estilo: "producto",
+    navActivo: "catalogo",
+    producto,
+    colores,
+    relacionados: productosRelacionados(producto.id),
   });
 });
 

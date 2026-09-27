@@ -26,6 +26,11 @@ app.use(
   }),
 );
 
+// Helpers disponibles en todas las vistas
+app.locals.formatoPrecio = (n) =>
+  "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+app.locals.descuentoTransferencia = 0.1;
+
 app.use((req, res, next) => {
   res.locals.currentPath = req.path;
   next();
