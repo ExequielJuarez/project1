@@ -658,6 +658,35 @@ ul {
   fill: var(--negro);
 }
 
+.tarjeta__fav.activo svg {
+  animation: latidoFav 0.35s;
+}
+
+@keyframes latidoFav {
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+.carrito-btn__contador[hidden] {
+  display: none;
+}
+
+/* En celular el corazón del header no entra: favoritos va dentro del menú */
+.favoritos-btn {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .favoritos-btn {
+    display: inline-flex;
+  }
+
+  .nav__item--movil {
+    display: none;
+  }
+}
+
 .tarjeta__agregar {
   width: 100%;
   height: 40px;

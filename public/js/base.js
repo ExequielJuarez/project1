@@ -1,7 +1,7 @@
 // ==========================================================
 // BASE — Interacciones compartidas por todas las vistas
 // Menú, buscador, paneles laterales, acordeones, carrito
-// (vía API en sesión), favoritos de demostración, campos de
+// (vía API en sesión), favoritos (vía API), campos de
 // contraseña, menú de cuenta y aviso (toast).
 // Expone window.Tienda para que cada vista lo reutilice.
 // ==========================================================
@@ -130,12 +130,41 @@
     });
   });
 
-  // ---------- Favoritos (demo) ----------
-  $$(".tarjeta__fav").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const activo = btn.classList.toggle("activo");
-      mostrarToast(activo ? "Guardado en favoritos" : "Quitado de favoritos");
+  // ---------- Favoritos ----------
+  // Los botones con data-fav-id guardan/quitan el producto y se sincronizan
+  // entre sí (el mismo producto puede aparecer en varias tarjetas).
+  const contadorFav = $("#contadorFavoritos");
+
+  function actualizarFavoritos(id, activo, cantidad) {
+    $$(`[data-fav-id="${id}"]`).forEach((b) => {
+      b.classList.toggle("activo", activo);
+      b.setAttribute("aria-pressed", String(activo));
+      b.setAttribute("aria-label", activo ? "Quitar de favoritos" : "Agregar a favoritos");
     });
+    contadorFav.textContent = cantidad;
+    contadorFav.hidden = cantidad === 0;
+    contadorFav.classList.add("pulso");
+    setTimeout(() => contadorFav.classList.remove("pulso"), 200);
+    document.dispatchEvent(new CustomEvent("favoritos:cambio", { detail: { id, activo, cantidad } }));
+  }
+
+  document.addEventListener("click", async (e) => {
+    const boton = e.target.closest("[data-fav-id]");
+    if (!boton) return;
+    e.preventDefault();
+    boton.disabled = true;
+    try {
+      const r = await api(`/favoritos/${boton.dataset.favId}`, "POST");
+      actualizarFavoritos(boton.dataset.favId, r.activo, r.cantidad);
+      mostrarToast(
+        r.activo ? "Guardado en favoritos" : "Quitado de favoritos",
+        r.activo && location.pathname !== "/favoritos" ? { texto: "Ver favoritos", href: "/favoritos" } : null
+      );
+    } catch (error) {
+      mostrarToast(error.message);
+    } finally {
+      boton.disabled = false;
+    }
   });
 
   // ---------- Campos de contraseña ----------
@@ -192,5 +221,5 @@
   const flash = $("#flash");
   if (flash) setTimeout(() => mostrarToast(flash.dataset.mensaje), 300);
 
-  window.Tienda = { $, $$, abrirPanel, cerrarPaneles, mostrarToast, api, actualizarContador, agregarAlCarrito };
+  window.Tienda = { $, $$, abrirPanel, cerrarPaneles, mostrarToast, api, actualizarContador, actualizarFavoritos, agregarAlCarrito };
 })();

@@ -18,6 +18,7 @@ const usuarioController = require("../controllers/usuarioController");
 const loginValidator = require("../validations/loginValidator");
 const registroValidator = require("../validations/registroValidator");
 const soloInvitados = require("../middlewares/soloInvitados");
+const favoritosController = require("../controllers/favoritosController");
 
 // ── MAQUETA: CATÁLOGO DE PRODUCTOS ─────────────────────────
 router.get(["/", "/catalogo"], (req, res) => {
@@ -67,6 +68,12 @@ router.delete("/carrito/cupon", carritoController.quitarCupon);
 router.post("/carrito/medio-pago", carritoController.medioPago);
 router.post("/carrito/envio", carritoController.envio);
 router.post("/carrito/entrega", carritoController.entrega);
+
+// ── FAVORITOS ──────────────────────────────────────────────
+router.get("/favoritos", favoritosController.ver);
+router.post("/favoritos/al-carrito", favoritosController.alCarrito);
+router.post("/favoritos/:id", favoritosController.alternar);
+router.delete("/favoritos", favoritosController.vaciar);
 
 // ── CHECKOUT ───────────────────────────────────────────────
 router.get("/checkout/datos", checkoutController.ver);

@@ -107,7 +107,8 @@
             <button type="button" class="cantidad__btn" data-cantidad="1" aria-label="Sumar">+</button>
           </div>
           <button class="btn btn--solido compra__agregar" id="btnAgregar" <%= sinStock ? 'disabled' : '' %>><%= sinStock ? 'Sin stock' : 'Agregar al carrito' %></button>
-          <button class="compra__fav tarjeta__fav" aria-label="Agregar a favoritos">
+          <% const esFav = (locals.favoritosIds || []).includes(p.id); %>
+          <button class="compra__fav tarjeta__fav <%= esFav ? 'activo' : '' %>" data-fav-id="<%= p.id %>" aria-pressed="<%= esFav %>" aria-label="<%= esFav ? 'Quitar de favoritos' : 'Agregar a favoritos' %>">
             <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
           </button>
         </div>

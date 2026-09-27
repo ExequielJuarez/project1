@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { validationResult } = require("express-validator");
 const usuarios = require("../data/usuariosMock");
+const favoritosData = require("../data/favoritos");
 
 const MAX_INTENTOS = 5;
 const BLOQUEO_MS = 60 * 1000;
@@ -20,7 +21,8 @@ function destinoSeguro(url) {
   return typeof url === "string" && url.startsWith("/") && !url.startsWith("//") ? url : "/";
 }
 
-// Crea una sesión nueva (evita fijación de sesión) conservando carrito, checkout y favoritos
+// Crea una sesión nueva (evita fijación de sesión) conservando carrito y checkout;
+// los favoritos de invitado pasan a la cuenta
 function iniciarSesion(req, res, usuario, { recordar = false, volver = "/", mensaje } = {}) {
   const { carrito, checkout, favoritos } = req.session;
   req.session.regenerate((err) => {
@@ -29,6 +31,7 @@ function iniciarSesion(req, res, usuario, { recordar = false, volver = "/", mens
       return res.redirect("/login");
     }
     Object.assign(req.session, { carrito, checkout, favoritos, usuarioLogueado: usuario });
+    favoritosData.pasarACuenta(req.session, usuario.id);
     if (recordar) req.session.cookie.maxAge = RECORDAR_MS;
     req.session.flash = mensaje || `¡Hola, ${usuario.nombre}! Iniciaste sesión.`;
     req.session.save(() => res.redirect(destinoSeguro(volver)));

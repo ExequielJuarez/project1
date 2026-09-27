@@ -47,6 +47,7 @@
             <% if (usuarioLocal.rol === 'admin') { %>
               <a href="/admin" class="cuenta__link cuenta__link--admin">Panel de administración →</a>
             <% } %>
+            <a href="/favoritos" class="cuenta__link">Mis favoritos</a>
             <a href="#" class="cuenta__link" data-proximamente>Mis pedidos</a>
             <a href="#" class="cuenta__link" data-proximamente>Mis datos</a>
             <form action="/logout" method="POST">
@@ -60,6 +61,11 @@
         <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         </a>
       <% } %>
+      <% const cantFav = (locals.favoritosIds || []).length; %>
+      <a href="/favoritos" class="icono-btn carrito-btn favoritos-btn" aria-label="Favoritos">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span class="carrito-btn__contador" id="contadorFavoritos" <%= cantFav ? '' : 'hidden' %>><%= cantFav %></span>
+      </a>
       <a href="/carrito" class="icono-btn carrito-btn" aria-label="Carrito">
         <svg viewBox="0 0 24 24" width="20" height="20"><path d="M5 8h14l-1.2 12H6.2L5 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 016 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
         <span class="carrito-btn__contador" id="contadorCarrito"><%= locals.cantidadCarrito || 0 %></span>
@@ -86,6 +92,7 @@
       <li><a href="#">Combos</a></li>
       <li><a href="#">Accesorios</a></li>
       <li><a href="#">Contacto</a></li>
+      <li class="nav__item--movil"><a href="/favoritos">Favoritos<% if ((locals.favoritosIds || []).length) { %> <small>(<%= favoritosIds.length %>)</small><% } %></a></li>
     </ul>
   </nav>
 </header>

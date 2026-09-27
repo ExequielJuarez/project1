@@ -9,6 +9,7 @@ const app = express();
 const indexRouter = require("./routes/index.Routes");
 const adminRouter = require("./routes/admin.Routes");
 const carrito = require("./data/carrito");
+const favoritos = require("./data/favoritos");
 
 const puerto = 3000;
 
@@ -55,6 +56,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.locals.usuarioLocal = req.session.usuarioLogueado || null;
   res.locals.cantidadCarrito = carrito.cantidadTotal(req.session);
+  res.locals.favoritosIds = favoritos.ids(req.session);
 
   // Mensaje de un solo uso (se muestra como aviso y se borra)
   res.locals.flash = req.session.flash || null;
