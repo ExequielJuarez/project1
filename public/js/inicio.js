@@ -29,7 +29,7 @@
           observador.unobserve(e.target);
         });
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.12 }
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.12 },
     );
     revelables.forEach((el) => observador.observe(el));
   }
@@ -57,7 +57,7 @@
           obsContadores.unobserve(e.target);
         });
       },
-      { threshold: 0.6 }
+      { threshold: 0.6 },
     );
     contadores.forEach((el) => {
       el.textContent = "0";
@@ -81,19 +81,20 @@
           pendiente = false;
         });
       },
-      { passive: true }
+      { passive: true },
     );
   }
 
   // ---------- Colecciones: flechas del carrusel (celular y tablet) ----------
   const lista = $("#colecciones");
-  $$("[data-mover]").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      const tarjeta = lista.querySelector(".coleccion");
-      const ancho = tarjeta ? tarjeta.getBoundingClientRect().width + 16 : 300;
-      lista.scrollBy({ left: Number(btn.dataset.mover) * ancho, behavior: sinMovimiento ? "auto" : "smooth" });
-    })
-  );
+  if (lista)
+    $$("[data-mover]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const tarjeta = lista.querySelector(".coleccion");
+        const ancho = tarjeta ? tarjeta.getBoundingClientRect().width + 16 : 300;
+        lista.scrollBy({ left: Number(btn.dataset.mover) * ancho, behavior: sinMovimiento ? "auto" : "smooth" });
+      }),
+    );
 
   // ---------- Proceso: cambia la imagen según el paso que se está leyendo ----------
   const pasos = $$("[data-paso]");
@@ -102,7 +103,7 @@
   function activarPaso(i) {
     pasos.forEach((p) => p.classList.toggle("activo", Number(p.dataset.paso) === i));
     imagenesPaso.forEach((img) => img.classList.toggle("activa", Number(img.dataset.pasoImg) === i));
-    pasoActual.textContent = String(i + 1).padStart(2, "0");
+    if (pasoActual) pasoActual.textContent = String(i + 1).padStart(2, "0");
   }
   if ("IntersectionObserver" in window) {
     const obsPasos = new IntersectionObserver(
@@ -110,86 +111,95 @@
         entradas.forEach((e) => e.isIntersecting && activarPaso(Number(e.target.dataset.paso)));
       },
       // Se activa el paso que cruza la franja del medio de la pantalla
-      { rootMargin: "-45% 0px -45% 0px" }
+      { rootMargin: "-45% 0px -45% 0px" },
     );
     pasos.forEach((p) => obsPasos.observe(p));
   }
 
   // ---------- Vista previa del grabado ----------
   const input = $("#grabadoInput");
-  const texto = $("#grabadoTexto");
-  const ruta = $("textPath", texto);
-  const curva = $("#curvaGrabado");
-  const detalle = $("#grabadoDetalle");
-  const cuenta = $("#grabadoCuenta");
-  const EJEMPLO = "Juan";
+  // Las secciones se pueden ocultar desde el panel: si no está, no hay nada que hacer
+  if (input) iniciarGrabado();
 
-  function iniciales(t) {
-    const partes = t.trim().split(/\s+/).filter(Boolean);
-    if (!partes.length) return "J";
-    return partes.map((p) => p[0].toUpperCase()).join(" · ");
-  }
+  function iniciarGrabado() {
+    const texto = $("#grabadoTexto");
+    const ruta = $("textPath", texto);
+    const curva = $("#curvaGrabado");
+    const detalle = $("#grabadoDetalle");
+    const cuenta = $("#grabadoCuenta");
+    const EJEMPLO = input.dataset.ejemplo || "Juan";
 
-  function pintarGrabado() {
-    const escrito = input.value.replace(/\s+/g, " ");
-    const estilo = $("input[name='tipografia']:checked").value;
-    const base = escrito.trim() || EJEMPLO;
-
-    ruta.textContent = estilo === "iniciales" ? iniciales(base) : base;
-    texto.setAttribute("class", `grabado grabado--${estilo}`);
-    // Los textos largos se achican hasta que entran en el ancho del mate
-    const tamanios = { clasica: 40, moderna: 22, iniciales: 56 };
-    let tamanio = tamanios[estilo];
-    texto.style.fontSize = `${tamanio}px`;
-    const disponible = curva.getTotalLength() * 0.94;
-    while (tamanio > 14 && texto.getComputedTextLength() > disponible) {
-      tamanio -= 1;
-      texto.style.fontSize = `${tamanio}px`;
+    function iniciales(t) {
+      const partes = t.trim().split(/\s+/).filter(Boolean);
+      if (!partes.length) return "J";
+      return partes.map((p) => p[0].toUpperCase()).join(" · ");
     }
 
-    detalle.textContent = estilo === "moderna" ? "— EST. 2026 —" : "✦ ✦ ✦";
-    cuenta.textContent = escrito.length;
-  }
+    function pintarGrabado() {
+      const escrito = input.value.replace(/\s+/g, " ");
+      const estilo = $("input[name='tipografia']:checked").value;
+      const base = escrito.trim() || EJEMPLO;
 
-  input.addEventListener("input", pintarGrabado);
-  $$("input[name='tipografia']").forEach((r) => r.addEventListener("change", pintarGrabado));
-  $("#grabador").addEventListener("submit", (e) => e.preventDefault());
-  pintarGrabado();
-  // Con la tipografía ya cargada las medidas cambian: se vuelve a ajustar
-  document.fonts?.ready.then(pintarGrabado);
+      ruta.textContent = estilo === "iniciales" ? iniciales(base) : base;
+      texto.setAttribute("class", `grabado grabado--${estilo}`);
+      // Los textos largos se achican hasta que entran en el ancho del mate
+      const tamanios = { clasica: 40, moderna: 22, iniciales: 56 };
+      let tamanio = tamanios[estilo];
+      texto.style.fontSize = `${tamanio}px`;
+      const disponible = curva.getTotalLength() * 0.94;
+      while (tamanio > 14 && texto.getComputedTextLength() > disponible) {
+        tamanio -= 1;
+        texto.style.fontSize = `${tamanio}px`;
+      }
+
+      detalle.textContent = estilo === "moderna" ? "— EST. 2026 —" : "✦ ✦ ✦";
+      cuenta.textContent = escrito.length;
+    }
+
+    input.addEventListener("input", pintarGrabado);
+    $$("input[name='tipografia']").forEach((r) => r.addEventListener("change", pintarGrabado));
+    $("#grabador").addEventListener("submit", (e) => e.preventDefault());
+    pintarGrabado();
+    // Con la tipografía ya cargada las medidas cambian: se vuelve a ajustar
+    document.fonts?.ready.then(pintarGrabado);
+  }
 
   // ---------- Testimonios (cambian solos; se pausan con el mouse encima) ----------
   const testimonios = $$("[data-testimonio]");
-  const puntos = $$("[data-ir]");
-  let actual = 0;
-  let intervalo;
+  if (testimonios.length > 1) iniciarTestimonios();
 
-  function mostrarTestimonio(i) {
-    actual = (i + testimonios.length) % testimonios.length;
-    testimonios.forEach((t, j) => {
-      t.classList.toggle("activo", j === actual);
-      t.setAttribute("aria-hidden", String(j !== actual));
-    });
-    puntos.forEach((p, j) => {
-      p.classList.toggle("activo", j === actual);
-      p.setAttribute("aria-selected", String(j === actual));
-    });
+  function iniciarTestimonios() {
+    const puntos = $$("[data-ir]");
+    let actual = 0;
+    let intervalo;
+
+    function mostrarTestimonio(i) {
+      actual = (i + testimonios.length) % testimonios.length;
+      testimonios.forEach((t, j) => {
+        t.classList.toggle("activo", j === actual);
+        t.setAttribute("aria-hidden", String(j !== actual));
+      });
+      puntos.forEach((p, j) => {
+        p.classList.toggle("activo", j === actual);
+        p.setAttribute("aria-selected", String(j === actual));
+      });
+    }
+
+    const arrancar = () => {
+      if (sinMovimiento) return;
+      clearInterval(intervalo);
+      intervalo = setInterval(() => mostrarTestimonio(actual + 1), 6500);
+    };
+
+    puntos.forEach((p) =>
+      p.addEventListener("click", () => {
+        mostrarTestimonio(Number(p.dataset.ir));
+        arrancar();
+      }),
+    );
+    const caja = $(".testimonios");
+    caja.addEventListener("mouseenter", () => clearInterval(intervalo));
+    caja.addEventListener("mouseleave", arrancar);
+    arrancar();
   }
-
-  const arrancar = () => {
-    if (sinMovimiento) return;
-    clearInterval(intervalo);
-    intervalo = setInterval(() => mostrarTestimonio(actual + 1), 6500);
-  };
-
-  puntos.forEach((p) =>
-    p.addEventListener("click", () => {
-      mostrarTestimonio(Number(p.dataset.ir));
-      arrancar();
-    })
-  );
-  const caja = $(".testimonios");
-  caja.addEventListener("mouseenter", () => clearInterval(intervalo));
-  caja.addEventListener("mouseleave", arrancar);
-  arrancar();
 })();

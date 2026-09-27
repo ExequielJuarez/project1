@@ -1144,6 +1144,14 @@
     grid-template-columns: repeat(4, 1fr);
   }
 
+  .cifras--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cifras--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .cifra,
   .cifra:nth-child(odd),
   .cifra:nth-child(even) {

@@ -18,6 +18,7 @@ USE tienda_db;
 SET NAMES utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS contenido_inicio;
 DROP TABLE IF EXISTS notificaciones;
 DROP TABLE IF EXISTS pedido_items;
 DROP TABLE IF EXISTS pedidos;
@@ -252,5 +253,21 @@ CREATE TABLE notificaciones (
   CONSTRAINT fk_notificaciones_pedido FOREIGN KEY (pedido_id) REFERENCES pedidos (id)
     ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT fk_notificaciones_producto FOREIGN KEY (producto_id) REFERENCES productos (id)
+    ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- contenido_inicio: textos e imágenes de la página de inicio que
+-- se editan desde el panel (Admin → Inicio). Una sola fila (id 1).
+-- datos guarda el contenido en JSON; lo que falte se completa con
+-- el original de src/data/inicioEditable.js
+-- ----------------------------------------------------------
+CREATE TABLE contenido_inicio (
+  id             TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  datos          LONGTEXT     NOT NULL COMMENT 'JSON con el contenido editado',
+  usuario_id     INT UNSIGNED NULL COMMENT 'último admin que lo modificó',
+  actualizado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_contenido_inicio_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

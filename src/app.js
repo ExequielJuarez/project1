@@ -34,6 +34,8 @@ app.use(
 app.locals.formatoPrecio = (n) =>
   "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 app.locals.descuentoTransferencia = 0.1;
+// Textos editables del inicio: *palabra* → cursiva (ya escapado)
+app.locals.textoRico = require("./services/inicioService").textoRico;
 // $4,7 M · $865 mil · $950 (para tarjetas y ejes del panel)
 app.locals.formatoCompacto = (n) => {
   const abs = Math.abs(n);
@@ -80,6 +82,8 @@ app.use((err, req, res, next) => {
 // Arranca solo si hay conexión con la base de datos
 db.sequelize
   .authenticate()
+  // Crea la tabla del inicio editable si la base es anterior a ese cambio
+  .then(() => db.ContenidoInicio.sync())
   .then(() => {
     console.log(`✅ Conectado a la base de datos "${db.sequelize.config.database}"`);
     app.listen(puerto, () => console.log(`🚀 Servidor Express corriendo en el puerto ${puerto}`));

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const productoService = require("../services/productoService");
+const inicioService = require("../services/inicioService");
 const carritoController = require("../controllers/carritoController");
 const checkoutController = require("../controllers/checkoutController");
 const checkoutValidator = require("../validations/checkoutValidator");
@@ -12,8 +13,10 @@ const soloInvitados = require("../middlewares/soloInvitados");
 const favoritosController = require("../controllers/favoritosController");
 
 // ── INICIO (presentación de la marca, sin precios) ─────────
-router.get("/", (req, res) => {
-  res.render("inicio", { titulo: "Mates artesanales", estilo: "inicio", navActivo: "inicio" });
+// Los textos y fotos se editan desde Admin → Inicio
+router.get("/", async (req, res) => {
+  const contenido = await inicioService.obtener();
+  res.render("inicio", { titulo: "Mates artesanales", estilo: "inicio", navActivo: "inicio", contenido });
 });
 
 // ── CATÁLOGO DE PRODUCTOS (y resultados de búsqueda con ?q=) ─
