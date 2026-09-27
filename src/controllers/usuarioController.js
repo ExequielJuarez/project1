@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const { validationResult } = require("express-validator");
 const usuarios = require("../data/usuariosMock");
 
@@ -5,15 +6,39 @@ const MAX_INTENTOS = 5;
 const BLOQUEO_MS = 60 * 1000;
 const RECORDAR_MS = 30 * 24 * 60 * 60 * 1000;
 
+// Google: si están estas variables en .env se usa el inicio de sesión real,
+// si no, un modo demo para mostrar la maqueta
+const GOOGLE = {
+  clientId: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callback: process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/auth/google/callback",
+};
+const googleConfigurado = () => Boolean(GOOGLE.clientId && GOOGLE.clientSecret);
+
 // Solo permitimos volver a rutas internas (evita redirecciones a otros sitios)
 function destinoSeguro(url) {
   return typeof url === "string" && url.startsWith("/") && !url.startsWith("//") ? url : "/";
 }
 
-function render(res, { req, datos = {}, errores = {}, errorGeneral = null, status = 200 }) {
+// Crea una sesión nueva (evita fijación de sesión) conservando carrito, checkout y favoritos
+function iniciarSesion(req, res, usuario, { recordar = false, volver = "/", mensaje } = {}) {
+  const { carrito, checkout, favoritos } = req.session;
+  req.session.regenerate((err) => {
+    if (err) {
+      req.session.flash = "No pudimos iniciar sesión, probá de nuevo.";
+      return res.redirect("/login");
+    }
+    Object.assign(req.session, { carrito, checkout, favoritos, usuarioLogueado: usuario });
+    if (recordar) req.session.cookie.maxAge = RECORDAR_MS;
+    req.session.flash = mensaje || `¡Hola, ${usuario.nombre}! Iniciaste sesión.`;
+    req.session.save(() => res.redirect(destinoSeguro(volver)));
+  });
+}
+
+function renderLogin(res, { req, datos = {}, errores = {}, errorGeneral = null, status = 200 }) {
   res.status(status).render("login", {
     titulo: "Iniciar sesión",
-    estilo: "login",
+    estilo: ["acceso", "login"],
     datos,
     errores,
     errorGeneral,
@@ -21,9 +46,20 @@ function render(res, { req, datos = {}, errores = {}, errorGeneral = null, statu
   });
 }
 
+function renderRegistro(res, { req, datos = {}, errores = {}, status = 200 }) {
+  res.status(status).render("registro", {
+    titulo: "Crear cuenta",
+    estilo: ["acceso", "registro"],
+    datos,
+    errores,
+    volver: destinoSeguro(req.query.volver || req.body?.volver),
+  });
+}
+
 module.exports = {
+  // ── Login con email ────────────────────────────────────────
   verLogin(req, res) {
-    render(res, { req });
+    renderLogin(res, { req });
   },
 
   async login(req, res) {
@@ -33,7 +69,7 @@ module.exports = {
     const intentos = req.session.intentosLogin || { cantidad: 0, hasta: 0 };
     if (intentos.hasta > Date.now()) {
       const segundos = Math.ceil((intentos.hasta - Date.now()) / 1000);
-      return render(res, {
+      return renderLogin(res, {
         req, datos, status: 429,
         errorGeneral: `Demasiados intentos. Probá de nuevo en ${segundos} segundos.`,
       });
@@ -41,7 +77,7 @@ module.exports = {
 
     const resultado = validationResult(req);
     if (!resultado.isEmpty()) {
-      return render(res, { req, datos, errores: resultado.mapped(), status: 422 });
+      return renderLogin(res, { req, datos, errores: resultado.mapped(), status: 422 });
     }
 
     const usuario = await usuarios.verificar(req.body.email, req.body.password);
@@ -53,23 +89,13 @@ module.exports = {
         intentos.hasta = Date.now() + BLOQUEO_MS;
       }
       req.session.intentosLogin = intentos;
-      return render(res, {
+      return renderLogin(res, {
         req, datos, status: 401,
         errorGeneral: "El email o la contraseña no son correctos.",
       });
     }
 
-    // Nueva sesión al iniciar (evita fijación de sesión) conservando el carrito y el checkout
-    const { carrito, checkout } = req.session;
-    req.session.regenerate((err) => {
-      if (err) return render(res, { req, datos, status: 500, errorGeneral: "No pudimos iniciar sesión, probá de nuevo." });
-
-      Object.assign(req.session, { carrito, checkout, usuarioLogueado: usuario });
-      if (datos.recordar) req.session.cookie.maxAge = RECORDAR_MS;
-      req.session.flash = `¡Hola, ${usuario.nombre}! Iniciaste sesión.`;
-
-      req.session.save(() => res.redirect(destinoSeguro(req.body.volver)));
-    });
+    iniciarSesion(req, res, usuario, { recordar: datos.recordar, volver: req.body.volver });
   },
 
   logout(req, res) {
@@ -77,5 +103,130 @@ module.exports = {
       res.clearCookie("connect.sid");
       res.redirect("/");
     });
+  },
+
+  // ── Registro ───────────────────────────────────────────────
+  verRegistro(req, res) {
+    renderRegistro(res, { req });
+  },
+
+  async registrar(req, res) {
+    const { nombre, apellido, email, telefono } = req.body;
+    const datos = { nombre, apellido, email, telefono, newsletter: Boolean(req.body.newsletter), terminos: req.body.terminos === "1" };
+
+    const resultado = validationResult(req);
+    if (!resultado.isEmpty()) {
+      return renderRegistro(res, { req, datos, errores: resultado.mapped(), status: 422 });
+    }
+
+    const usuario = await usuarios.crear({ nombre, apellido, email, telefono, password: req.body.password });
+    iniciarSesion(req, res, usuario, {
+      volver: req.body.volver,
+      mensaje: `¡Bienvenido/a, ${usuario.nombre}! Tu cuenta está lista.`,
+    });
+  },
+
+  // ── Google ─────────────────────────────────────────────────
+  googleInicio(req, res) {
+    const volver = destinoSeguro(req.query.volver);
+    if (!googleConfigurado()) return res.redirect(`/auth/google/demo?volver=${encodeURIComponent(volver)}`);
+
+    // "state" aleatorio para verificar que la respuesta de Google es de este pedido
+    const state = crypto.randomBytes(16).toString("hex");
+    req.session.google = { state, volver };
+
+    const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+    url.search = new URLSearchParams({
+      client_id: GOOGLE.clientId,
+      redirect_uri: GOOGLE.callback,
+      response_type: "code",
+      scope: "openid email profile",
+      state,
+      prompt: "select_account",
+    });
+    req.session.save(() => res.redirect(url.toString()));
+  },
+
+  async googleCallback(req, res) {
+    const esperado = req.session.google;
+    delete req.session.google;
+
+    if (!esperado || req.query.state !== esperado.state || !req.query.code) {
+      req.session.flash = "No pudimos iniciar sesión con Google. Probá de nuevo.";
+      return res.redirect("/login");
+    }
+
+    try {
+      // Cambiamos el código por un token de acceso
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          code: req.query.code,
+          client_id: GOOGLE.clientId,
+          client_secret: GOOGLE.clientSecret,
+          redirect_uri: GOOGLE.callback,
+          grant_type: "authorization_code",
+        }),
+      });
+      const token = await tokenRes.json();
+      if (!tokenRes.ok) throw new Error(token.error_description || "Token inválido");
+
+      // Y con el token pedimos los datos del perfil
+      const perfilRes = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+        headers: { Authorization: `Bearer ${token.access_token}` },
+      });
+      const perfil = await perfilRes.json();
+      if (!perfilRes.ok || !perfil.email_verified) throw new Error("Email de Google no verificado");
+
+      const usuario = await usuarios.desdeGoogle({
+        googleId: perfil.sub,
+        email: perfil.email,
+        nombre: perfil.given_name || perfil.name || "Cliente",
+        apellido: perfil.family_name || "",
+      });
+      iniciarSesion(req, res, usuario, { volver: esperado.volver });
+    } catch (error) {
+      console.error("Error en el login con Google:", error.message);
+      req.session.flash = "No pudimos iniciar sesión con Google. Probá de nuevo.";
+      res.redirect("/login");
+    }
+  },
+
+  // Modo demo: simula la elección de cuenta cuando Google no está configurado
+  googleDemo(req, res) {
+    if (googleConfigurado()) return res.redirect("/auth/google");
+    res.render("google-demo", {
+      titulo: "Continuar con Google",
+      estilo: "google-demo",
+      volver: destinoSeguro(req.query.volver),
+      errores: {},
+      datos: {},
+    });
+  },
+
+  async googleDemoConfirmar(req, res) {
+    if (googleConfigurado()) return res.redirect("/auth/google");
+
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const nombre = String(req.body.nombre || "").trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || nombre.length < 2) {
+      return res.status(422).render("google-demo", {
+        titulo: "Continuar con Google",
+        estilo: "google-demo",
+        volver: destinoSeguro(req.body.volver),
+        datos: { email, nombre },
+        errores: { email: { msg: "Completá un nombre y un email válidos" } },
+      });
+    }
+
+    const [primerNombre, ...resto] = nombre.split(" ");
+    const usuario = await usuarios.desdeGoogle({
+      googleId: `demo-${email}`,
+      email,
+      nombre: primerNombre,
+      apellido: resto.join(" "),
+    });
+    iniciarSesion(req, res, usuario, { volver: req.body.volver });
   },
 };

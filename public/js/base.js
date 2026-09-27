@@ -1,7 +1,8 @@
 // ==========================================================
 // BASE — Interacciones compartidas por todas las vistas
 // Menú, buscador, paneles laterales, acordeones, carrito
-// (vía API en sesión), favoritos de demostración y aviso (toast).
+// (vía API en sesión), favoritos de demostración, campos de
+// contraseña, menú de cuenta y aviso (toast).
 // Expone window.Tienda para que cada vista lo reutilice.
 // ==========================================================
 
@@ -135,6 +136,31 @@
       const activo = btn.classList.toggle("activo");
       mostrarToast(activo ? "Guardado en favoritos" : "Quitado de favoritos");
     });
+  });
+
+  // ---------- Campos de contraseña ----------
+  // Botón para mostrar/ocultar y aviso de mayúsculas activadas
+  $$(".clave").forEach((clave) => {
+    const input = $("input", clave);
+    const boton = $(".clave__ver", clave);
+    const avisoMayus = document.getElementById(`${input.id}-mayus`);
+
+    boton?.addEventListener("click", () => {
+      const mostrar = input.type === "password";
+      input.type = mostrar ? "text" : "password";
+      boton.setAttribute("aria-pressed", String(mostrar));
+      boton.setAttribute("aria-label", mostrar ? "Ocultar contraseña" : "Mostrar contraseña");
+      input.focus();
+    });
+
+    if (avisoMayus) {
+      ["keydown", "keyup"].forEach((evento) =>
+        input.addEventListener(evento, (e) => {
+          if (e.getModifierState) avisoMayus.hidden = !e.getModifierState("CapsLock");
+        })
+      );
+      input.addEventListener("blur", () => (avisoMayus.hidden = true));
+    }
   });
 
   // ---------- Menú de la cuenta (usuario logueado) ----------

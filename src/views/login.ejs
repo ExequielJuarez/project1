@@ -1,10 +1,6 @@
 <%- include('partials/head') %>
 <%- include('partials/header') %>
 
-<%
-  const errorPassword = errores.password ? errores.password.msg : "";
-%>
-
   <div class="contenedor">
     <nav class="migas migas--acceso" aria-label="Ruta">
       <a href="/">Inicio</a>
@@ -41,28 +37,12 @@
         <div class="aviso aviso--error" role="alert"><%= errorGeneral %></div>
       <% } %>
 
-      <form action="/login" method="POST" id="formLogin" novalidate>
+      <form action="/login" method="POST" id="formLogin" class="acceso__campos" novalidate>
         <input type="hidden" name="volver" value="<%= volver %>">
 
         <%- include('partials/campo', { nombre: 'email', etiqueta: 'Email', tipo: 'email', placeholder: 'tu@email.com', attrs: 'autocomplete="email" autocapitalize="off" required autofocus' }) %>
 
-        <div class="campo <%= errorPassword ? 'campo--error' : '' %>">
-          <div class="campo__cabecera">
-            <label class="campo__label" for="password">Contraseña</label>
-            <a href="#" class="acceso__olvido" data-proximamente>¿La olvidaste?</a>
-          </div>
-          <div class="clave">
-            <input class="campo__control" type="password" id="password" name="password"
-                   autocomplete="current-password" required
-                   aria-describedby="password-error password-mayus" <%- errorPassword ? 'aria-invalid="true"' : '' %>>
-            <button type="button" class="clave__ver" id="verClave" aria-label="Mostrar contraseña" aria-pressed="false">
-              <svg class="clave__ojo" viewBox="0 0 24 24" width="20" height="20"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-              <svg class="clave__ojo-tachado" viewBox="0 0 24 24" width="20" height="20"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 20L20 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            </button>
-          </div>
-          <p class="clave__mayus" id="password-mayus" hidden>Tenés activadas las mayúsculas</p>
-          <p class="campo__error" id="password-error" aria-live="polite"><%= errorPassword %></p>
-        </div>
+        <%- include('partials/campo-clave', { nombre: 'password', etiqueta: 'Contraseña', autocomplete: 'current-password', enlace: { texto: '¿La olvidaste?', href: '#' } }) %>
 
         <label class="check-simple">
           <input type="checkbox" name="recordar" value="1" <%= datos.recordar ? 'checked' : '' %>>
@@ -76,20 +56,23 @@
       <div class="separador"><span>o</span></div>
 
       <div class="acceso__sociales">
-        <button type="button" class="btn btn--linea" data-proximamente>(GOOGLE) Continuar con Google</button>
+        <a href="/auth/google?volver=<%= encodeURIComponent(volver) %>" class="btn btn--linea">(GOOGLE) Continuar con Google</a>
         <button type="button" class="btn btn--linea" data-proximamente>(APPLE) Continuar con Apple</button>
       </div>
 
       <p class="acceso__registro">
-        ¿No tenés cuenta? <a href="#" data-proximamente>Creá una</a>
+        ¿No tenés cuenta? <a href="/registro?volver=<%= encodeURIComponent(volver) %>">Creá una</a>
       </p>
 
       <!-- Solo para la maqueta: datos para probar -->
       <aside class="demo" aria-label="Usuario de prueba">
-        <p class="demo__titulo">Usuario de prueba</p>
-        <p><span>Email</span> demo@tienda.com</p>
-        <p><span>Contraseña</span> Demo1234</p>
-        <button type="button" class="demo__usar" id="usarDemo">Completar</button>
+        <p class="demo__titulo">Usuarios de prueba</p>
+        <p><span>Cliente</span> demo@tienda.com · Demo1234</p>
+        <p><span>Admin</span> admin@tienda.com · Admin1234</p>
+        <div class="demo__botones">
+          <button type="button" class="demo__usar" data-demo-email="demo@tienda.com" data-demo-clave="Demo1234">Cliente</button>
+          <button type="button" class="demo__usar" data-demo-email="admin@tienda.com" data-demo-clave="Admin1234">Admin</button>
+        </div>
       </aside>
     </section>
   </main>

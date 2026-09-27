@@ -16,6 +16,7 @@ const checkoutController = require("../controllers/checkoutController");
 const checkoutValidator = require("../validations/checkoutValidator");
 const usuarioController = require("../controllers/usuarioController");
 const loginValidator = require("../validations/loginValidator");
+const registroValidator = require("../validations/registroValidator");
 const soloInvitados = require("../middlewares/soloInvitados");
 
 // ── MAQUETA: CATÁLOGO DE PRODUCTOS ─────────────────────────
@@ -75,5 +76,13 @@ router.post("/checkout/datos", checkoutValidator, checkoutController.guardar);
 router.get("/login", soloInvitados, usuarioController.verLogin);
 router.post("/login", soloInvitados, loginValidator, usuarioController.login);
 router.post("/logout", usuarioController.logout);
+router.get("/registro", soloInvitados, usuarioController.verRegistro);
+router.post("/registro", soloInvitados, registroValidator, usuarioController.registrar);
+
+// Google (real si está configurado en .env, demo si no)
+router.get("/auth/google", soloInvitados, usuarioController.googleInicio);
+router.get("/auth/google/callback", usuarioController.googleCallback);
+router.get("/auth/google/demo", soloInvitados, usuarioController.googleDemo);
+router.post("/auth/google/demo", soloInvitados, usuarioController.googleDemoConfirmar);
 
 module.exports = router;
