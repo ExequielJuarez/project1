@@ -31,6 +31,19 @@ pendiente hasta que el admin lo marca como **Pagado** en Admin → Pedidos.
 6. Cuando todo ande, cambiá a las **Credenciales de producción** (activalas en el
    mismo panel) y reemplazá `MP_ACCESS_TOKEN`. Desde ese momento se cobra de verdad.
 
+### Si el botón "Pagar" de Mercado Pago queda gris
+
+Casi siempre es porque **quien cobra y quien paga son la misma cuenta**. Los últimos
+números del Access Token son el ID de la cuenta que cobra: tienen que ser los del
+**vendedor de prueba**, y para pagar hay que iniciar sesión con el **comprador de prueba**.
+
+1. En developers → tu aplicación → **Cuentas de prueba**, creá un **Vendedor** y un **Comprador**.
+2. En incógnito, entrá a developers con el **vendedor de prueba**, creá una aplicación
+   y copiá su Access Token de *Credenciales de producción* (es de prueba: no cobra de verdad).
+3. Ese token va en `MP_ACCESS_TOKEN`. Al pagar, iniciá sesión con el **comprador**.
+4. Si pide un código de verificación, son los últimos 6 dígitos del ID de esa cuenta de prueba.
+5. En Brave, bajá los *Shields* en mercadopago.com.ar (bloquean el antifraude).
+
 Sin `MP_ACCESS_TOKEN` la tienda funciona en **modo demo**: una página simula el pago
 aprobado, rechazado o en proceso, y no se cobra nada.
 
