@@ -16,7 +16,13 @@ const CUPONES = {
 
 function obtener(session) {
   if (!session.carrito) {
-    session.carrito = { items: [], cupon: null, medioPago: "tarjeta", codigoPostal: null };
+    session.carrito = {
+      items: [],
+      cupon: null,
+      medioPago: "tarjeta",
+      entrega: "domicilio",
+      codigoPostal: null,
+    };
   }
   return session.carrito;
 }
@@ -83,6 +89,10 @@ function fijarMedioPago(session, medio) {
   if (["tarjeta", "transferencia"].includes(medio)) obtener(session).medioPago = medio;
 }
 
+function fijarEntrega(session, entrega) {
+  if (["domicilio", "retiro"].includes(entrega)) obtener(session).entrega = entrega;
+}
+
 function fijarCodigoPostal(session, cp) {
   if (!/^\d{4}$/.test(String(cp || ""))) return false;
   obtener(session).codigoPostal = String(cp);
@@ -109,8 +119,9 @@ function resumen(session) {
     carrito.medioPago === "transferencia" ? Math.round(baseTransferencia * DESCUENTO_TRANSFERENCIA) : 0;
 
   const envioGratis = subtotal >= ENVIO_GRATIS_DESDE;
+  const entrega = carrito.entrega || "domicilio";
   let envio = null; // null = todavía sin calcular
-  if (envioGratis) envio = 0;
+  if (envioGratis || entrega === "retiro") envio = 0;
   else if (carrito.codigoPostal) envio = COSTO_ENVIO;
 
   const total = subtotal - descuentoCupon - descuentoPago + (envio || 0);
@@ -124,6 +135,8 @@ function resumen(session) {
     medioPago: carrito.medioPago,
     descuentoPago,
     codigoPostal: carrito.codigoPostal,
+    entrega,
+    costoEnvio: COSTO_ENVIO,
     envio,
     envioGratis,
     envioGratisDesde: ENVIO_GRATIS_DESDE,
@@ -143,6 +156,7 @@ module.exports = {
   aplicarCupon,
   quitarCupon,
   fijarMedioPago,
+  fijarEntrega,
   fijarCodigoPostal,
   resumen,
 };

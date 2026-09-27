@@ -20,11 +20,7 @@
         <sup class="carrito-hero__cantidad" id="cantidadTitulo"><%= r.cantidad %></sup>
       </h1>
 
-      <ol class="pasos" aria-label="Pasos de la compra">
-        <li class="pasos__item activo"><span>01</span> Carrito</li>
-        <li class="pasos__item"><span>02</span> Datos</li>
-        <li class="pasos__item"><span>03</span> Pago</li>
-      </ol>
+      <%- include('partials/pasos', { pasoActual: 1 }) %>
     </div>
   </section>
 
@@ -186,7 +182,7 @@
           o <%= r.cuotas %> cuotas sin interés de <strong data-valor="cuota"><%= formatoPrecio(r.total / r.cuotas) %></strong>
         </p>
 
-        <button class="btn btn--solido resumen__finalizar" id="btnFinalizar">Finalizar compra</button>
+        <a href="/checkout/datos" class="btn btn--solido resumen__finalizar" id="btnFinalizar">Finalizar compra</a>
 
         <p class="resumen__seguro">
           <svg viewBox="0 0 24 24" width="16" height="16"><rect x="5" y="10" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
@@ -218,7 +214,7 @@
       <p class="barra-total__label">Total</p>
       <p class="barra-total__precio" data-valor="total"><%= formatoPrecio(r.total) %></p>
     </div>
-    <button class="btn btn--solido" data-finalizar>Finalizar compra</button>
+    <a href="/checkout/datos" class="btn btn--solido" data-finalizar>Finalizar compra</a>
   </div>
 
   <%- include('partials/footer') %>

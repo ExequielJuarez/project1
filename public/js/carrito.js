@@ -138,11 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("#btnQuitarCupon").addEventListener("click", () => pedir("/carrito/cupon", "DELETE"));
 
-  // ---------- Finalizar (demo) ----------
-  $$("#btnFinalizar, [data-finalizar]").forEach((btn) =>
-    btn.addEventListener("click", () => mostrarToast("Siguiente paso: datos de envío (próximamente)"))
-  );
-
   // ---------- Barra fija con el total ----------
   // Se oculta cuando el resumen ya está en pantalla o el carrito está vacío
   let resumenVisible = false;

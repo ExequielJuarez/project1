@@ -12,6 +12,8 @@ const {
   productosRelacionados,
 } = require("../data/productosMock");
 const carritoController = require("../controllers/carritoController");
+const checkoutController = require("../controllers/checkoutController");
+const checkoutValidator = require("../validations/checkoutValidator");
 
 // ── MAQUETA: CATÁLOGO DE PRODUCTOS ─────────────────────────
 router.get(["/", "/catalogo"], (req, res) => {
@@ -60,5 +62,10 @@ router.post("/carrito/cupon", carritoController.cupon);
 router.delete("/carrito/cupon", carritoController.quitarCupon);
 router.post("/carrito/medio-pago", carritoController.medioPago);
 router.post("/carrito/envio", carritoController.envio);
+router.post("/carrito/entrega", carritoController.entrega);
+
+// ── CHECKOUT ───────────────────────────────────────────────
+router.get("/checkout/datos", checkoutController.ver);
+router.post("/checkout/datos", checkoutValidator, checkoutController.guardar);
 
 module.exports = router;

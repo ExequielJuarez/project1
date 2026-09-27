@@ -904,6 +904,55 @@ ul {
 }
 
 /* ==========================================================
+   PASOS DE LA COMPRA (carrito → datos → pago)
+   ========================================================== */
+.pasos {
+  display: flex;
+  list-style: none;
+  border-top: 1px solid var(--gris-200);
+}
+
+.pasos__item {
+  flex: 1;
+  padding-top: 10px;
+  margin-top: -1px;
+  border-top: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gris-400);
+}
+
+.pasos__item span {
+  margin-right: 4px;
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.pasos__item.activo {
+  border-top-color: var(--negro);
+  color: var(--negro);
+}
+
+.pasos__item a {
+  display: block;
+}
+
+.pasos__item a:hover {
+  color: var(--negro);
+}
+
+/* Paso ya completado */
+.pasos__item.hecho {
+  border-top-color: var(--gris-400);
+  color: var(--gris-600);
+}
+
+/* ==========================================================
    TABLET ≥ 768px
    ========================================================== */
 @media (min-width: 768px) {
