@@ -14,14 +14,14 @@
         <div>
           <p class="admin-cabecera__migas"><a href="/admin">Panel</a> / Pedidos</p>
           <h1 class="admin-cabecera__titulo">Pedidos</h1>
-          <p class="admin-cabecera__bajada"><%= total %> en total · <%= pedidosPendientes %> por preparar o enviar</p>
+          <p class="admin-cabecera__bajada"><%= total %> en total · <span data-pendientes><%= pedidosPendientes %></span> por preparar o enviar</p>
         </div>
       </div>
 
       <nav class="segmentado segmentado--estados" aria-label="Filtrar por estado">
         <a href="<%= url({ estado: '' }) %>" class="<%= !filtros.estado ? 'activo' : '' %>">Todos <small><%= total %></small></a>
         <% estados.forEach(e => { %>
-          <a href="<%= url({ estado: e }) %>" class="<%= filtros.estado === e ? 'activo' : '' %>"><%= nombresEstado[e] %> <small><%= conteo[e] %></small></a>
+          <a href="<%= url({ estado: e }) %>" class="<%= filtros.estado === e ? 'activo' : '' %>"><%= nombresEstado[e] %> <small data-conteo="<%= e %>"><%= conteo[e] %></small></a>
         <% }) %>
       </nav>
 
@@ -41,7 +41,7 @@
       <% } else { %>
         <ul class="pedidos-lista">
           <% lista.forEach(p => { %>
-            <li class="pedido-fila" data-numero="<%= p.numero %>">
+            <li class="pedido-fila" data-numero="<%= p.numero %>" data-unidades="<%= p.items.filter(i => i.productoId).reduce((a, i) => a + i.cantidad, 0) %>" data-ganancia="<%= p.ganancia %>">
               <details>
                 <summary class="pedido-fila__resumen">
                   <span class="pedido-fila__numero">#<%= p.numero %></span>
@@ -52,7 +52,7 @@
                   <span class="pedido-fila__estado estado estado--<%= p.estado %>" data-estado-tag><%= nombresEstado[p.estado] %></span>
                   <span class="pedido-fila__total">
                     <strong><%= formatoPrecio(p.total) %></strong>
-                    <small><%= p.estado === 'cancelado' ? 'sin ganancia' : 'ganancia ' + formatoCompacto(p.ganancia) %></small>
+                    <small data-ganancia-texto><%= p.estado === 'cancelado' ? 'cancelado · no suma' : 'ganancia ' + formatoCompacto(p.ganancia) %></small>
                   </span>
                   <span class="pedido-fila__flecha" aria-hidden="true"></span>
                 </summary>

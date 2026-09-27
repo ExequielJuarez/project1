@@ -56,10 +56,29 @@
   let formPendiente = null;
   let focoAnterior = null;
 
+  let resolverConfirmacion = null; // para Admin.confirmar()
+
   function cerrarModal() {
     modal.hidden = true;
     formPendiente = null;
+    if (resolverConfirmacion) resolverConfirmacion(false);
+    resolverConfirmacion = null;
     focoAnterior?.focus();
+  }
+
+  function abrirModal({ titulo, texto, boton }) {
+    focoAnterior = document.activeElement;
+    $("#modalTitulo").textContent = titulo || "¿Confirmás?";
+    $("#modalTexto").textContent = texto || "";
+    $("#modalAceptar").textContent = boton || "Aceptar";
+    modal.hidden = false;
+    $("#modalCancelar").focus();
+  }
+
+  // Uso desde JS: if (await Admin.confirmar({ titulo, texto, boton })) { ... }
+  function confirmar(opciones) {
+    abrirModal(opciones);
+    return new Promise((resolver) => (resolverConfirmacion = resolver));
   }
 
   document.addEventListener("submit", (e) => {
@@ -67,18 +86,24 @@
     if (!form.dataset.confirmar || form.dataset.confirmado) return;
     e.preventDefault();
     formPendiente = form;
-    focoAnterior = document.activeElement;
-    $("#modalTitulo").textContent = form.dataset.confirmarTitulo || "¿Confirmás?";
-    $("#modalTexto").textContent = form.dataset.confirmar;
-    $("#modalAceptar").textContent = form.dataset.confirmarBoton || "Eliminar";
-    modal.hidden = false;
-    $("#modalCancelar").focus();
+    abrirModal({
+      titulo: form.dataset.confirmarTitulo,
+      texto: form.dataset.confirmar,
+      boton: form.dataset.confirmarBoton || "Eliminar",
+    });
   });
 
   $("#modalCancelar").addEventListener("click", cerrarModal);
   modal.addEventListener("click", (e) => e.target === modal && cerrarModal());
   document.addEventListener("keydown", (e) => e.key === "Escape" && !modal.hidden && cerrarModal());
   $("#modalAceptar").addEventListener("click", () => {
+    if (resolverConfirmacion) {
+      const resolver = resolverConfirmacion;
+      resolverConfirmacion = null;
+      modal.hidden = true;
+      resolver(true);
+      return;
+    }
     if (!formPendiente) return;
     formPendiente.dataset.confirmado = "1";
     formPendiente.submit();
@@ -87,5 +112,5 @@
   const formatoPrecio = (n) =>
     "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  window.Admin = { $, $$, api, mostrarToast, formatoPrecio };
+  window.Admin = { $, $$, api, mostrarToast, formatoPrecio, confirmar };
 })();

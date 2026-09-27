@@ -42,12 +42,58 @@ async function pendientes() {
   return db.Pedido.count({ where: { estado: ["pendiente", "pagado"] } });
 }
 
+// Cambia el estado de un pedido y mantiene el stock al día:
+//   · al CANCELAR se devuelven al stock las unidades del pedido
+//   · al REACTIVAR un cancelado se vuelven a descontar (si alcanza el stock)
+// Las métricas no cuentan los cancelados, así que la venta sale sola de las estadísticas.
+// Devuelve { pedido, stockMovido } o lanza un error con .mensaje si no se puede.
 async function cambiarEstado(id, estado) {
   if (!ESTADOS.includes(estado)) return null;
-  const pedido = await db.Pedido.findByPk(id);
-  if (!pedido) return null;
-  await pedido.update({ estado });
-  return pedido;
+
+  return db.sequelize.transaction(async (t) => {
+    // Bloquea el pedido mientras se cambia (evita devolver el stock dos veces)
+    const pedido = await db.Pedido.findByPk(id, {
+      include: [{ association: "items" }],
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+    if (!pedido) return null;
+
+    const antes = pedido.estado;
+    const cancela = estado === "cancelado" && antes !== "cancelado";
+    const reactiva = antes === "cancelado" && estado !== "cancelado";
+    // Solo los items cuyo producto sigue existiendo mueven stock
+    const items = pedido.items.filter((i) => i.productoId);
+    let stockMovido = 0;
+
+    if (cancela) {
+      for (const i of items) {
+        await db.sequelize.query("UPDATE productos SET stock = stock + :cantidad WHERE id = :id", {
+          replacements: { id: i.productoId, cantidad: i.cantidad },
+          transaction: t,
+        });
+        stockMovido += i.cantidad;
+      }
+    }
+
+    if (reactiva) {
+      for (const i of items) {
+        const [, filas] = await db.sequelize.query(
+          "UPDATE productos SET stock = stock - :cantidad WHERE id = :id AND stock >= :cantidad",
+          { replacements: { id: i.productoId, cantidad: i.cantidad }, transaction: t, type: db.Sequelize.QueryTypes.UPDATE }
+        );
+        if (!filas) {
+          const error = new Error("Sin stock para reactivar");
+          error.mensaje = `No hay stock suficiente de "${i.nombre}" para reactivar el pedido`;
+          throw error; // la transacción deshace lo descontado hasta acá
+        }
+        stockMovido -= i.cantidad;
+      }
+    }
+
+    await pedido.update({ estado }, { transaction: t });
+    return { pedido: plano(pedido), stockMovido };
+  });
 }
 
 // ── Crear un pedido desde el carrito ────────────────────────

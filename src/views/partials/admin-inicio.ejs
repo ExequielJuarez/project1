@@ -28,7 +28,7 @@
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><%- iconos[item.id] %></svg>
           <span><%= item.texto %></span>
           <% if (item.badge !== undefined) { %>
-            <span class="admin-nav__badge <%= item.badgeFuerte ? 'admin-nav__badge--fuerte' : '' %>"><%= item.badge %></span>
+            <span class="admin-nav__badge <%= item.badgeFuerte ? 'admin-nav__badge--fuerte' : '' %>" data-badge="<%= item.id %>"><%= item.badge %></span>
           <% } %>
         </a>
       <% }) %>

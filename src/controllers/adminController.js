@@ -215,8 +215,22 @@ module.exports = {
   },
 
   async cambiarEstado(req, res) {
-    const pedido = await pedidoService.cambiarEstado(req.params.numero, req.body.estado);
-    if (!pedido) return res.status(400).json({ ok: false, mensaje: "No se pudo cambiar el estado" });
-    res.json({ ok: true, estado: pedido.estado });
+    let resultado;
+    try {
+      resultado = await pedidoService.cambiarEstado(req.params.numero, req.body.estado);
+    } catch (error) {
+      if (!error.mensaje) throw error;
+      return res.status(409).json({ ok: false, mensaje: error.mensaje });
+    }
+    if (!resultado) return res.status(400).json({ ok: false, mensaje: "No se pudo cambiar el estado" });
+
+    const { pedido, stockMovido } = resultado;
+    res.json({
+      ok: true,
+      estado: pedido.estado,
+      ganancia: pedido.ganancia,
+      stockMovido, // + unidades devueltas al stock, − unidades descontadas
+      pendientes: await pedidoService.pendientes(),
+    });
   },
 };
