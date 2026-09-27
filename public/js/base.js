@@ -137,5 +137,34 @@
     });
   });
 
+  // ---------- Menú de la cuenta (usuario logueado) ----------
+  const cuentaBtn = $("#cuentaBtn");
+  if (cuentaBtn) {
+    const menu = $("#cuentaMenu");
+    const cerrarMenu = () => {
+      menu.hidden = true;
+      cuentaBtn.setAttribute("aria-expanded", "false");
+    };
+    cuentaBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+      cuentaBtn.setAttribute("aria-expanded", String(!menu.hidden));
+    });
+    document.addEventListener("click", (e) => !menu.contains(e.target) && cerrarMenu());
+    document.addEventListener("keydown", (e) => e.key === "Escape" && cerrarMenu());
+  }
+
+  // Enlaces de secciones que todavía no existen en la maqueta
+  $$("[data-proximamente]").forEach((link) =>
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      mostrarToast("Esta sección llega en una próxima versión");
+    })
+  );
+
+  // Mensaje que dejó el servidor para mostrar una sola vez
+  const flash = $("#flash");
+  if (flash) setTimeout(() => mostrarToast(flash.dataset.mensaje), 300);
+
   window.Tienda = { $, $$, abrirPanel, cerrarPaneles, mostrarToast, api, actualizarContador, agregarAlCarrito };
 })();

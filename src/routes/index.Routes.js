@@ -14,6 +14,9 @@ const {
 const carritoController = require("../controllers/carritoController");
 const checkoutController = require("../controllers/checkoutController");
 const checkoutValidator = require("../validations/checkoutValidator");
+const usuarioController = require("../controllers/usuarioController");
+const loginValidator = require("../validations/loginValidator");
+const soloInvitados = require("../middlewares/soloInvitados");
 
 // ── MAQUETA: CATÁLOGO DE PRODUCTOS ─────────────────────────
 router.get(["/", "/catalogo"], (req, res) => {
@@ -67,5 +70,10 @@ router.post("/carrito/entrega", carritoController.entrega);
 // ── CHECKOUT ───────────────────────────────────────────────
 router.get("/checkout/datos", checkoutController.ver);
 router.post("/checkout/datos", checkoutValidator, checkoutController.guardar);
+
+// ── USUARIOS ───────────────────────────────────────────────
+router.get("/login", soloInvitados, usuarioController.verLogin);
+router.post("/login", soloInvitados, loginValidator, usuarioController.login);
+router.post("/logout", usuarioController.logout);
 
 module.exports = router;

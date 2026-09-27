@@ -10,7 +10,13 @@ const CAMPOS = [
 
 function datosIniciales(req, resumen) {
   const guardados = req.session.checkout?.datos || {};
+  // Si inició sesión, completamos el contacto con sus datos
+  const u = req.session.usuarioLogueado;
+  const deCuenta = u
+    ? { email: u.email, nombre: u.nombre, apellido: u.apellido, telefono: u.telefono || "" }
+    : {};
   return {
+    ...deCuenta,
     entrega: resumen.entrega,
     facturacion: "consumidor",
     codigoPostal: resumen.codigoPostal || "",

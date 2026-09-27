@@ -77,4 +77,8 @@
 <!-- Aviso al agregar al carrito -->
 <div class="toast" id="toast" role="status"></div>
 
+<% if (locals.flash) { %>
+  <div id="flash" data-mensaje="<%= flash %>" hidden></div>
+<% } %>
+
 <script src="/js/base.js"></script>

@@ -40,6 +40,10 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.locals.usuarioLocal = req.session.usuarioLogueado || null;
   res.locals.cantidadCarrito = carrito.cantidadTotal(req.session);
+
+  // Mensaje de un solo uso (se muestra como aviso y se borra)
+  res.locals.flash = req.session.flash || null;
+  delete req.session.flash;
   next();
 });
 
