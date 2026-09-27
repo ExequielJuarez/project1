@@ -11,8 +11,13 @@ const registroValidator = require("../validations/registroValidator");
 const soloInvitados = require("../middlewares/soloInvitados");
 const favoritosController = require("../controllers/favoritosController");
 
+// ── INICIO (presentación de la marca, sin precios) ─────────
+router.get("/", (req, res) => {
+  res.render("inicio", { titulo: "Mates artesanales", estilo: "inicio", navActivo: "inicio" });
+});
+
 // ── CATÁLOGO DE PRODUCTOS (y resultados de búsqueda con ?q=) ─
-router.get(["/", "/catalogo"], async (req, res) => {
+router.get("/catalogo", async (req, res) => {
   const busqueda = String(req.query.q || "").trim().slice(0, 60);
   const [productos, colores, categorias] = await Promise.all([
     productoService.listar({ q: busqueda }),

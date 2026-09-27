@@ -91,7 +91,7 @@
 
   <nav class="nav" id="nav" aria-label="Principal">
     <ul class="nav__lista contenedor">
-      <li><a href="/">Inicio</a></li>
+      <li class="<%= locals.navActivo === 'inicio' ? 'nav__item--activo' : '' %>"><a href="/">Inicio</a></li>
       <li class="<%= locals.navActivo === 'catalogo' ? 'nav__item--activo' : '' %>"><a href="/catalogo">Catálogo</a></li>
       <li><a href="#">Categoría 1</a></li>
       <li><a href="#">Categoría 2</a></li>

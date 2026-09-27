@@ -1,0 +1,337 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<%
+  // Las ilustraciones están en /public/img/inicio. Para usar fotos reales
+  // alcanza con reemplazar los archivos (o cambiar las rutas acá).
+  const img = (nombre) => `/img/inicio/${nombre}`;
+
+  const colecciones = [
+    { num: "01", nombre: "Línea Clásica", busqueda: "Clásica", frase: "Calabaza seleccionada y virola de alpaca. El de toda la vida.", imagen: "mate-calabaza.svg", tono: "claro" },
+    { num: "02", nombre: "Línea Madera", busqueda: "Madera", frase: "Algarrobo torneado a mano, con la veta a la vista.", imagen: "mate-madera.svg", tono: "medio" },
+    { num: "03", nombre: "Línea Acero", busqueda: "Acero", frase: "Torpedos de acero: livianos, eternos y fáciles de limpiar.", imagen: "mate-acero.svg", tono: "claro" },
+    { num: "04", nombre: "Línea Premium", busqueda: "Premium", frase: "Imperiales en cuero con base cincelada. Para regalar.", imagen: "mate-imperial.svg", tono: "oscuro" },
+  ];
+
+  const pasos = [
+    { titulo: "Selección", texto: "Elegimos una por una cada calabaza y cada pieza de madera. Solo pasan las que tienen buen grosor y ninguna fisura.", imagen: "mate-calabaza.svg" },
+    { titulo: "Tallado y forrado", texto: "Se tornea, se lija y se forra a mano. En los imperiales, el cuero se cose con puntada visible, como se hizo siempre.", imagen: "mate-imperial.svg" },
+    { titulo: "Virola y cincelado", texto: "La virola de alpaca se ajusta a cada boca y se cincela a mano. Por eso no hay dos iguales.", imagen: "mate-portada.svg" },
+    { titulo: "Terminación", texto: "Revisamos cada detalle, lo protegemos por dentro y lo embalamos listo para regalar (o para estrenar esa misma tarde).", imagen: "mate-madera.svg" },
+  ];
+
+  const consejos = [
+    { titulo: "Agua a 75°, nunca hervida", texto: "Si el agua hierve, la yerba se quema y el mate se lava enseguida." },
+    { titulo: "Yerba hasta tres cuartos", texto: "Tapá la boca con la mano, sacudí, y dejá la montañita de costado." },
+    { titulo: "Primero agua tibia", texto: "Humedecé la yerba y esperá un minuto antes de clavar la bombilla." },
+    { titulo: "La bombilla no se mueve", texto: "Es la regla de oro de la ronda. El que ceba es el que manda." },
+  ];
+
+  const testimonios = [
+    { texto: "Lo regalé para el cumpleaños de mi viejo y no lo suelta más. Se nota que está hecho a mano, cada detalle.", autor: "Lucía M.", lugar: "Córdoba" },
+    { texto: "Llegó impecable, con una tarjeta escrita a mano y las instrucciones para curarlo. Ceba de diez.", autor: "Martín G.", lugar: "Rosario" },
+    { texto: "Encargué seis con el nombre de cada uno para la oficina. Ahora la ronda tiene otro nivel.", autor: "Carla R.", lugar: "CABA" },
+  ];
+%>
+
+<main class="inicio">
+
+  <!-- ═════════════ PORTADA ═════════════ -->
+  <section class="portada">
+    <div class="contenedor portada__grilla">
+      <div class="portada__texto">
+        <p class="portada__etiqueta"><span class="portada__linea"></span>(NOMBRE DE LA MARCA) · Mates artesanales</p>
+        <h1 class="portada__titulo">
+          <span class="portada__renglon"><span>El ritual</span></span>
+          <span class="portada__renglon"><span>de <em>compartir</em>,</span></span>
+          <span class="portada__renglon"><span>hecho a mano.</span></span>
+        </h1>
+        <p class="portada__bajada">
+          Mates de calabaza, madera y cuero hechos uno por uno en nuestro taller.
+          Piezas con historia, pensadas para pasar de mano en mano.
+        </p>
+        <div class="portada__acciones">
+          <a href="/catalogo" class="btn btn--solido">Descubrir la colección</a>
+          <a href="#historia" class="portada__secundario">Nuestra historia <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+
+      <div class="portada__visual" data-parallax>
+        <div class="portada__arco">
+          <img src="<%= img('mate-portada.svg') %>" alt="Mate imperial forrado en cuero con bombilla de alpaca y hojas de yerba" width="480" height="540" fetchpriority="high">
+        </div>
+
+        <!-- Sello giratorio -->
+        <svg class="portada__sello" viewBox="0 0 200 200" aria-hidden="true">
+          <defs><path id="circuloSello" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/></defs>
+          <text><textPath href="#circuloSello" textLength="458" lengthAdjust="spacing">HECHO A MANO ✦ DESDE (AÑO) ✦ TALLER (CIUDAD) ✦</textPath></text>
+          <circle cx="100" cy="100" r="34" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="100" y="108" text-anchor="middle" class="portada__sello-centro">(L)</text>
+        </svg>
+
+        <figure class="portada__mini">
+          <img src="<%= img('mate-calabaza.svg') %>" alt="Mate de calabaza con virola de alpaca" width="400" height="500" loading="lazy">
+          <figcaption>Calabaza<br>&amp; alpaca</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <a href="#historia" class="portada__bajar" aria-label="Bajar a nuestra historia"><span></span></a>
+  </section>
+
+  <!-- ═════════════ CINTA ═════════════ -->
+  <div class="cinta" aria-hidden="true">
+    <div class="cinta__pista">
+      <% for (let vuelta = 0; vuelta < 2; vuelta++) { %>
+        <span>Calabaza</span><i>✦</i><span><em>Algarrobo</em></span><i>✦</i><span>Cuero cosido</span><i>✦</i>
+        <span><em>Alpaca cincelada</em></span><i>✦</i><span>Grabado a mano</span><i>✦</i><span><em>Acero</em></span><i>✦</i>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ═════════════ HISTORIA ═════════════ -->
+  <section class="historia" id="historia">
+    <div class="contenedor">
+      <p class="seccion-etiqueta" data-revelar>Nuestra historia</p>
+      <p class="historia__texto" data-revelar>
+        Creemos que un mate
+        <span class="historia__chip"><img src="<%= img('mate-calabaza.svg') %>" alt="" loading="lazy"></span>
+        es mucho más que un objeto: es la excusa para sentarse, frenar un rato y
+        <em>compartir</em>
+        <span class="historia__chip historia__chip--oscuro"><img src="<%= img('mate-imperial.svg') %>" alt="" loading="lazy"></span>
+        lo que venga. Por eso hacemos cada pieza a mano, sin apuro, en nuestro taller de (CIUDAD).
+      </p>
+
+      <div class="cifras">
+        <div class="cifra" data-revelar>
+          <strong><span data-contar="12">12</span>+</strong>
+          <span>años de oficio</span>
+        </div>
+        <div class="cifra" data-revelar>
+          <strong><span data-contar="8000">8.000</span>+</strong>
+          <span>mates en ronda</span>
+        </div>
+        <div class="cifra" data-revelar>
+          <strong><span data-contar="24">24</span></strong>
+          <span>provincias con envío</span>
+        </div>
+        <div class="cifra" data-revelar>
+          <strong><span data-contar="100">100</span>%</strong>
+          <span>hecho a mano</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ COLECCIONES ═════════════ -->
+  <section class="colecciones">
+    <div class="contenedor">
+      <div class="seccion-cabecera">
+        <div>
+          <p class="seccion-etiqueta" data-revelar>Colecciones</p>
+          <h2 class="seccion-titulo" data-revelar>Un mate para <em>cada ronda</em></h2>
+        </div>
+        <div class="colecciones__flechas" aria-hidden="true">
+          <button type="button" class="flecha" data-mover="-1" tabindex="-1">←</button>
+          <button type="button" class="flecha" data-mover="1" tabindex="-1">→</button>
+        </div>
+      </div>
+    </div>
+
+    <ul class="colecciones__lista" id="colecciones">
+      <% colecciones.forEach((c) => { %>
+        <li class="coleccion coleccion--<%= c.tono %>" data-revelar>
+          <a href="/catalogo?q=<%= encodeURIComponent(c.busqueda) %>" class="coleccion__link">
+            <div class="coleccion__imagen">
+              <img src="<%= img(c.imagen) %>" alt="<%= c.nombre %>" width="400" height="500" loading="lazy">
+            </div>
+            <div class="coleccion__info">
+              <span class="coleccion__num"><%= c.num %></span>
+              <h3 class="coleccion__nombre"><%= c.nombre %></h3>
+              <p class="coleccion__frase"><%= c.frase %></p>
+              <span class="coleccion__ver">Explorar <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+
+  <!-- ═════════════ PROCESO ═════════════ -->
+  <section class="proceso">
+    <div class="contenedor proceso__grilla">
+      <div class="proceso__visual">
+        <div class="proceso__marco">
+          <% pasos.forEach((p, i) => { %>
+            <img src="<%= img(p.imagen) %>" alt="" class="proceso__img <%= i === 0 ? 'activa' : '' %>" data-paso-img="<%= i %>" loading="lazy">
+          <% }) %>
+          <span class="proceso__contador"><span id="pasoActual">01</span> / 0<%= pasos.length %></span>
+        </div>
+      </div>
+
+      <div class="proceso__texto">
+        <p class="seccion-etiqueta" data-revelar>El proceso</p>
+        <h2 class="seccion-titulo" data-revelar>Del taller <em>a tu ronda</em></h2>
+        <ol class="pasos-taller">
+          <% pasos.forEach((p, i) => { %>
+            <li class="paso-taller <%= i === 0 ? 'activo' : '' %>" data-paso="<%= i %>" data-revelar>
+              <span class="paso-taller__num">0<%= i + 1 %></span>
+              <div>
+                <h3><%= p.titulo %></h3>
+                <p><%= p.texto %></p>
+              </div>
+            </li>
+          <% }) %>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ EL RITUAL ═════════════ -->
+  <section class="ritual">
+    <div class="contenedor ritual__grilla">
+      <div class="ritual__cabecera">
+        <p class="seccion-etiqueta seccion-etiqueta--clara" data-revelar>El ritual</p>
+        <h2 class="seccion-titulo" data-revelar>Cebá como <em>se debe</em></h2>
+        <p class="ritual__bajada" data-revelar>Cuatro reglas simples que en cualquier ronda se respetan. Cada mate sale del taller con su guía para curarlo.</p>
+      </div>
+
+      <figure class="ritual__imagen" data-revelar>
+        <img src="<%= img('ronda.svg') %>" alt="Termo y mate de calabaza listos para la ronda" width="640" height="520" loading="lazy">
+      </figure>
+
+      <ol class="consejos">
+        <% consejos.forEach((c, i) => { %>
+          <li class="consejo" data-revelar>
+            <span class="consejo__num"><%= ['I', 'II', 'III', 'IV'][i] %></span>
+            <h3><%= c.titulo %></h3>
+            <p><%= c.texto %></p>
+          </li>
+        <% }) %>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═════════════ PERSONALIZADOS ═════════════ -->
+  <section class="personaliza">
+    <div class="contenedor personaliza__grilla">
+      <div class="personaliza__visual" data-revelar>
+        <svg viewBox="0 0 400 500" class="personaliza__mate" role="img" aria-label="Vista previa del grabado">
+          <image href="<%= img('mate-grabado.svg') %>" width="400" height="500"/>
+          <defs><path id="curvaGrabado" d="M122,322 Q200,338 278,322"/></defs>
+          <text class="grabado grabado--clasica" id="grabadoTexto" text-anchor="middle">
+            <textPath href="#curvaGrabado" startOffset="50%">Juan</textPath>
+          </text>
+          <text class="grabado grabado--fecha" x="200" y="366" text-anchor="middle" id="grabadoDetalle">✦ ✦ ✦</text>
+        </svg>
+      </div>
+
+      <div class="personaliza__texto">
+        <p class="seccion-etiqueta" data-revelar>Personalizados</p>
+        <h2 class="seccion-titulo" data-revelar>Hacelo <em>tuyo</em></h2>
+        <p class="personaliza__bajada" data-revelar>
+          Grabamos nombres, fechas o iniciales en cada pieza. Probá cómo quedaría el tuyo:
+        </p>
+
+        <form class="grabador" id="grabador" data-revelar>
+          <label class="grabador__campo">
+            <span>Texto a grabar</span>
+            <input type="text" id="grabadoInput" maxlength="14" placeholder="Juan" autocomplete="off">
+            <small><span id="grabadoCuenta">0</span>/14</small>
+          </label>
+
+          <fieldset class="grabador__estilos">
+            <legend>Tipografía</legend>
+            <label><input type="radio" name="tipografia" value="clasica" checked><span class="tipo tipo--clasica">Clásica</span></label>
+            <label><input type="radio" name="tipografia" value="moderna"><span class="tipo tipo--moderna">Moderna</span></label>
+            <label><input type="radio" name="tipografia" value="iniciales"><span class="tipo tipo--iniciales">Iniciales</span></label>
+          </fieldset>
+
+          <div class="grabador__acciones">
+            <a href="/catalogo?q=Personalizados" class="btn btn--solido">Ver personalizados</a>
+            <a href="#" class="btn btn--linea">Escribinos</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ GALERÍA ═════════════ -->
+  <section class="galeria">
+    <div class="contenedor">
+      <div class="seccion-cabecera">
+        <div>
+          <p class="seccion-etiqueta" data-revelar>#MateEnRonda</p>
+          <h2 class="seccion-titulo" data-revelar>Momentos <em>compartidos</em></h2>
+        </div>
+        <a href="#" class="galeria__seguir" data-revelar>(IG) Seguinos <span aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="galeria__grilla">
+        <figure class="galeria__item galeria__item--alto galeria__item--oscuro" data-revelar>
+          <img src="<%= img('mate-portada.svg') %>" alt="Mate imperial con hojas de yerba" loading="lazy">
+          <figcaption>Domingo de sol</figcaption>
+        </figure>
+        <figure class="galeria__item" data-revelar>
+          <img src="<%= img('mate-madera.svg') %>" alt="Mate de algarrobo" loading="lazy">
+          <figcaption>El primero del día</figcaption>
+        </figure>
+        <figure class="galeria__item galeria__item--frase" data-revelar>
+          <blockquote>“El mate no es una bebida. Es una forma de <em>estar</em>.”</blockquote>
+        </figure>
+        <figure class="galeria__item galeria__item--ancho galeria__item--medio" data-revelar>
+          <img src="<%= img('ronda.svg') %>" alt="Termo y mate" loading="lazy">
+          <figcaption>La ronda del taller</figcaption>
+        </figure>
+        <figure class="galeria__item galeria__item--oscuro" data-revelar>
+          <img src="<%= img('mate-acero.svg') %>" alt="Mate torpedo de acero" loading="lazy">
+          <figcaption>Para la ruta</figcaption>
+        </figure>
+        <figure class="galeria__item galeria__item--ultimo" data-revelar>
+          <img src="<%= img('mate-calabaza.svg') %>" alt="Mate de calabaza" loading="lazy">
+          <figcaption>El de siempre</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ TESTIMONIOS ═════════════ -->
+  <section class="testimonios" aria-roledescription="carrusel" aria-label="Lo que dicen nuestros clientes">
+    <div class="contenedor testimonios__caja">
+      <p class="seccion-etiqueta" data-revelar>Lo que dicen</p>
+      <div class="testimonios__pista" id="testimonios" aria-live="polite">
+        <% testimonios.forEach((t, i) => { %>
+          <figure class="testimonio <%= i === 0 ? 'activo' : '' %>" data-testimonio="<%= i %>" <%= i === 0 ? '' : 'aria-hidden=true' %>>
+            <blockquote><%= t.texto %></blockquote>
+            <figcaption><strong><%= t.autor %></strong> · <%= t.lugar %></figcaption>
+          </figure>
+        <% }) %>
+      </div>
+      <div class="testimonios__puntos" role="tablist">
+        <% testimonios.forEach((t, i) => { %>
+          <button type="button" class="<%= i === 0 ? 'activo' : '' %>" data-ir="<%= i %>" role="tab" aria-selected="<%= i === 0 %>" aria-label="Opinión <%= i + 1 %>"></button>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ CIERRE ═════════════ -->
+  <section class="cierre">
+    <img src="<%= img('rama.svg') %>" alt="" class="cierre__rama cierre__rama--izq" loading="lazy">
+    <img src="<%= img('rama.svg') %>" alt="" class="cierre__rama cierre__rama--der" loading="lazy">
+    <div class="contenedor cierre__caja">
+      <p class="seccion-etiqueta seccion-etiqueta--clara" data-revelar>Tu próximo compañero</p>
+      <h2 class="cierre__titulo" data-revelar>Encontrá el mate que<br>te va a <em>acompañar</em></h2>
+      <div class="cierre__acciones" data-revelar>
+        <a href="/catalogo" class="btn btn--claro">Ver el catálogo</a>
+        <a href="/catalogo?q=Combos" class="cierre__link">Combos para regalar →</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<%- include('partials/footer') %>
+<script src="/js/inicio.js"></script>
+</body>
+</html>
