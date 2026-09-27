@@ -121,7 +121,6 @@ async function iniciar(pedido) {
   const publica = CONFIG.appUrl.startsWith("https://");
   const retorno = `${CONFIG.appUrl}/pagos/retorno?pedido=${pedido.numero}`;
   const vence = new Date(new Date(pedido.fecha || Date.now()).getTime() + CONFIG.venceHoras * 3600 * 1000);
-  const [nombre, ...apellido] = String(pedido.cliente).split(" ");
 
   const preferencia = await llamar(
     "POST",
@@ -137,7 +136,9 @@ async function iniciar(pedido) {
           unit_price: Number(pedido.total),
         },
       ],
-      payer: { name: nombre, surname: apellido.join(" "), email: pedido.email },
+      // No se manda el email del comprador: si no coincide con la cuenta con la que
+      // inicia sesión en Mercado Pago (por ejemplo, un comprador de prueba), el
+      // botón "Pagar" queda deshabilitado. El cliente completa sus datos allá.
       external_reference: String(pedido.numero),
       back_urls: { success: retorno, pending: retorno, failure: retorno },
       // Mercado Pago solo vuelve solo y avisa por webhook a direcciones https públicas
