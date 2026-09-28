@@ -99,7 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="foto-admin__principal">
           <input type="radio" name="principal" value="n-${i}"><span>Principal</span>
         </label>
-        <button type="button" class="foto-admin__sacar" aria-label="Sacar ${n.archivo.name}">×</button>`;
+        <button type="button" class="foto-admin__sacar">×</button>`;
+      // El nombre del archivo va como texto (no como HTML)
+      $(".foto-admin__sacar", li).setAttribute("aria-label", `Sacar ${n.archivo.name}`);
       $(".foto-admin__sacar", li).addEventListener("click", () => {
         URL.revokeObjectURL(n.url);
         nuevas.splice(i, 1);

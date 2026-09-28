@@ -64,7 +64,8 @@
         ¿No tenés cuenta? <a href="/registro?volver=<%= encodeURIComponent(volver) %>">Creá una</a>
       </p>
 
-      <!-- Solo para la maqueta: datos para probar -->
+      <!-- Solo en desarrollo: datos para probar (con NODE_ENV=production no se muestra) -->
+      <% if (mostrarDemo) { %>
       <aside class="demo" aria-label="Usuario de prueba">
         <p class="demo__titulo">Usuarios de prueba</p>
         <p><span>Cliente</span> demo@tienda.com · Demo1234</p>
@@ -74,6 +75,7 @@
           <button type="button" class="demo__usar" data-demo-email="admin@tienda.com" data-demo-clave="Admin1234">Admin</button>
         </div>
       </aside>
+      <% } %>
     </section>
   </main>
 

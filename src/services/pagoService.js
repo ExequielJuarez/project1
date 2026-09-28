@@ -32,7 +32,9 @@ const CONFIG = {
   venceHoras: Number(process.env.PAGO_VENCE_HORAS) || 48,
 };
 
-const modo = () => (CONFIG.token ? "mercadopago" : "demo");
+// mercadopago: cobra de verdad · demo: simula (solo en desarrollo) ·
+// desactivado: tienda publicada sin token → no se ofrece tarjeta (evita "pagos" simulados)
+const modo = () => (CONFIG.token ? "mercadopago" : process.env.NODE_ENV === "production" ? "desactivado" : "demo");
 const esTokenDePrueba = () => CONFIG.token.startsWith("TEST-");
 
 // ---------- Estados de Mercado Pago → estados del pedido ----------
@@ -117,6 +119,7 @@ async function llamar(metodo, ruta, cuerpo, idempotencia) {
 // Devuelve la URL a la que hay que mandar al cliente
 async function iniciar(pedido) {
   if (modo() === "demo") return `/pagos/demo/${pedido.numero}`;
+  if (modo() === "desactivado") throw new Error("El pago con tarjeta no está configurado (falta MP_ACCESS_TOKEN)");
 
   const publica = CONFIG.appUrl.startsWith("https://");
   const retorno = `${CONFIG.appUrl}/pagos/retorno?pedido=${pedido.numero}`;
@@ -158,7 +161,7 @@ async function iniciar(pedido) {
 // ---------- Consultar un pago y actualizar el pedido ----------
 // pedidoEsperado: si viene de la URL de retorno, el pago tiene que ser de ese pedido
 async function sincronizar(pagoId, pedidoEsperado = null) {
-  if (modo() === "demo" || !/^\d{1,20}$/.test(String(pagoId))) return null;
+  if (modo() !== "mercadopago" || !/^\d{1,20}$/.test(String(pagoId))) return null;
   const pago = await llamar("GET", `/v1/payments/${pagoId}`);
   return aplicarPago(pago, pedidoEsperado);
 }
@@ -194,7 +197,7 @@ async function aplicarPago(pago, pedidoEsperado = null) {
 // Le pregunta a Mercado Pago por los pagos de un pedido (sin esperar al cliente
 // ni al webhook). Si hay uno aprobado se toma ese; si no, el más reciente.
 async function sincronizarPedido(numero) {
-  if (modo() === "demo") return null;
+  if (modo() !== "mercadopago") return null;
   const r = await llamar("GET", `/v1/payments/search?external_reference=${Number(numero)}&sort=date_created&criteria=desc&limit=20`);
   const pagos = (r.results || []).filter((p) => String(p.external_reference) === String(numero));
   const elegido = pagos.find((p) => p.status === "approved") || pagos[0];
@@ -204,7 +207,7 @@ async function sincronizarPedido(numero) {
 // Revisa los pedidos con tarjeta que siguen sin pagar (en localhost Mercado Pago
 // no puede avisar por webhook, y el cliente puede cerrar la página sin volver)
 async function revisarSinPagar() {
-  if (modo() === "demo") return 0;
+  if (modo() !== "mercadopago") return 0;
   const numeros = await pedidoService.sinPagarRecientes(CONFIG.venceHoras + 1);
   let actualizados = 0;
   for (const numero of numeros) {

@@ -2,12 +2,13 @@
 // pago, cancelar, y todo lo que vuelve de Mercado Pago (retorno y webhook).
 const pedidos = require("../services/pedidoService");
 const pagos = require("../services/pagoService");
+const { esAdmin } = require("../helpers/roles");
 
 // Puede ver el pedido: su dueño, quien lo hizo en esta sesión o un admin
 function puedeVer(req, pedido) {
   const u = req.session.usuarioLogueado;
   if (!pedido) return false;
-  if (u && (u.rol === "admin" || (pedido.usuarioId && pedido.usuarioId === u.id))) return true;
+  if (u && (esAdmin(u) || (pedido.usuarioId && pedido.usuarioId === u.id))) return true;
   return (req.session.pedidosRecientes || []).includes(pedido.numero);
 }
 

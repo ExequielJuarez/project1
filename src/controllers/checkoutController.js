@@ -87,6 +87,11 @@ module.exports = {
     const datos = req.session.checkout?.datos;
     if (!resumen.items.length) return res.redirect("/carrito");
     if (!datos) return res.redirect("/checkout/datos");
+    // Sin Mercado Pago configurado en la tienda publicada, solo transferencia
+    if (pagos.modo() === "desactivado" && resumen.medioPago !== "transferencia") {
+      carrito.fijarMedioPago(req.session, "transferencia");
+      return res.redirect("/checkout/pago");
+    }
     res.render("checkout-pago", {
       titulo: "Pago",
       estilo: ["checkout-datos", "checkout-pago"],
@@ -102,6 +107,7 @@ module.exports = {
   // con tarjeta → Mercado Pago; con transferencia → página con los datos
   async confirmar(req, res) {
     if (["tarjeta", "transferencia"].includes(req.body.medio)) carrito.fijarMedioPago(req.session, req.body.medio);
+    if (pagos.modo() === "desactivado") carrito.fijarMedioPago(req.session, "transferencia");
     const resumen = await carrito.resumen(req.session);
     const datos = req.session.checkout?.datos;
     if (!resumen.items.length) return res.redirect("/carrito");

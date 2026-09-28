@@ -37,12 +37,13 @@ No borran datos.
 | `002-notificaciones.sql` | Crea `notificaciones` (avisos de compras nuevas para el admin) |
 | `003-contenido-inicio.sql` | Crea `contenido_inicio` (textos e imágenes del inicio editables desde el panel). La app también la crea sola al arrancar |
 | `004-pagos-y-cuenta.sql` | Agrega a `pedidos` el estado del cobro (Mercado Pago) y a `usuarios` el DNI y la dirección guardada. La app también las agrega sola al arrancar |
+| `005-superadmin.sql` | Agrega el rol `superadmin` (edita la página de inicio). La app también lo agrega sola |
 
 ## Tablas
 
 | Tabla | Para qué | Relaciones |
 |---|---|---|
-| `usuarios` | Clientes y administradores (`rol`). Guarda DNI y dirección para completar el checkout. `password` es un hash bcrypt, NULL en cuentas solo de Google (`google_id`) | — |
+| `usuarios` | Clientes y administradores (`rol`: cliente, admin o superadmin, que además edita la página de inicio). Guarda DNI y dirección para completar el checkout. `password` es un hash bcrypt, NULL en cuentas solo de Google (`google_id`) | — |
 | `categorias` | Categorías del catálogo | — |
 | `colores` | Colores (valor para filtros, nombre y hex) | — |
 | `productos` | Catálogo: precio, **costo** (para la ganancia), stock, etiqueta, textos | → `categorias`, → `colores` |
@@ -62,4 +63,5 @@ El carrito y los favoritos de quien no inició sesión se guardan en la sesión,
 | Rol | Email | Contraseña |
 |---|---|---|
 | Cliente | demo@tienda.com | Demo1234 |
-| Admin | admin@tienda.com | Admin1234 |
+| Admin (el dueño de la tienda) | admin@tienda.com | Admin1234 |
+| Superadmin (además edita la página de inicio) | super@tienda.com | Super1234 |

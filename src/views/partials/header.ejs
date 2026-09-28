@@ -38,7 +38,7 @@
       <button class="icono-btn header__buscar-movil" id="btnBuscarMovil" aria-label="Buscar">
         <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
-      <% if (locals.usuarioLocal && usuarioLocal.rol === 'admin') { %>
+      <% if (esAdmin(locals.usuarioLocal)) { %>
         <%- include('notificaciones') %>
       <% } %>
       <% if (locals.usuarioLocal) { %>
@@ -49,7 +49,7 @@
           <div class="cuenta__menu" id="cuentaMenu" hidden>
             <p class="cuenta__hola">Hola, <strong><%= usuarioLocal.nombre %></strong></p>
             <p class="cuenta__email"><%= usuarioLocal.email %></p>
-            <% if (usuarioLocal.rol === 'admin') { %>
+            <% if (esAdmin(usuarioLocal)) { %>
               <a href="/admin" class="cuenta__link cuenta__link--admin">Panel de administración →</a>
             <% } %>
             <a href="/mi-cuenta/pedidos" class="cuenta__link">Mis pedidos</a>

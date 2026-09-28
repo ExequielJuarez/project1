@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const soloAdmin = require("../middlewares/soloAdmin");
+const soloSuperAdmin = require("../middlewares/soloSuperAdmin");
 const subirImagenes = require("../middlewares/subirImagenes");
 const productoValidator = require("../validations/productoValidator");
 const admin = require("../controllers/adminController");
@@ -16,7 +17,7 @@ const soloCampos = (req, res, next) =>
     err ? res.status(400).send("No se pudo armar la vista previa") : next()
   );
 
-// Todo el panel requiere un usuario con rol admin
+// Todo el panel requiere un administrador (admin o superadmin)
 router.use(soloAdmin);
 
 router.get("/", admin.dashboard);
@@ -35,11 +36,11 @@ router.patch("/productos/:id/stock", admin.ajustarStock);
 router.get("/pedidos", admin.pedidos);
 router.patch("/pedidos/:numero/estado", admin.cambiarEstado);
 
-// ── Página de inicio (textos, fotos y secciones visibles) ──
-router.get("/inicio", inicio.ver);
-router.put("/inicio", subirImagenesInicio, inicio.guardar);
-router.post("/inicio/vista-previa", soloCampos, inicio.vistaPrevia);
-router.delete("/inicio", inicio.restablecer);
+// ── Página de inicio (solo superadmin: textos, fotos y secciones visibles) ──
+router.get("/inicio", soloSuperAdmin, inicio.ver);
+router.put("/inicio", soloSuperAdmin, subirImagenesInicio, inicio.guardar);
+router.post("/inicio/vista-previa", soloSuperAdmin, soloCampos, inicio.vistaPrevia);
+router.delete("/inicio", soloSuperAdmin, inicio.restablecer);
 
 // ── Notificaciones (las usa el panel y la tienda cuando entra un admin) ──
 router.get("/notificaciones", notificaciones.listar);

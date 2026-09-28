@@ -50,4 +50,13 @@ module.exports = async function actualizarBase() {
     }
   }
   for (const tarea of pendientes) await tarea(qi);
+
+  // Rol superadmin (bases anteriores solo tenían cliente y admin)
+  const { rol } = await qi.describeTable("usuarios");
+  if (rol && !/superadmin/i.test(rol.type)) {
+    await qi.sequelize.query(
+      "ALTER TABLE usuarios MODIFY rol ENUM('cliente', 'admin', 'superadmin') NOT NULL DEFAULT 'cliente'"
+    );
+    console.log("   + rol superadmin en usuarios");
+  }
 };

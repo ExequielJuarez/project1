@@ -76,7 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
     chips.forEach((c) => {
       const chip = document.createElement("button");
       chip.className = "chip";
-      chip.innerHTML = `${c.texto} <span aria-hidden="true">✕</span>`;
+      chip.textContent = `${c.texto} `;
+      chip.insertAdjacentHTML("beforeend", '<span aria-hidden="true">✕</span>');
       chip.setAttribute("aria-label", `Quitar filtro ${c.texto}`);
       chip.addEventListener("click", () => {
         if (c.tipo === "precio") {

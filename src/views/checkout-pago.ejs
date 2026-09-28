@@ -74,6 +74,7 @@
         <legend class="bloque__titulo"><span>02</span> ¿Cómo querés pagar?</legend>
 
         <div class="medios">
+          <% if (modoPago !== "desactivado") { %>
           <label class="medio">
             <input type="radio" name="medio" value="tarjeta" <%= conTarjeta ? 'checked' : '' %>>
             <span class="medio__caja">
@@ -94,6 +95,9 @@
             </span>
           </label>
 
+          <% } else { %>
+            <p class="aviso-modo">El pago con tarjeta no está disponible en este momento. Podés pagar por transferencia.</p>
+          <% } %>
           <label class="medio">
             <input type="radio" name="medio" value="transferencia" <%= !conTarjeta ? 'checked' : '' %>>
             <span class="medio__caja">

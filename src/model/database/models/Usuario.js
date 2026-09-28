@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       telefono: DataTypes.STRING(20),
       password: DataTypes.CHAR(60), // hash bcrypt; NULL en cuentas solo de Google
       googleId: { type: DataTypes.STRING(64), unique: true },
-      rol: { type: DataTypes.ENUM("cliente", "admin"), allowNull: false, defaultValue: "cliente" },
+      rol: { type: DataTypes.ENUM("cliente", "admin", "superadmin"), allowNull: false, defaultValue: "cliente" },
       newsletter: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
       // Datos guardados para completar el checkout (Mi cuenta → Mis datos)
       dni: DataTypes.STRING(8),

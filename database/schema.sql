@@ -44,7 +44,7 @@ CREATE TABLE usuarios (
   telefono        VARCHAR(20)  NULL,
   password        CHAR(60)     NULL COMMENT 'hash bcrypt',
   google_id       VARCHAR(64)  NULL,
-  rol             ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente',
+  rol             ENUM('cliente', 'admin', 'superadmin') NOT NULL DEFAULT 'cliente' COMMENT 'superadmin: además edita la página de inicio',
   newsletter      TINYINT(1)   NOT NULL DEFAULT 0,
   -- Datos guardados para completar el checkout (Mi cuenta → Mis datos)
   dni             VARCHAR(8)   NULL,

@@ -82,6 +82,6 @@
 <% } %>
 
 <script src="/js/base.js"></script>
-<% if (locals.usuarioLocal && usuarioLocal.rol === 'admin') { %>
+<% if (esAdmin(locals.usuarioLocal)) { %>
   <%- include('notificaciones-avisos') %>
 <% } %>

@@ -12,7 +12,8 @@
     { id: "dashboard", texto: "Panel", href: "/admin" },
     { id: "productos", texto: "Productos", href: "/admin/productos", badge: totalProductos },
     { id: "pedidos", texto: "Pedidos", href: "/admin/pedidos", badge: pedidosPendientes, badgeFuerte: pedidosPendientes > 0 },
-    { id: "inicio", texto: "Página de inicio", href: "/admin/inicio" },
+    // El editor del inicio es solo para el superadmin
+    ...(esSuperAdmin(usuario) ? [{ id: "inicio", texto: "Página de inicio", href: "/admin/inicio" }] : []),
   ];
 %>
 
@@ -21,7 +22,7 @@
   <aside class="admin-lateral" id="adminLateral" aria-label="Menú del panel">
     <div class="admin-lateral__marca">
       <span class="admin-lateral__logo">(LOGO)</span>
-      <span class="admin-lateral__etiqueta">Admin</span>
+      <span class="admin-lateral__etiqueta"><%= esSuperAdmin(usuario) ? 'Super admin' : 'Admin' %></span>
     </div>
 
     <nav class="admin-nav">

@@ -15,6 +15,9 @@ const GOOGLE = {
   callback: process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/auth/google/callback",
 };
 const googleConfigurado = () => Boolean(GOOGLE.clientId && GOOGLE.clientSecret);
+// Con la tienda publicada (NODE_ENV=production) no hay modo demo de Google
+// ni se muestran los usuarios de prueba en el login
+const enProduccion = () => process.env.NODE_ENV === "production";
 
 // Solo permitimos volver a rutas internas (evita redirecciones a otros sitios)
 function destinoSeguro(url) {
@@ -49,6 +52,7 @@ function renderLogin(res, { req, datos = {}, errores = {}, errorGeneral = null, 
     datos,
     errores,
     errorGeneral,
+    mostrarDemo: !enProduccion(),
     volver: destinoSeguro(req.query.volver || req.body?.volver),
   });
 }
@@ -143,7 +147,13 @@ module.exports = {
   // ── Google ─────────────────────────────────────────────────
   googleInicio(req, res) {
     const volver = destinoSeguro(req.query.volver);
-    if (!googleConfigurado()) return res.redirect(`/auth/google/demo?volver=${encodeURIComponent(volver)}`);
+    if (!googleConfigurado()) {
+      if (enProduccion()) {
+        req.session.flash = "El inicio de sesión con Google todavía no está disponible. Entrá con tu email.";
+        return res.redirect("/login");
+      }
+      return res.redirect(`/auth/google/demo?volver=${encodeURIComponent(volver)}`);
+    }
 
     // "state" aleatorio para verificar que la respuesta de Google es de este pedido
     const state = crypto.randomBytes(16).toString("hex");
@@ -209,7 +219,7 @@ module.exports = {
 
   // Modo demo: simula la elección de cuenta cuando Google no está configurado
   googleDemo(req, res) {
-    if (googleConfigurado()) return res.redirect("/auth/google");
+    if (googleConfigurado() || enProduccion()) return res.redirect("/auth/google");
     res.render("google-demo", {
       titulo: "Continuar con Google",
       estilo: "google-demo",
@@ -220,18 +230,27 @@ module.exports = {
   },
 
   async googleDemoConfirmar(req, res) {
-    if (googleConfigurado()) return res.redirect("/auth/google");
+    if (googleConfigurado() || enProduccion()) return res.redirect("/auth/google");
 
     const email = String(req.body.email || "").trim().toLowerCase();
     const nombre = String(req.body.nombre || "").trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || nombre.length < 2) {
-      return res.status(422).render("google-demo", {
+    const error = (msg) =>
+      res.status(422).render("google-demo", {
         titulo: "Continuar con Google",
         estilo: "google-demo",
         volver: destinoSeguro(req.body.volver),
         datos: { email, nombre },
-        errores: { email: { msg: "Completá un nombre y un email válidos" } },
+        errores: { email: { msg } },
       });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || nombre.length < 2) {
+      return error("Completá un nombre y un email válidos");
+    }
+
+    // La demo no verifica el email: solo puede entrar a cuentas creadas por la
+    // propia demo (si no, cualquiera podría entrar a la cuenta de otro, incluso al admin)
+    const existente = await usuarios.buscarPorEmail(email);
+    if (existente && existente.googleId !== `demo-${email}`) {
+      return error("Ya existe una cuenta con ese email: entrá con tu contraseña");
     }
 
     const [primerNombre, ...resto] = nombre.split(" ");
