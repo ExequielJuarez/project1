@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <dl>
         <dt>Pedidos</dt><dd>${d.pedidos}</dd>
         <dt>Ingresos</dt><dd>${formatoPrecio(d.ingresos)}</dd>
-        <dt><span class="muestra" style="background:#8a8a8a"></span>Costo</dt><dd>${formatoPrecio(d.costo)}</dd>
+        <dt><span class="muestra" style="background:#b58a62"></span>Costo</dt><dd>${formatoPrecio(d.costo)}</dd>
         <dt><span class="muestra" style="background:#fff"></span>Ganancia</dt><dd><b>${formatoPrecio(d.ganancia)}</b></dd>
       </dl>`;
     tooltip.hidden = false;

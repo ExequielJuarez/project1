@@ -21,7 +21,7 @@
   <!-- ═════════════ MENÚ LATERAL ═════════════ -->
   <aside class="admin-lateral" id="adminLateral" aria-label="Menú del panel">
     <div class="admin-lateral__marca">
-      <span class="admin-lateral__logo">(LOGO)</span>
+      <img src="/img/marca/logo.png" alt="Santiago Mates" class="admin-lateral__logo" width="121" height="111">
       <span class="admin-lateral__etiqueta"><%= esSuperAdmin(usuario) ? 'Super admin' : 'Admin' %></span>
     </div>
 
@@ -64,7 +64,7 @@
       <button class="admin-barra__menu" id="adminMenuBtn" aria-label="Abrir menú" aria-controls="adminLateral" aria-expanded="false">
         <span></span>
       </button>
-      <span class="admin-lateral__logo">(LOGO)</span>
+      <img src="/img/marca/logo.png" alt="Santiago Mates" class="admin-lateral__logo" width="121" height="111">
       <div class="admin-barra__acciones">
         <%- include('notificaciones') %>
         <span class="admin-usuario__inicial"><%= usuario.nombre.charAt(0) %></span>

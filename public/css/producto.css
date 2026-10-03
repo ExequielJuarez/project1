@@ -688,7 +688,7 @@ body.con-barra .whatsapp {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 8, 8, 0.96);
+  background: rgba(43, 24, 16, 0.96);
   color: var(--blanco);
   animation: fundido 0.25s both;
 }

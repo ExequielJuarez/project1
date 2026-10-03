@@ -6,9 +6,11 @@
   // textoRico() escapa el texto y convierte *palabra* en cursiva.
   const c = contenido;
   const plano = (t) => String(t || "").replace(/\*/g, "");
+  // Las fotos (jpg, png, webp) llenan su marco; las ilustraciones .svg no
+  const foto = (src) => (/\.svg$/i.test(String(src || "")) ? "" : "foto");
   const romanos = ["I", "II", "III", "IV", "V", "VI"];
   const claseGaleria = ["galeria__item--alto", "", "galeria__item--ancho", "", "galeria__item--ultimo"];
-  const chip = (src, oscuro) => `<span class="historia__chip ${oscuro ? 'historia__chip--oscuro' : ''}"><img src="${src}" alt="" loading="lazy"></span>`;
+  const chip = (src, oscuro) => `<span class="historia__chip ${oscuro ? 'historia__chip--oscuro' : ''}"><img src="${src}" alt="" class="${foto(src)}" loading="lazy"></span>`;
   const cifras = c.historia.cifras.filter((x) => x.texto);
   const pasos = c.proceso.pasos.filter((p) => p.titulo || p.texto);
 %>
@@ -40,7 +42,7 @@
 
       <div class="portada__visual" data-parallax>
         <div class="portada__arco">
-          <img src="<%= c.portada.imagen %>" alt="<%= plano(c.portada.titulo).replace(/\n/g, ' ') %>" width="480" height="540" fetchpriority="high">
+          <img src="<%= c.portada.imagen %>" class="<%= foto(c.portada.imagen) %>" alt="<%= plano(c.portada.titulo).replace(/\n/g, ' ') %>" width="480" height="540" fetchpriority="high">
         </div>
 
         <% if (c.portada.sello) { %>
@@ -49,12 +51,12 @@
             <defs><path id="circuloSello" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/></defs>
             <text><textPath href="#circuloSello" textLength="458" lengthAdjust="spacing"><%= c.portada.sello %></textPath></text>
             <circle cx="100" cy="100" r="34" fill="none" stroke="currentColor" stroke-width="1"/>
-            <text x="100" y="108" text-anchor="middle" class="portada__sello-centro">(L)</text>
+            <image href="/img/favicon.svg" x="76" y="76" width="48" height="48"/>
           </svg>
         <% } %>
 
         <figure class="portada__mini">
-          <img src="<%= c.portada.miniImagen %>" alt="" width="400" height="500" loading="lazy">
+          <img src="<%= c.portada.miniImagen %>" class="<%= foto(c.portada.miniImagen) %>" alt="" width="400" height="500" loading="lazy">
           <% if (c.portada.miniTexto) { %><figcaption><%- c.portada.miniTexto.split("\n").map(textoRico).join("<br>") %></figcaption><% } %>
         </figure>
       </div>
@@ -119,7 +121,7 @@
           <li class="coleccion coleccion--<%= col.fondo %>" data-revelar>
             <a href="<%= col.link || '/catalogo' %>" class="coleccion__link">
               <div class="coleccion__imagen">
-                <img src="<%= col.imagen %>" alt="<%= col.nombre %>" width="400" height="500" loading="lazy">
+                <img src="<%= col.imagen %>" class="<%= foto(col.imagen) %>" alt="<%= col.nombre %>" width="400" height="500" loading="lazy">
               </div>
               <div class="coleccion__info">
                 <span class="coleccion__num"><%= String(i + 1).padStart(2, '0') %></span>
@@ -141,7 +143,7 @@
         <div class="proceso__visual">
           <div class="proceso__marco">
             <% pasos.forEach((p, i) => { %>
-              <img src="<%= p.imagen %>" alt="" class="proceso__img <%= i === 0 ? 'activa' : '' %>" data-paso-img="<%= i %>" loading="lazy">
+              <img src="<%= p.imagen %>" alt="" class="proceso__img <%= foto(p.imagen) %> <%= i === 0 ? 'activa' : '' %>" data-paso-img="<%= i %>" loading="lazy">
             <% }) %>
             <span class="proceso__contador"><span id="pasoActual">01</span> / <%= String(pasos.length).padStart(2, '0') %></span>
           </div>
@@ -177,7 +179,7 @@
         </div>
 
         <figure class="ritual__imagen" data-revelar>
-          <img src="<%= c.ritual.imagen %>" alt="" width="640" height="520" loading="lazy">
+          <img src="<%= c.ritual.imagen %>" class="<%= foto(c.ritual.imagen) %>" alt="" width="640" height="520" loading="lazy">
         </figure>
 
         <ol class="consejos">
@@ -254,7 +256,7 @@
         <div class="galeria__grilla">
           <% c.galeria.fotos.forEach((f, i) => { %>
             <figure class="galeria__item <%= claseGaleria[i] %> galeria__item--<%= f.fondo %>" data-revelar>
-              <img src="<%= f.imagen %>" alt="<%= f.texto %>" loading="lazy">
+              <img src="<%= f.imagen %>" class="<%= foto(f.imagen) %>" alt="<%= f.texto %>" loading="lazy">
               <% if (f.texto) { %><figcaption><%= f.texto %></figcaption><% } %>
             </figure>
             <% if (i === 1) { %>

@@ -5,15 +5,22 @@
    ========================================================== */
 
 :root {
-  --negro: #0b0b0b;
-  --grafito: #1c1c1c;
-  --gris-900: #2a2a2a;
-  --gris-600: #6b6b6b;
-  --gris-400: #a3a3a3;
-  --gris-200: #e4e4e4;
-  --gris-100: #f2f2f2;
-  --hueso: #fafaf8;
-  --blanco: #ffffff;
+  /* Paleta "casa matera": madera, cuero y alpaca (inspirada en Santiago Mates).
+     Los nombres quedan del diseño original: --negro es el espresso de los textos y
+     botones, --grafito el marrón del logo, los --gris son tonos tostados. */
+  --negro: #2b1810;
+  --grafito: #3a2116;
+  --gris-900: #553728;
+  --gris-600: #7d6455;
+  --gris-400: #b59d8b;
+  --gris-200: #e8dccd;
+  --gris-100: #f3eadf;
+  --hueso: #faf5ee;
+  --blanco: #fffdfa;
+  /* Acentos: caramelo (cuero/madera) y dorado (alpaca) */
+  --acento: #b0692b;
+  --acento-claro: #e2b77a;
+  --dorado: #c9a24a;
 
   --fuente-titulos: "Cormorant Garamond", Georgia, serif;
   --fuente-texto: "Manrope", system-ui, -apple-system, sans-serif;
@@ -240,19 +247,6 @@ ul {
   align-items: center;
 }
 
-.logo__marca {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 120px;
-  height: 40px;
-  padding: 0 16px;
-  border: 1.5px dashed var(--negro);
-  font-family: var(--fuente-titulos);
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-}
 
 .header__acciones {
   justify-self: end;
@@ -934,9 +928,16 @@ ul {
   padding-bottom: 40px;
 }
 
-.logo__marca--footer {
-  border-color: var(--blanco);
-  color: var(--blanco);
+/* Logo de la marca (imagen con su fondo marrón) */
+.logo__img {
+  display: block;
+  height: 46px;
+  width: auto;
+  border-radius: 6px;
+}
+
+.logo__img--footer {
+  height: 78px;
   margin-bottom: 16px;
 }
 
@@ -1439,10 +1440,8 @@ select.campo__control {
     display: none;
   }
 
-  .logo__marca {
-    min-width: 150px;
-    height: 46px;
-    font-size: 22px;
+  .logo__img {
+    height: 58px;
   }
 
   /* En tablet+ el botón aparece sobre la imagen al pasar el mouse */

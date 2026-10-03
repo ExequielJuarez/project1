@@ -4,13 +4,23 @@
    ========================================================== */
 
 .inicio {
-  --arena: #e9e9e6;
-  --piedra: #d6d6d2;
+  /* Fondos tostados para fotos e ilustraciones */
+  --arena: #efe3d3;
+  --piedra: #e0cdb6;
+  --cuero: #5c3a26;
   overflow: hidden;
 }
 
 .inicio em {
   font-style: italic;
+  color: var(--acento);
+}
+
+/* En las secciones oscuras el acento va más claro */
+.ritual em,
+.cierre em,
+.detalle-estado em {
+  color: var(--acento-claro);
 }
 
 /* ---------- Piezas comunes de las secciones ---------- */
@@ -184,7 +194,7 @@
 .portada__arco {
   aspect-ratio: 4 / 5;
   border-radius: 999px 999px 0 0;
-  background: radial-gradient(120% 80% at 50% 30%, #2f2f2f 0%, var(--grafito) 45%, var(--negro) 100%);
+  background: radial-gradient(120% 80% at 50% 30%, var(--cuero) 0%, var(--grafito) 45%, var(--negro) 100%);
   overflow: hidden;
   display: flex;
   align-items: flex-end;
@@ -303,7 +313,11 @@
 .cinta__pista i {
   font-size: 0.45em;
   font-style: normal;
-  color: var(--gris-600);
+  color: var(--dorado);
+}
+
+.cinta__pista em {
+  color: var(--acento-claro);
 }
 
 .cinta:hover .cinta__pista {
@@ -334,7 +348,7 @@
 }
 
 .historia__texto em {
-  color: var(--gris-600);
+  color: var(--acento);
 }
 
 /* Pastillas con mates metidas en el texto */
@@ -467,7 +481,7 @@
 }
 
 .coleccion--oscuro .coleccion__imagen {
-  background: radial-gradient(90% 70% at 50% 35%, #333, var(--negro));
+  background: radial-gradient(90% 70% at 50% 35%, var(--cuero), var(--negro));
 }
 
 .coleccion__imagen img {
@@ -702,7 +716,7 @@
 
 /* El texto grabado: oscuro y "hundido" sobre la madera */
 .grabado {
-  fill: #1c1c1c;
+  fill: #2b1810;
   fill-opacity: 0.78;
   stroke: #fff;
   stroke-opacity: 0.12;
@@ -912,7 +926,7 @@
 }
 
 .galeria__item--oscuro {
-  background: radial-gradient(90% 70% at 50% 35%, #333, var(--negro));
+  background: radial-gradient(90% 70% at 50% 35%, var(--cuero), var(--negro));
 }
 
 .galeria__item--medio {
@@ -1074,7 +1088,7 @@
 }
 
 .cierre__titulo em {
-  color: var(--gris-400);
+  color: var(--acento-claro);
 }
 
 .cierre__acciones {
@@ -1462,4 +1476,63 @@
   .js-animar [data-revelar] {
     transform: none;
   }
+}
+
+/* ==========================================================
+   FOTOS (jpg / png / webp) — llenan su marco
+   Las ilustraciones .svg siguen con su encuadre "contenido".
+   La clase .foto la pone inicio.ejs según la extensión.
+   ========================================================== */
+.portada__arco img.foto,
+.coleccion__imagen img.foto,
+.galeria__item img.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.portada__arco:has(img.foto),
+.coleccion__imagen:has(img.foto) {
+  align-items: stretch;
+}
+
+.portada__arco img.foto {
+  transform: scale(1.06) translateY(var(--desplazar, 0px));
+}
+
+.coleccion__link:hover .coleccion__imagen img.foto {
+  transform: scale(1.05);
+}
+
+.portada__mini img.foto {
+  object-fit: cover;
+  padding: 0;
+}
+
+.historia__chip img.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: none;
+}
+
+.proceso__marco:has(img.foto) {
+  overflow: hidden;
+}
+
+.proceso__img.foto {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ritual__imagen:has(img.foto) {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ritual__imagen img.foto {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }

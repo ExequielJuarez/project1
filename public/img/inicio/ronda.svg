@@ -25,7 +25,7 @@
 <path d="M92,190 Q170,204 248,190" stroke="#fff" stroke-opacity=".12" stroke-width="1.2" fill="none"/>
 <path d="M92,440 Q170,456 248,440" stroke="#fff" stroke-opacity=".12" stroke-width="1.2" fill="none"/>
 <path d="M122,170 L126,460" stroke="#fff" stroke-opacity=".28" stroke-width="5" filter="url(#mblur2)"/>
-<text x="170" y="330" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#fff" fill-opacity=".55" letter-spacing="2">(LOGO)</text>
+<text x="170" y="330" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#fff" fill-opacity=".55" letter-spacing="2">Santiago</text>
 <path d="M248,210 C300,212 304,238 300,300 C298,350 290,380 248,384" stroke="#141414" stroke-width="16" fill="none" stroke-linecap="round"/>
 <path d="M250,214 C292,218 294,240 291,300" stroke="#555" stroke-width="3" fill="none" stroke-linecap="round"/>
 <path d="M100,112 L240,112 L248,152 L92,152 Z" fill="url(#tTapa)"/>

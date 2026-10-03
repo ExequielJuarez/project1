@@ -46,16 +46,10 @@ body {
 }
 
 .admin-lateral__logo {
-  padding: 6px 10px;
-  border: 1.5px dashed currentColor;
-  font-family: var(--fuente-titulos);
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-}
-
-.admin-lateral .admin-lateral__logo {
-  color: var(--blanco);
+  display: block;
+  height: 40px;
+  width: auto;
+  border-radius: 5px;
 }
 
 .admin-lateral__etiqueta {
