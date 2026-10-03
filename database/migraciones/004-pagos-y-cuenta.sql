@@ -8,12 +8,12 @@
 -- (La app también las agrega sola al arrancar si faltan.)
 --
 -- Uso: abrir en Workbench y ejecutar (⚡), o
---      mysql -u root -p tienda_db < database/migraciones/004-pagos-y-cuenta.sql
+--      mysql -u root -p tienda_mates < database/migraciones/004-pagos-y-cuenta.sql
 -- Ejecutala una sola vez. Si instalás la base desde cero con
 -- schema.sql, NO hace falta.
 -- ==========================================================
 
-USE tienda_db;
+USE tienda_mates;
 SET NAMES utf8mb4;
 
 ALTER TABLE pedidos

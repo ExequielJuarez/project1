@@ -11,10 +11,10 @@
 --   Admin    admin@tienda.com  /  Admin1234
 --
 -- Uso:  npm run db:instalar   (carga schema.sql + este archivo)
---   o:  mysql -u root -p tienda_db < database/datos-prueba.sql
+--   o:  mysql -u root -p tienda_mates < database/datos-prueba.sql
 -- ==========================================================
 
-USE tienda_db;
+USE tienda_mates;
 
 -- Acentos bien guardados aunque el cliente de MySQL no esté en UTF-8
 SET NAMES utf8mb4;

@@ -5,11 +5,11 @@
 -- notificaciones. No toca ni borra datos.
 --
 -- Uso: abrir en Workbench y ejecutar (⚡), o
---      mysql -u root -p tienda_db < database/migraciones/002-notificaciones.sql
+--      mysql -u root -p tienda_mates < database/migraciones/002-notificaciones.sql
 -- Si instalás la base desde cero con schema.sql, NO hace falta.
 -- ==========================================================
 
-USE tienda_db;
+USE tienda_mates;
 SET NAMES utf8mb4;
 
 -- ----------------------------------------------------------

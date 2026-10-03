@@ -9,7 +9,7 @@
 -- Uso: abrir en Workbench y ejecutar (⚡).
 -- ==========================================================
 
-USE tienda_db;
+USE tienda_mates;
 
 ALTER TABLE usuarios
   MODIFY rol ENUM('cliente', 'admin', 'superadmin') NOT NULL DEFAULT 'cliente';

@@ -6,11 +6,11 @@
 -- producto y borra la columna vieja. No pierde datos.
 --
 -- Uso: abrir en Workbench y ejecutar (⚡), o
---      mysql -u root -p tienda_db < database/migraciones/001-varias-imagenes.sql
+--      mysql -u root -p tienda_mates < database/migraciones/001-varias-imagenes.sql
 -- Si instalás la base desde cero con schema.sql, NO hace falta.
 -- ==========================================================
 
-USE tienda_db;
+USE tienda_mates;
 SET NAMES utf8mb4;
 
 CREATE TABLE IF NOT EXISTS producto_imagenes (

@@ -8,11 +8,11 @@
 --   o:  mysql -u root -p < database/schema.sql
 -- ==========================================================
 
-CREATE DATABASE IF NOT EXISTS tienda_db
+CREATE DATABASE IF NOT EXISTS tienda_mates
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE tienda_db;
+USE tienda_mates;
 
 -- Acentos y ñ bien guardados aunque el cliente de MySQL no esté en UTF-8
 SET NAMES utf8mb4;
