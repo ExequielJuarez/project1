@@ -928,17 +928,46 @@ ul {
   padding-bottom: 40px;
 }
 
-/* Logo de la marca (imagen con su fondo marrón) */
-.logo__img {
+/* Logo de la marca (vector: toma el color del texto que lo rodea) */
+.logo-svg {
   display: block;
-  height: 46px;
   width: auto;
-  border-radius: 6px;
+  overflow: visible;
 }
 
-.logo__img--footer {
-  height: 78px;
-  margin-bottom: 16px;
+.logo-svg__marca {
+  font-family: var(--fuente-titulos);
+  font-size: 35px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  fill: currentColor;
+}
+
+.logo-svg__marca--fuerte {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.logo-svg__bajada {
+  font-family: var(--fuente-texto);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  fill: currentColor;
+  opacity: 0.75;
+}
+
+.logo .logo-svg {
+  height: 48px;
+  color: var(--negro);
+  --logo-fondo: var(--blanco); /* línea que separa la boca del mate */
+}
+
+.logo-svg--footer {
+  height: 140px;
+  margin: 0 0 18px -18px;
+  color: var(--hueso);
+  --logo-fondo: var(--grafito);
 }
 
 .footer__marca p {
@@ -1440,8 +1469,8 @@ select.campo__control {
     display: none;
   }
 
-  .logo__img {
-    height: 58px;
+  .logo .logo-svg {
+    height: 66px;
   }
 
   /* En tablet+ el botón aparece sobre la imagen al pasar el mouse */

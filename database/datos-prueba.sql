@@ -136,24 +136,8 @@ Terminación interior protegida
 Producto 100% artesanal
 Incluye accesorio de regalo');
 
--- Fotos de ejemplo (las mismas del inicio). Desde el panel se pueden cambiar:
--- las que se suben nuevas van a public/img/productos.
-INSERT INTO producto_imagenes (producto_id, ruta, orden) VALUES
-  (1, '/img/inicio/foto-cuero-alpaca.jpg', 1),
-  (1, '/img/inicio/foto-imperial-sol.jpg', 2),
-  (2, '/img/inicio/foto-grabado-papa.jpg', 1),
-  (3, '/img/inicio/foto-grabado-papa.jpg', 1),
-  (4, '/img/inicio/foto-grabado-papa.jpg', 1),
-  (5, '/img/inicio/foto-imperial-sol.jpg', 1),
-  (6, '/img/inicio/foto-imperial-sol.jpg', 1),
-  (7, '/img/inicio/foto-imperial-sol.jpg', 1),
-  (7, '/img/inicio/foto-cuero-alpaca.jpg', 2),
-  (8, '/img/inicio/foto-mates-color.jpg', 1),
-  (8, '/img/inicio/foto-grabado-papa.jpg', 2),
-  (9, '/img/inicio/foto-mates-color.jpg', 1),
-  (10, '/img/inicio/foto-grabado-papa.jpg', 1),
-  (11, '/img/inicio/foto-cuero-alpaca.jpg', 1),
-  (12, '/img/inicio/foto-mates-color.jpg', 1);
+-- Los productos de prueba no traen fotos: se cargan desde el panel admin
+-- (se guardan en producto_imagenes).
 
 -- ── Ficha técnica de cada producto ──────────────────────
 INSERT INTO especificaciones (producto_id, clave, valor, orden) VALUES

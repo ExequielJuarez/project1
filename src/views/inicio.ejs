@@ -10,8 +10,6 @@
   const foto = (src) => (/\.svg$/i.test(String(src || "")) ? "" : "foto");
   const romanos = ["I", "II", "III", "IV", "V", "VI"];
   const claseGaleria = ["galeria__item--alto", "", "galeria__item--ancho", "", "galeria__item--ultimo"];
-  const chip = (src, oscuro) => `<span class="historia__chip ${oscuro ? 'historia__chip--oscuro' : ''}"><img src="${src}" alt="" class="${foto(src)}" loading="lazy"></span>`;
-  const cifras = c.historia.cifras.filter((x) => x.texto);
   const pasos = c.proceso.pasos.filter((p) => p.titulo || p.texto);
 %>
 
@@ -62,7 +60,7 @@
       </div>
     </div>
 
-    <a href="<%= c.historia.visible ? '#historia' : '#contenido' %>" class="portada__bajar" aria-label="Seguir bajando"><span></span></a>
+    <a href="#contenido" class="portada__bajar" aria-label="Seguir bajando"><span></span></a>
   </section>
   <span id="contenido"></span>
 
@@ -77,32 +75,9 @@
     </div>
   <% } %>
 
-  <!-- ═════════════ HISTORIA ═════════════ -->
-  <% if (c.historia.visible) { %>
-    <section class="historia" id="historia" data-seccion="historia">
-      <div class="contenedor">
-        <% if (c.historia.etiqueta) { %><p class="seccion-etiqueta" data-revelar><%= c.historia.etiqueta %></p><% } %>
-        <p class="historia__texto" data-revelar>
-          <%- textoRico(c.historia.texto).replace("[foto1]", chip(c.historia.foto1, false)).replace("[foto2]", chip(c.historia.foto2, true)) %>
-        </p>
-
-        <% if (cifras.length) { %>
-          <div class="cifras cifras--<%= cifras.length %>">
-            <% cifras.forEach((x) => { %>
-              <div class="cifra" data-revelar>
-                <strong><span data-contar="<%= x.numero %>"><%= x.numero.toLocaleString('es-AR') %></span><%= x.sufijo %></strong>
-                <span><%= x.texto %></span>
-              </div>
-            <% }) %>
-          </div>
-        <% } %>
-      </div>
-    </section>
-  <% } %>
-
   <!-- ═════════════ COLECCIONES ═════════════ -->
   <% if (c.colecciones.visible) { %>
-    <section class="colecciones" data-seccion="colecciones">
+    <section class="colecciones" id="nuestras-colecciones" data-seccion="colecciones">
       <div class="contenedor">
         <div class="seccion-cabecera">
           <div>

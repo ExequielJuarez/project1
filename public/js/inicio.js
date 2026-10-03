@@ -1,13 +1,12 @@
 // ==========================================================
 // INICIO — Animaciones y detalles de la presentación (usa base.js)
-// Aparición al hacer scroll, contadores, parallax de la portada,
+// Aparición al hacer scroll, parallax de la portada,
 // proceso con imagen fija, vista previa del grabado y testimonios.
 // ==========================================================
 
 (() => {
   const { $, $$ } = window.Tienda;
   const sinMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const formatoNumero = (n) => n.toLocaleString("es-AR");
 
   // ---------- Aparición al hacer scroll ----------
   const revelables = $$("[data-revelar]");
@@ -32,37 +31,6 @@
       { rootMargin: "0px 0px -8% 0px", threshold: 0.12 },
     );
     revelables.forEach((el) => observador.observe(el));
-  }
-
-  // ---------- Contadores de la historia ----------
-  const contadores = $$("[data-contar]");
-  function contar(el) {
-    const final = Number(el.dataset.contar);
-    const duracion = 1600;
-    const inicio = performance.now();
-    const paso = (ahora) => {
-      const t = Math.min(1, (ahora - inicio) / duracion);
-      const suave = 1 - Math.pow(1 - t, 3);
-      el.textContent = formatoNumero(Math.round(final * suave));
-      if (t < 1) requestAnimationFrame(paso);
-    };
-    requestAnimationFrame(paso);
-  }
-  if ("IntersectionObserver" in window && !sinMovimiento) {
-    const obsContadores = new IntersectionObserver(
-      (entradas) => {
-        entradas.forEach((e) => {
-          if (!e.isIntersecting) return;
-          contar(e.target);
-          obsContadores.unobserve(e.target);
-        });
-      },
-      { threshold: 0.6 },
-    );
-    contadores.forEach((el) => {
-      el.textContent = "0";
-      obsContadores.observe(el);
-    });
   }
 
   // ---------- Parallax suave de la portada ----------

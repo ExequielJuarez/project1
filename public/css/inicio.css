@@ -331,90 +331,6 @@
 }
 
 /* ==========================================================
-   HISTORIA
-   ========================================================== */
-.historia {
-  padding: 76px 0 70px;
-}
-
-.historia__texto {
-  max-width: 1100px;
-  margin-top: 26px;
-  font-family: var(--fuente-titulos);
-  font-size: clamp(28px, 5vw, 58px);
-  font-weight: 500;
-  line-height: 1.18;
-  letter-spacing: -0.005em;
-}
-
-.historia__texto em {
-  color: var(--acento);
-}
-
-/* Pastillas con mates metidas en el texto */
-.historia__chip {
-  display: inline-flex;
-  align-items: flex-end;
-  justify-content: center;
-  width: 1.7em;
-  height: 0.95em;
-  margin: 0 0.08em;
-  vertical-align: -0.1em;
-  border-radius: 999px;
-  background: var(--arena);
-  overflow: hidden;
-}
-
-.historia__chip--oscuro {
-  background: var(--grafito);
-}
-
-.historia__chip img {
-  height: 130%;
-  transform: translateY(12%);
-}
-
-.cifras {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  margin-top: 54px;
-  border-top: 1px solid var(--gris-200);
-}
-
-.cifra {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 22px 0;
-  border-bottom: 1px solid var(--gris-200);
-}
-
-.cifra:nth-child(odd) {
-  padding-right: 14px;
-  border-right: 1px solid var(--gris-200);
-}
-
-.cifra:nth-child(even) {
-  padding-left: 18px;
-}
-
-.cifra strong {
-  font-family: var(--fuente-titulos);
-  font-size: clamp(40px, 6vw, 64px);
-  font-weight: 500;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.cifra > span {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gris-600);
-}
-
-/* ==========================================================
    COLECCIONES
    ========================================================== */
 .colecciones {
@@ -1150,37 +1066,6 @@
     left: -34px;
   }
 
-  .historia {
-    padding: 110px 0 100px;
-  }
-
-  .cifras {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .cifras--3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .cifras--2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .cifra,
-  .cifra:nth-child(odd),
-  .cifra:nth-child(even) {
-    padding: 26px 20px;
-    border-right: 1px solid var(--gris-200);
-  }
-
-  .cifra:first-child {
-    padding-left: 0;
-  }
-
-  .cifra:last-child {
-    border-right: 0;
-  }
-
   .colecciones {
     padding: 100px 0 110px;
   }
@@ -1318,14 +1203,6 @@
     to {
       transform: translateY(260%);
     }
-  }
-
-  .historia__texto {
-    margin-top: 34px;
-  }
-
-  .cifras {
-    margin-top: 80px;
   }
 
   /* Colecciones: cuatro columnas escalonadas */
@@ -1507,13 +1384,6 @@
 .portada__mini img.foto {
   object-fit: cover;
   padding: 0;
-}
-
-.historia__chip img.foto {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: none;
 }
 
 .proceso__marco:has(img.foto) {

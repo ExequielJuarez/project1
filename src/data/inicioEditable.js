@@ -45,8 +45,8 @@ const SECCIONES = {
       ),
       botonTexto: texto("Botón principal", "Descubrir la colección", 30, { ancho: "medio" }),
       botonLink: link("Link del botón principal", "/catalogo"),
-      secundarioTexto: texto("Link secundario", "Nuestra historia", 30, { ancho: "medio" }),
-      secundarioLink: link("A dónde lleva", "#historia"),
+      secundarioTexto: texto("Link secundario", "Ver colecciones", 30, { ancho: "medio" }),
+      secundarioLink: link("A dónde lleva", "#nuestras-colecciones"),
       imagen: imagen("Foto principal (dentro del arco)", IMG("foto-cuero-alpaca.jpg"), {
         ayuda: "Queda mejor una foto vertical, con el mate centrado.",
         fondo: "oscuro",
@@ -75,40 +75,6 @@ const SECCIONES = {
         max: 240,
         maxLineas: 10,
         ayuda: "Una por renglón. *Entre asteriscos* va en cursiva.",
-      },
-    },
-  },
-
-  historia: {
-    titulo: "Nuestra historia",
-    descripcion: "El texto grande con fotitos y las cifras.",
-    campos: {
-      etiqueta: etiquetaSeccion("Nuestra historia"),
-      texto: parrafo(
-        "Texto",
-        "Creemos que un mate [foto1] es mucho más que un objeto: es la excusa para sentarse, frenar un rato y *compartir* [foto2] lo que venga. Por eso hacemos cada pieza a mano, sin apuro, en nuestro taller de (CIUDAD).",
-        420,
-        { ayuda: "Escribí [foto1] y [foto2] donde quieras que aparezcan las fotitos redondas." }
-      ),
-      foto1: imagen("[foto1]", IMG("foto-cuero-alpaca.jpg"), { ancho: "medio" }),
-      foto2: imagen("[foto2]", IMG("foto-mates-color.jpg"), { ancho: "medio", fondo: "oscuro" }),
-      cifras: {
-        tipo: "lista",
-        etiqueta: "Cifras",
-        item: "Cifra",
-        cantidad: 4,
-        ayuda: "Dejá el texto vacío para ocultar una cifra.",
-        campos: {
-          numero: { tipo: "numero", etiqueta: "Número", max: 9999999, ancho: "tercio" },
-          sufijo: texto("Signo", "", 3, { ancho: "tercio", placeholder: "+ o %" }),
-          texto: texto("Texto", "", 30, { ancho: "tercio" }),
-        },
-        defecto: [
-          { numero: 12, sufijo: "+", texto: "años de oficio" },
-          { numero: 8000, sufijo: "+", texto: "mates en ronda" },
-          { numero: 24, sufijo: "", texto: "provincias con envío" },
-          { numero: 100, sufijo: "%", texto: "hecho a mano" },
-        ],
       },
     },
   },

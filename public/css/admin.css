@@ -39,17 +39,21 @@ body {
 
 .admin-lateral__marca {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   padding: 0 8px 24px;
   border-bottom: 1px solid var(--gris-900);
 }
 
 .admin-lateral__logo {
-  display: block;
-  height: 40px;
-  width: auto;
-  border-radius: 5px;
+  height: 46px;
+  color: var(--negro);
+}
+
+.admin-lateral .admin-lateral__logo {
+  color: var(--hueso);
+  --logo-fondo: var(--negro);
 }
 
 .admin-lateral__etiqueta {
