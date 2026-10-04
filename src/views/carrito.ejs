@@ -2,6 +2,12 @@
 <%- include('partials/header') %>
 
 <%
+  // Sin sesión, el botón lleva al login y después vuelve al checkout
+  const urlFinalizar = locals.usuarioLocal ? '/checkout/datos' : '/login?volver=' + encodeURIComponent('/checkout/datos');
+  const textoFinalizar = locals.usuarioLocal ? 'Finalizar compra' : 'Iniciar sesión para comprar';
+%>
+
+<%
   const r = resumen;
   const vacio = r.items.length === 0;
 %>
@@ -186,13 +192,16 @@
           o <%= r.cuotas %> cuotas sin interés de <strong data-valor="cuota"><%= formatoPrecio(r.total / r.cuotas) %></strong>
         </p>
 
-        <a href="/checkout/datos" class="btn btn--solido resumen__finalizar" id="btnFinalizar">Finalizar compra</a>
+        <a href="<%= urlFinalizar %>" class="btn btn--solido resumen__finalizar" id="btnFinalizar"><%= textoFinalizar %></a>
+        <% if (!locals.usuarioLocal) { %>
+          <p class="resumen__login">Para comprar necesitás una cuenta: entrá con Google, con tu email o con un código que te mandamos.</p>
+        <% } %>
 
         <p class="resumen__seguro">
           <svg viewBox="0 0 24 24" width="16" height="16"><rect x="5" y="10" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           Compra 100% segura
         </p>
-        <p class="resumen__logos">(VISA) (MASTER) (AMEX) (MP)</p>
+        <p class="resumen__logos">Visa · Mastercard · Amex · Naranja · Mercado Pago</p>
       </div>
     </aside>
   </main>
@@ -218,7 +227,7 @@
       <p class="barra-total__label">Total</p>
       <p class="barra-total__precio" data-valor="total"><%= formatoPrecio(r.total) %></p>
     </div>
-    <a href="/checkout/datos" class="btn btn--solido" data-finalizar>Finalizar compra</a>
+    <a href="<%= urlFinalizar %>" class="btn btn--solido" data-finalizar><%= locals.usuarioLocal ? 'Finalizar compra' : 'Iniciar sesión' %></a>
   </div>
 
   <%- include('partials/footer') %>

@@ -128,7 +128,7 @@ module.exports = {
 
   // ── Productos: crear ───────────────────────────────────────
   async nuevo(req, res) {
-    await renderFormulario(res, req, { datos: { categoria: "", color: "", stock: 0 } });
+    await renderFormulario(res, req, { datos: { categoria: "", colores: [], stock: 0 } });
   },
 
   async crear(req, res) {
@@ -148,7 +148,7 @@ module.exports = {
   async editar(req, res) {
     const producto = await productoService.obtener(req.params.id);
     if (!producto) return res.redirect("/admin/productos");
-    await renderFormulario(res, req, { producto, datos: { ...producto } });
+    await renderFormulario(res, req, { producto, datos: { ...producto, colores: producto.colores.map((c) => c.valor) } });
   },
 
   async actualizar(req, res) {
@@ -167,6 +167,17 @@ module.exports = {
 
     req.session.flash = "Cambios guardados.";
     res.redirect(`/admin/productos/${producto.id}`);
+  },
+
+  // ── Colores: alta rápida desde el formulario de producto (JSON) ──
+  async crearColor(req, res) {
+    const nombre = String(req.body.nombre || "").trim();
+    if (nombre.length < 2 || nombre.length > 40) {
+      return res.status(422).json({ ok: false, mensaje: "Escribí un nombre de color (2 a 40 letras)" });
+    }
+    const color = await productoService.crearColor({ nombre, hex: req.body.hex });
+    if (!color) return res.status(422).json({ ok: false, mensaje: "Ese nombre de color no es válido" });
+    res.status(color.nuevo ? 201 : 200).json({ ok: true, color });
   },
 
   // ── Productos: borrar ──────────────────────────────────────
@@ -217,6 +228,30 @@ module.exports = {
         total: Object.entries(conteo).reduce((a, [e, n]) => (e === "sin_pagar" ? a : a + n), 0),
       })
     );
+  },
+
+  // ── Pedidos: comprobante para imprimir ─────────────────────
+  async comprobante(req, res) {
+    const numero = Number(req.params.numero);
+    const pedido = Number.isInteger(numero) ? await pedidoService.obtener(numero) : null;
+    if (!pedido) {
+      req.session.flash = "No encontramos ese pedido.";
+      return res.redirect("/admin/pedidos");
+    }
+    res.render("admin/comprobante", {
+      titulo: `Comprobante #${pedido.numero}`,
+      estilo: "admin-comprobante",
+      pedido,
+      // Datos de la tienda que salen en el encabezado (ver .env.example)
+      tienda: {
+        cuit: process.env.TIENDA_CUIT || "",
+        direccion: process.env.TIENDA_DIRECCION || "",
+        telefono: process.env.TIENDA_TELEFONO || "",
+        email: process.env.TIENDA_EMAIL || "",
+        web: (process.env.APP_URL || "").replace(/^https?:\/\//, "").replace(/\/$/, ""),
+      },
+      emitido: new Date(),
+    });
   },
 
   async cambiarEstado(req, res) {

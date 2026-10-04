@@ -1,0 +1,7 @@
+<%# Aviso en login / registro cuando se llega desde el checkout %>
+<% if (locals.paraComprar) { %>
+  <div class="aviso-compra" role="note">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 016 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+    <p><strong>Para terminar tu compra iniciá sesión o creá tu cuenta.</strong> Tu carrito queda guardado y después seguís desde donde estabas.</p>
+  </div>
+<% } %>

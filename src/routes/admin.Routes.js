@@ -31,10 +31,12 @@ router.get("/productos/:id/editar", admin.editar);
 router.put("/productos/:id", subirImagenes, productoValidator, admin.actualizar);
 router.delete("/productos/:id", admin.eliminar);
 router.patch("/productos/:id/stock", admin.ajustarStock);
+router.post("/colores", admin.crearColor);
 
 // ── Pedidos ────────────────────────────────────────────────
 router.get("/pedidos", admin.pedidos);
 router.patch("/pedidos/:numero/estado", admin.cambiarEstado);
+router.get("/pedidos/:numero/comprobante", admin.comprobante);
 
 // ── Página de inicio (solo superadmin: textos, fotos y secciones visibles) ──
 router.get("/inicio", soloSuperAdmin, inicio.ver);

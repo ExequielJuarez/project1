@@ -146,6 +146,14 @@ details[open] .pedido-fila__flecha {
   align-self: flex-start;
 }
 
+/* Abre el comprobante en otra pestaña para imprimirlo */
+.pedido-fila__imprimir {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+}
+
 /* Estado del cobro (en la línea de cada pedido) */
 .cobro {
   padding: 1px 6px;
@@ -268,6 +276,7 @@ details[open] .pedido-fila__flecha {
 
   .pedido-fila__pie {
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
   }

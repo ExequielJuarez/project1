@@ -1,6 +1,7 @@
 // Productos, categorías y colores (tablas productos, especificaciones,
 // categorias, colores). Devuelve objetos planos con la misma forma que
-// usan las vistas: p.categoria = "Línea Madera", p.color = "madera", etc.
+// usan las vistas: p.categoria = "Mates", p.color = "negro" (el principal),
+// p.colores = todos los colores en que se vende, etc.
 
 const { Op } = require("sequelize");
 const db = require("../model/database/models");
@@ -20,6 +21,7 @@ const incluir = [
   { association: "categoria", attributes: ["id", "nombre"] },
   { association: "color", attributes: ["id", "valor", "nombre", "hex"] },
   { association: "imagenes", attributes: ["id", "ruta", "orden"] },
+  { association: "colores", attributes: ["id", "valor", "nombre", "hex"], through: { attributes: ["orden"] } },
 ];
 
 // Las fotos siempre ordenadas: la principal primero
@@ -31,6 +33,12 @@ function plano(p) {
   const parrafos = (texto) => (texto ? texto.split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean) : null);
   const lineas = (texto) => (texto ? texto.split("\n").map((t) => t.trim()).filter(Boolean) : null);
 
+  // Colores en venta, el principal primero (bases viejas: solo el principal)
+  const colores = (x.colores || [])
+    .sort((a, b) => (a.ProductoColor?.orden ?? 0) - (b.ProductoColor?.orden ?? 0) || (a.id === x.colorId ? -1 : 1))
+    .map(({ id, valor, nombre, hex }) => ({ id, valor, nombre, hex }));
+  if (!colores.length && x.color) colores.push({ id: x.color.id, valor: x.color.valor, nombre: x.color.nombre, hex: x.color.hex });
+
   return {
     id: x.id,
     nombre: x.nombre,
@@ -39,6 +47,7 @@ function plano(p) {
     colorId: x.colorId,
     color: x.color?.valor || "",
     colorInfo: x.color || null,
+    colores,
     precio: x.precio,
     costo: x.costo,
     stock: x.stock,
@@ -82,6 +91,7 @@ async function listar({ q = "", categoria = "", stock = "", orden = "" } = {}) {
       { ...incluir[0], ...(categoria ? { where: { nombre: categoria } } : {}) },
       incluir[1],
       incluir[2],
+      incluir[3],
     ],
     order: [...(ordenes[orden] || [["id", "ASC"]]), ordenImagenes],
   });
@@ -121,9 +131,39 @@ async function categorias() {
 }
 
 async function colores() {
-  const filas = await db.Color.findAll({ order: [["orden", "ASC"]], raw: true });
+  const filas = await db.Color.findAll({ order: [["orden", "ASC"], ["id", "ASC"]], raw: true });
   return filas.map(({ valor, nombre, hex }) => ({ valor, nombre, hex }));
 }
+
+// "Rojo oscuro" → "rojo-oscuro" (identificador para filtros)
+const valorDeColor = (nombre) =>
+  String(nombre)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 30);
+
+// Crea un color nuevo (o devuelve el que ya existe con ese nombre)
+async function crearColor({ nombre, hex }) {
+  const limpio = String(nombre || "").trim().replace(/\s+/g, " ").slice(0, 40);
+  const valor = valorDeColor(limpio);
+  if (!valor) return null;
+  const existente = await db.Color.findOne({ where: { valor } });
+  if (existente) return { valor: existente.valor, nombre: existente.nombre, hex: existente.hex, nuevo: false };
+  const ultimo = (await db.Color.max("orden")) || 0;
+  const color = await db.Color.create({
+    valor,
+    nombre: limpio.charAt(0).toUpperCase() + limpio.slice(1),
+    hex: /^#[0-9a-f]{6}$/i.test(hex) ? hex.toLowerCase() : "#999999",
+    orden: ultimo + 1,
+  });
+  return { valor: color.valor, nombre: color.nombre, hex: color.hex, nuevo: true };
+}
+
+// El formulario manda un valor suelto o una lista; sin repetidos y en orden
+const listaDeColores = (v) => [...new Set([].concat(v || []).map(String).filter(Boolean))];
 
 async function resumenStock() {
   const [fila] = await db.sequelize.query(
@@ -153,16 +193,20 @@ async function total() {
 }
 
 // ── ABM (panel admin) ───────────────────────────────────────
-// datos.categoria es el nombre y datos.color el valor ("negro"), como en el formulario
+// datos.categoria es el nombre y datos.colores los valores ("negro"), como en el formulario
+// datos.colores: lista de valores ("negro", "rojo"); el primero es el principal
 async function datosParaGuardar(datos) {
-  const [categoria, color] = await Promise.all([
+  const valores = listaDeColores(datos.colores);
+  const [categoria, filasColor] = await Promise.all([
     db.Categoria.findOne({ where: { nombre: datos.categoria } }),
-    db.Color.findOne({ where: { valor: datos.color } }),
+    db.Color.findAll({ where: { valor: valores } }),
   ]);
+  const colorIds = valores.map((v) => filasColor.find((c) => c.valor === v)?.id).filter(Boolean);
   return {
+    colorIds,
     nombre: String(datos.nombre).trim(),
     categoriaId: categoria.id,
-    colorId: color.id,
+    colorId: colorIds[0],
     precio: Number(datos.precio),
     costo: Number(datos.costo),
     stock: Math.max(0, parseInt(datos.stock, 10) || 0),
@@ -208,9 +252,19 @@ async function contarImagenes(productoId) {
   return productoId ? db.ProductoImagen.count({ where: { productoId } }) : 0;
 }
 
+async function guardarColores(productoId, colorIds, t) {
+  await db.ProductoColor.destroy({ where: { productoId }, transaction: t });
+  await db.ProductoColor.bulkCreate(
+    colorIds.map((colorId, orden) => ({ productoId, colorId, orden })),
+    { transaction: t }
+  );
+}
+
 async function crear(datos, imagenes = {}) {
   const id = await db.sequelize.transaction(async (t) => {
-    const producto = await db.Producto.create(await datosParaGuardar(datos), { transaction: t });
+    const { colorIds, ...campos } = await datosParaGuardar(datos);
+    const producto = await db.Producto.create(campos, { transaction: t });
+    await guardarColores(producto.id, colorIds, t);
     await guardarImagenes(producto.id, imagenes, t);
     return producto.id;
   });
@@ -222,7 +276,9 @@ async function actualizar(id, datos, imagenes = {}) {
   const producto = await db.Producto.findByPk(id);
   if (!producto) return null;
   const rutasBorradas = await db.sequelize.transaction(async (t) => {
-    await producto.update(await datosParaGuardar(datos), { transaction: t });
+    const { colorIds, ...campos } = await datosParaGuardar(datos);
+    await producto.update(campos, { transaction: t });
+    await guardarColores(producto.id, colorIds, t);
     return guardarImagenes(producto.id, imagenes, t);
   });
   return { producto: await obtener(id), rutasBorradas };
@@ -254,6 +310,8 @@ module.exports = {
   relacionados,
   categorias,
   colores,
+  crearColor,
+  listaDeColores,
   resumenStock,
   total,
   crear,

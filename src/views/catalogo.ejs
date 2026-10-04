@@ -10,6 +10,10 @@
         <a href="/catalogo">Catálogo</a>
         <span>/</span>
         <span aria-current="page">Búsqueda</span>
+      <% } else if (categoria) { %>
+        <a href="/catalogo">Catálogo</a>
+        <span>/</span>
+        <span aria-current="page"><%= categoria %></span>
       <% } else { %>
         <span aria-current="page"><%= titulo %></span>
       <% } %>
@@ -28,7 +32,8 @@
           <p class="hero__texto">Piezas pensadas para durar. Elegí, personalizá y recibí en tu casa.</p>
         <% } %>
       </div>
-      <p class="hero__cantidad"><span id="cantidadVisible"><%= productos.length %></span> productos</p>
+      <% const visiblesAlCargar = categoria ? productos.filter(p => p.categoria === categoria).length : productos.length; %>
+      <p class="hero__cantidad"><span id="cantidadVisible"><%= visiblesAlCargar %></span> productos</p>
     </div>
   </section>
 
@@ -86,7 +91,7 @@
           <div class="acordeon__contenido">
             <% categorias.forEach(cat => { %>
               <label class="check">
-                <input type="checkbox" name="categoria" value="<%= cat.nombre %>">
+                <input type="checkbox" name="categoria" value="<%= cat.nombre %>" <%= cat.nombre === categoria ? 'checked' : '' %>>
                 <span class="check__caja"></span>
                 <span class="check__texto"><%= cat.nombre %></span>
                 <span class="check__cantidad"><%= cat.cantidad %></span>
@@ -134,23 +139,17 @@
       <!-- Grilla de productos -->
       <section class="grilla" id="grilla" data-columnas="3" aria-live="polite">
         <% productos.forEach((p, i) => { %>
-          <%- include('partials/tarjeta', { p, i }) %>
+          <%- include('partials/tarjeta', { p, i, oculta: Boolean(categoria) && p.categoria !== categoria }) %>
         <% }) %>
 
-        <div class="vacio" id="vacio" <%= productos.length ? 'hidden' : '' %>>
+        <div class="vacio" id="vacio" <%= visiblesAlCargar ? 'hidden' : '' %>>
           <p class="vacio__titulo">Sin resultados</p>
-          <p>Probá quitando algunos filtros.</p>
-          <button class="btn btn--linea" data-limpiar>Limpiar filtros</button>
+          <p>Probá quitando algunos filtros. Si buscabas una categoría, puede que todavía no tengamos productos cargados.</p>
+          <button class="btn btn--linea" data-limpiar>Ver todo el catálogo</button>
         </div>
       </section>
     </div>
 
-    <nav class="paginacion" aria-label="Paginación">
-      <a href="#" class="paginacion__num activo">1</a>
-      <a href="#" class="paginacion__num">2</a>
-      <a href="#" class="paginacion__num">3</a>
-      <a href="#" class="paginacion__sig">Siguiente →</a>
-    </nav>
   </main>
 
   <%- include('partials/footer') %>

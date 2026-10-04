@@ -40,16 +40,39 @@
             <div class="campos-admin">
               <%- include('../partials/campo', { nombre: 'nombre', etiqueta: 'Nombre', clase: 'campo--completo', placeholder: 'Ej: Producto Madera Torneada a Mano', attrs: 'maxlength="90" required' }) %>
               <%- include('../partials/campo', { nombre: 'categoria', etiqueta: 'Categoría', tipo: 'select', opciones: categorias }) %>
-              <div class="campo <%= errores.color ? 'campo--error' : '' %>">
-                <label class="campo__label" for="color">Color</label>
-                <select class="campo__control" id="color" name="color" aria-describedby="color-error">
-                  <option value="">Elegí una opción</option>
-                  <% colores.forEach(c => { %>
-                    <option value="<%= c.valor %>" <%= d.color === c.valor ? 'selected' : '' %>><%= c.nombre %></option>
+<%
+                const elegidos = [].concat(d.colores || []);
+                // Los elegidos primero, en el orden guardado (el primero es el principal)
+                const ordenColores = [...colores].sort((a, b) => {
+                  const ia = elegidos.indexOf(a.valor), ib = elegidos.indexOf(b.valor);
+                  return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+                });
+              %>
+              <fieldset class="campo campo--completo colores-admin <%= errores.colores ? 'campo--error' : '' %>" id="colores">
+                <legend class="campo__label">Colores disponibles</legend>
+                <p class="colores-admin__ayuda">Marcá todos los colores en que lo vendés. El cliente elige uno al comprarlo. El primero que marques es el principal.</p>
+                <div class="colores-admin__lista" id="listaColores">
+                  <% ordenColores.forEach(c => { %>
+                    <label class="color-opcion">
+                      <input type="checkbox" name="colores" value="<%= c.valor %>" <%= elegidos.includes(c.valor) ? 'checked' : '' %>>
+                      <span class="color-opcion__muestra" style="--muestra: <%= c.hex %>"></span>
+                      <span class="color-opcion__nombre"><%= c.nombre %></span>
+                    </label>
                   <% }) %>
-                </select>
-                <p class="campo__error" id="color-error"><%= errores.color ? errores.color.msg : '' %></p>
-              </div>
+                </div>
+                <p class="colores-admin__cuenta" id="cuentaColores" aria-live="polite"></p>
+
+                <div class="color-nuevo" id="colorNuevo">
+                  <button type="button" class="color-nuevo__abrir" id="btnColorNuevo" aria-expanded="false" aria-controls="colorNuevoCampos">+ Agregar un color que no está</button>
+                  <div class="color-nuevo__campos" id="colorNuevoCampos" hidden>
+                    <input type="text" id="colorNuevoNombre" class="campo__control" maxlength="40" placeholder="Ej: Rojo, Azul marino, Suela" aria-label="Nombre del color nuevo">
+                    <input type="color" id="colorNuevoHex" value="#8b4a2b" aria-label="Tono del color nuevo">
+                    <button type="button" class="btn btn--solido color-nuevo__guardar" id="btnGuardarColor">Agregar</button>
+                  </div>
+                  <p class="color-nuevo__error" id="colorNuevoError" role="alert"></p>
+                </div>
+                <p class="campo__error" id="colores-error"><%= errores.colores ? errores.colores.msg : '' %></p>
+              </fieldset>
               <%- include('../partials/campo', { nombre: 'etiqueta', etiqueta: 'Etiqueta destacada', opcional: true, clase: 'campo--completo', placeholder: 'Ej: Nuevo, Más vendido, Exclusivo', attrs: 'maxlength="24"' }) %>
             </div>
           </section>

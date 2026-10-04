@@ -1,0 +1,113 @@
+/* ==========================================================
+   VERIFICAR CÓDIGO — Ingresar los 6 números del email
+   Mobile first · Tablet ≥ 768px
+   ========================================================== */
+
+.codigo {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 72px;
+}
+
+.codigo__tarjeta {
+  width: 100%;
+  max-width: 460px;
+}
+
+.codigo__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: var(--hueso);
+  color: var(--acento);
+}
+
+.codigo__input {
+  width: 100%;
+  height: 64px;
+  margin-top: 8px;
+  padding: 0 16px;
+  border: 1px solid var(--gris-400);
+  background: var(--blanco);
+  font-family: inherit;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  text-align: center;
+  color: var(--negro);
+}
+
+.codigo__input:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+  border-color: var(--acento);
+}
+
+.codigo__ayuda {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--gris-600);
+}
+
+.codigo__demo {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: #fff6e0;
+  border: 1px dashed var(--dorado);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.codigo__demo strong {
+  display: block;
+}
+
+.codigo__demo-numero {
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  font-size: 1.05rem;
+}
+
+.codigo__reenviar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--gris-600);
+}
+
+.codigo__reenviar-btn {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--acento);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.codigo__reenviar-btn:disabled {
+  color: var(--gris-400);
+  text-decoration: none;
+  cursor: default;
+}
+
+@media (min-width: 768px) {
+  .codigo {
+    padding-top: 24px;
+  }
+
+  .codigo__tarjeta {
+    padding: 44px 48px;
+    background: var(--blanco);
+    border: 1px solid var(--gris-200);
+  }
+}

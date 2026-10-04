@@ -14,7 +14,7 @@
 
     <!-- Panel de marca (PC / tablet) -->
     <section class="acceso__panel" aria-label="Beneficios de tu cuenta">
-      <span class="acceso__panel-imagen" aria-hidden="true">(IMAGEN DE MARCA)</span>
+      <img class="acceso__panel-imagen" src="/img/productos/torpedo-roma-calabaza-1.jpg" alt="" aria-hidden="true">
 
       <div class="acceso__panel-texto">
         <p class="acceso__etiqueta">Tu cuenta</p>
@@ -33,6 +33,8 @@
       <h1 class="acceso__titulo" id="tituloLogin">Iniciar sesión</h1>
       <p class="acceso__bajada">Ingresá con tu email y contraseña.</p>
 
+      <%- include('partials/aviso-compra') %>
+
       <% if (errorGeneral) { %>
         <div class="aviso aviso--error" role="alert"><%= errorGeneral %></div>
       <% } %>
@@ -42,7 +44,7 @@
 
         <%- include('partials/campo', { nombre: 'email', etiqueta: 'Email', tipo: 'email', placeholder: 'tu@email.com', attrs: 'autocomplete="email" autocapitalize="off" required autofocus' }) %>
 
-        <%- include('partials/campo-clave', { nombre: 'password', etiqueta: 'Contraseña', autocomplete: 'current-password', enlace: { texto: '¿La olvidaste?', href: '#' } }) %>
+        <%- include('partials/campo-clave', { nombre: 'password', etiqueta: 'Contraseña', autocomplete: 'current-password', enlace: codigoDisponible ? { texto: '¿La olvidaste?', href: '/login/codigo?motivo=recuperar&volver=' + encodeURIComponent(volver) } : null }) %>
 
         <label class="check-simple">
           <input type="checkbox" name="recordar" value="1" <%= datos.recordar ? 'checked' : '' %>>
@@ -53,12 +55,21 @@
         <button type="submit" class="btn btn--solido acceso__enviar" id="btnIngresar">Ingresar</button>
       </form>
 
+      <% if (googleDisponible || codigoDisponible) { %>
       <div class="separador"><span>o</span></div>
 
       <div class="acceso__sociales">
-        <a href="/auth/google?volver=<%= encodeURIComponent(volver) %>" class="btn btn--linea">(GOOGLE) Continuar con Google</a>
-        <button type="button" class="btn btn--linea" data-proximamente>(APPLE) Continuar con Apple</button>
+        <% if (googleDisponible) { %>
+          <%- include('partials/boton-google', { volver }) %>
+        <% } %>
+        <% if (codigoDisponible) { %>
+          <a href="/login/codigo?volver=<%= encodeURIComponent(volver) %>" class="btn btn--linea boton-codigo">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 6l8.5 7 8.5-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <span>Recibir un código por email</span>
+          </a>
+        <% } %>
       </div>
+      <% } %>
 
       <p class="acceso__registro">
         ¿No tenés cuenta? <a href="/registro?volver=<%= encodeURIComponent(volver) %>">Creá una</a>

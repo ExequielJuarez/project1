@@ -2,9 +2,9 @@
          data-id="<%= p.id %>"
          data-nombre="<%= p.nombre %>"
          data-categoria="<%= p.categoria %>"
-         data-color="<%= p.color %>"
+         data-colores="<%= (p.colores || []).map(c => c.valor).join(' ') %>"
          data-precio="<%= p.precio %>"
-         data-orden="<%= typeof i !== 'undefined' ? i : 0 %>">
+         data-orden="<%= typeof i !== 'undefined' ? i : 0 %>"<%= locals.oculta ? ' hidden' : '' %>>
   <div class="tarjeta__media">
     <a href="/producto/<%= p.id %>" class="tarjeta__imagen">
       <% if (p.stock <= 0) { %>

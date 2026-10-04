@@ -4,6 +4,11 @@ const pedidos = require("../services/pedidoService");
 const usuarios = require("../services/usuarioService");
 const provincias = require("../data/provincias");
 
+// Después de entrar con un código para recuperar la cuenta, puede elegir
+// una contraseña nueva sin escribir la anterior durante 30 minutos
+const RECUPERO_MS = 30 * 60 * 1000;
+const recuperando = (req) => Date.now() - (req.session.recuperoClaveEn || 0) < RECUPERO_MS;
+
 const CAMPOS_PERFIL = ["nombre", "apellido", "email", "telefono", "dni", "calle", "numero", "piso", "codigoPostal", "ciudad", "provincia"];
 
 async function renderDatos(req, res, { datos, errores = {}, erroresClave = {}, status = 200, abrir = null }) {
@@ -17,7 +22,8 @@ async function renderDatos(req, res, { datos, errores = {}, erroresClave = {}, s
     errores,
     erroresClave,
     provincias,
-    abrir,
+    abrir: abrir || (req.query.clave === "nueva" ? "clave" : null),
+    recuperando: recuperando(req),
   });
 }
 
@@ -56,12 +62,13 @@ module.exports = {
     const erroresClave = resultado.isEmpty() ? {} : resultado.mapped();
 
     if (!Object.keys(erroresClave).length) {
-      const ok = await usuarios.cambiarClave(id, req.body.actual, req.body.nueva);
+      const ok = await usuarios.cambiarClave(id, req.body.actual, req.body.nueva, { sinActual: recuperando(req) });
       if (!ok) erroresClave.actual = { msg: "La contraseña actual no es correcta" };
     }
     if (Object.keys(erroresClave).length) {
       return renderDatos(req, res, { erroresClave, status: 422, abrir: "clave" });
     }
+    delete req.session.recuperoClaveEn;
     req.session.flash = "Listo, cambiaste tu contraseña.";
     res.redirect("/mi-cuenta/datos");
   },

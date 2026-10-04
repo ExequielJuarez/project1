@@ -20,6 +20,13 @@ module.exports = (sequelize, DataTypes) => {
   Producto.associate = (db) => {
     Producto.belongsTo(db.Categoria, { as: "categoria", foreignKey: "categoriaId" });
     Producto.belongsTo(db.Color, { as: "color", foreignKey: "colorId" });
+    // Todos los colores en los que se vende (el principal es colorId)
+    Producto.belongsToMany(db.Color, {
+      as: "colores",
+      through: db.ProductoColor,
+      foreignKey: "productoId",
+      otherKey: "colorId",
+    });
     Producto.hasMany(db.Especificacion, { as: "especificaciones", foreignKey: "productoId" });
     Producto.hasMany(db.ProductoImagen, { as: "imagenes", foreignKey: "productoId" });
     Producto.hasMany(db.PedidoItem, { as: "ventas", foreignKey: "productoId" });

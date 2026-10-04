@@ -562,6 +562,14 @@
   margin-top: 20px;
 }
 
+.resumen__login {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--gris-600);
+}
+
 .resumen__seguro {
   display: flex;
   align-items: center;

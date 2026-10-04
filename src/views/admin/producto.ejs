@@ -70,7 +70,9 @@
               <div><dt>Costo</dt><dd><%= formatoPrecio(p.costo) %></dd></div>
               <div><dt>Ganancia por unidad</dt><dd><strong><%= formatoPrecio(p.precio - p.costo) %></strong> (<%= formatoPorcentaje(margen) %>)</dd></div>
               <div><dt>Categoría</dt><dd><%= p.categoria %></dd></div>
-              <div><dt>Color</dt><dd><span class="punto-color" style="--muestra: <%= color ? color.hex : '#ccc' %>"></span><%= color ? color.nombre : p.color %></dd></div>
+              <div><dt><%= p.colores.length > 1 ? `Colores (${p.colores.length})` : 'Color' %></dt><dd class="lista-colores">
+                <% p.colores.forEach(c => { %><span><span class="punto-color" style="--muestra: <%= c.hex %>"></span><%= c.nombre %></span><% }) %>
+              </dd></div>
               <div><dt>Etiqueta</dt><dd><%= p.etiqueta || '—' %></dd></div>
             </dl>
           </section>

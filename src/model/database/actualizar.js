@@ -37,6 +37,24 @@ module.exports = async function actualizarBase() {
 
   // Tablas nuevas
   await db.ContenidoInicio.sync();
+  const tablas = (await qi.showAllTables()).map((t) => (typeof t === "string" ? t : t.tableName));
+  if (!tablas.includes("producto_colores")) {
+    await qi.sequelize.query(`
+      CREATE TABLE producto_colores (
+        producto_id  INT UNSIGNED      NOT NULL,
+        color_id     SMALLINT UNSIGNED NOT NULL,
+        orden        SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+        PRIMARY KEY (producto_id, color_id),
+        KEY idx_producto_colores_color (color_id),
+        CONSTRAINT fk_pcolores_producto FOREIGN KEY (producto_id) REFERENCES productos (id)
+          ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT fk_pcolores_color FOREIGN KEY (color_id) REFERENCES colores (id)
+          ON UPDATE CASCADE ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    // Cada producto arranca con el color que ya tenía
+    await qi.sequelize.query("INSERT IGNORE INTO producto_colores (producto_id, color_id, orden) SELECT id, color_id, 0 FROM productos");
+    console.log("   + tabla producto_colores (varios colores por producto)");
+  }
 
   // Columnas nuevas (pagado_en se agrega antes de usarla en el UPDATE)
   const pendientes = [];

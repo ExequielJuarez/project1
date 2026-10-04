@@ -30,6 +30,119 @@
   gap: 16px;
 }
 
+/* Colores disponibles (uno o varios) */
+.colores-admin {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.colores-admin__ayuda {
+  margin: 4px 0 12px;
+  font-size: 0.82rem;
+  color: var(--gris-600);
+}
+
+.colores-admin__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.color-opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--gris-200);
+  background: var(--blanco);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.color-opcion input {
+  accent-color: var(--acento);
+  margin: 0;
+}
+
+.color-opcion:has(input:checked) {
+  border-color: var(--acento);
+  background: var(--hueso);
+}
+
+.color-opcion:has(input:focus-visible) {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.color-opcion__muestra {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--muestra);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+.colores-admin__cuenta {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--gris-600);
+}
+
+.color-nuevo {
+  margin-top: 12px;
+}
+
+.color-nuevo__abrir {
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  color: var(--acento);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.color-nuevo__campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.color-nuevo__campos[hidden] {
+  display: none;
+}
+
+.color-nuevo__campos input[type="color"] {
+  width: 48px;
+  height: 100%;
+  min-height: 44px;
+  padding: 2px;
+  border: 1px solid var(--gris-200);
+  background: var(--blanco);
+  cursor: pointer;
+}
+
+.color-nuevo__guardar {
+  grid-column: 1 / -1;
+}
+
+.color-nuevo__error {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #b3261e;
+}
+
+.color-nuevo__error:empty {
+  display: none;
+}
+
 /* Rentabilidad calculada en vivo */
 .rentabilidad {
   display: grid;
@@ -426,6 +539,14 @@
 
   .campos-admin .campo--completo {
     grid-column: 1 / -1;
+  }
+
+  .color-nuevo__campos {
+    grid-template-columns: minmax(0, 320px) 48px auto;
+  }
+
+  .color-nuevo__guardar {
+    grid-column: auto;
   }
 
   .rentabilidad {

@@ -129,6 +129,14 @@ db.sequelize
       }[pagos.modo()]
     );
     pagos.vencerPeriodicamente();
+    // Emails con los códigos de acceso
+    console.log(
+      {
+        smtp: "✉️  Emails: enviando con SMTP",
+        demo: "✉️  Emails en MODO DEMO: los códigos se muestran en pantalla. Configurá SMTP_* en .env (ver ACCESO.md).",
+        desactivado: "⚠️  Faltan SMTP_*: no se pueden mandar códigos por email (ver ACCESO.md).",
+      }[require("./services/correoService").modo()]
+    );
   })
   .catch((error) => {
     console.error("❌ No se pudo conectar con la base de datos:", error.message);

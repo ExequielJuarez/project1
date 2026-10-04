@@ -38,6 +38,7 @@ No borran datos.
 | `003-contenido-inicio.sql` | Crea `contenido_inicio` (textos e imágenes del inicio editables desde el panel). La app también la crea sola al arrancar |
 | `004-pagos-y-cuenta.sql` | Agrega a `pedidos` el estado del cobro (Mercado Pago) y a `usuarios` el DNI y la dirección guardada. La app también las agrega sola al arrancar |
 | `005-superadmin.sql` | Agrega el rol `superadmin` (edita la página de inicio). La app también lo agrega sola |
+| `006-varios-colores.sql` | Crea `producto_colores` (cada producto se vende en uno o varios colores) y le pasa a cada producto el color que tenía. La app también lo hace sola |
 
 ## Tablas
 
@@ -48,6 +49,7 @@ No borran datos.
 | `colores` | Colores (valor para filtros, nombre y hex) | — |
 | `productos` | Catálogo: precio, **costo** (para la ganancia), stock, etiqueta, textos | → `categorias`, → `colores` |
 | `producto_imagenes` | Fotos de cada producto (hasta 8). La de menor `orden` es la principal | → `productos` (se borran con el producto) |
+| `producto_colores` | Colores en que se vende cada producto (el cliente elige uno). El de menor `orden` es el principal (`productos.color_id`) | → `productos`, `colores` (se borran con el producto) |
 | `especificaciones` | Ficha técnica de cada producto (clave / valor) | → `productos` (se borra con el producto) |
 | `favoritos` | Productos guardados por cada usuario | → `usuarios`, → `productos` |
 | `cupones` | Códigos de descuento (porcentaje, activo, vencimiento) | — |

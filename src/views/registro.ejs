@@ -19,7 +19,7 @@
 
     <!-- Panel de marca (PC / tablet) -->
     <section class="acceso__panel" aria-label="Beneficios de tu cuenta">
-      <span class="acceso__panel-imagen" aria-hidden="true">(IMAGEN DE MARCA)</span>
+      <img class="acceso__panel-imagen" src="/img/productos/torpedo-roma-calabaza-1.jpg" alt="" aria-hidden="true">
 
       <div class="acceso__panel-texto">
         <p class="acceso__etiqueta">Nueva cuenta</p>
@@ -36,13 +36,15 @@
     <!-- Formulario -->
     <section class="acceso__form" aria-labelledby="tituloRegistro">
       <h1 class="acceso__titulo" id="tituloRegistro">Crear cuenta</h1>
-      <p class="acceso__bajada">Te lleva menos de un minuto.</p>
+      <p class="acceso__bajada">Te lleva menos de un minuto. Te vamos a mandar un código a tu email para confirmarlo.</p>
 
-      <a href="/auth/google?volver=<%= encodeURIComponent(volver) %>" class="btn btn--linea registro__google">
-        (GOOGLE) Registrarme con Google
-      </a>
+      <%- include('partials/aviso-compra') %>
 
-      <div class="separador"><span>o con tu email</span></div>
+      <% if (googleDisponible) { %>
+        <%- include('partials/boton-google', { volver, texto: 'Registrarme con Google', clase: 'registro__google' }) %>
+
+        <div class="separador"><span>o con tu email</span></div>
+      <% } %>
 
       <% if (hayErrores) { %>
         <div class="aviso aviso--error" role="alert" id="resumenErrores" tabindex="-1">

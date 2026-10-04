@@ -1,0 +1,379 @@
+/* ==========================================================
+   ADMIN · COMPROBANTE DE COMPRA — Para imprimir
+   Pantalla: hoja centrada con barra de opciones arriba.
+   Impresión: hoja A4 (comprobante compacto) o ticket de 80 mm.
+   ========================================================== */
+
+body {
+  background: var(--gris-100);
+  color: var(--negro);
+}
+
+/* ---------- Barra de opciones (no se imprime) ---------- */
+.comprobante-barra {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--negro);
+  color: var(--hueso);
+}
+
+.comprobante-barra__volver {
+  font-size: 13px;
+  color: var(--hueso);
+}
+
+.comprobante-barra__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.comprobante-barra .btn {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.formato {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.formato__opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.formato__opcion:has(input:checked) {
+  background: var(--hueso);
+  color: var(--negro);
+}
+
+.formato__opcion input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.formato__opcion:has(input:focus-visible) {
+  outline: 2px solid var(--acento-claro);
+}
+
+/* ---------- Hoja ---------- */
+.comprobante {
+  position: relative;
+  width: calc(100% - 32px);
+  max-width: 720px;
+  margin: 24px auto 48px;
+  padding: 28px 20px;
+  background: #fff;
+  box-shadow: 0 10px 40px rgba(43, 24, 16, 0.12);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow: hidden;
+}
+
+.comprobante__anulado {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-24deg);
+  padding: 6px 28px;
+  border: 4px solid rgba(179, 38, 30, 0.45);
+  color: rgba(179, 38, 30, 0.45);
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  pointer-events: none;
+}
+
+.comprobante__cabecera {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--negro);
+}
+
+.comprobante__logo {
+  width: 220px;
+  height: auto;
+  color: var(--negro);
+}
+
+.comprobante__tienda {
+  margin-top: 8px;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--gris-600);
+}
+
+.comprobante__tipo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--acento);
+}
+
+.comprobante__nro {
+  margin: 2px 0 8px;
+  font-family: var(--fuente-titulos);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.comprobante__fechas div,
+.comprobante__totales div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.comprobante__fechas dt {
+  color: var(--gris-600);
+}
+
+.comprobante__partes {
+  display: grid;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--gris-200);
+}
+
+.comprobante__subtitulo {
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gris-600);
+}
+
+.comprobante__nota {
+  font-style: italic;
+  color: var(--gris-600);
+}
+
+/* ---------- Detalle ---------- */
+.comprobante__items {
+  width: 100%;
+  margin-top: 18px;
+  border-collapse: collapse;
+}
+
+.comprobante__items th {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--negro);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.comprobante__items td {
+  padding: 9px 6px;
+  border-bottom: 1px dashed var(--gris-200);
+  vertical-align: top;
+}
+
+.comprobante__items .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.comprobante__items th.num:first-child,
+.comprobante__items td.num:first-child {
+  text-align: center;
+  width: 48px;
+}
+
+.comprobante__color {
+  color: var(--gris-600);
+}
+
+.comprobante__pie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.comprobante__unidades {
+  font-size: 12px;
+  color: var(--gris-600);
+}
+
+.comprobante__totales {
+  flex: 1 1 260px;
+  max-width: 320px;
+  margin-left: auto;
+}
+
+.comprobante__totales div {
+  padding: 4px 0;
+}
+
+.comprobante__total {
+  margin-top: 6px;
+  padding-top: 10px !important;
+  border-top: 2px solid var(--negro);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.comprobante__legal {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gris-200);
+  font-size: 11px;
+  text-align: center;
+  color: var(--gris-600);
+}
+
+.comprobante__legal p:first-child {
+  font-family: var(--fuente-titulos);
+  font-size: 18px;
+  color: var(--negro);
+}
+
+/* ---------- Formato ticket (80 mm) ---------- */
+.comprobante--ticket {
+  max-width: 302px; /* ≈ 80 mm */
+  padding: 16px 12px;
+  font-size: 11px;
+}
+
+.comprobante--ticket .comprobante__cabecera,
+.comprobante--ticket .comprobante__partes {
+  grid-template-columns: 1fr !important;
+  text-align: center;
+}
+
+.comprobante--ticket .comprobante__logo {
+  width: 180px;
+  margin: 0 auto;
+}
+
+.comprobante--ticket .comprobante__nro {
+  font-size: 18px;
+}
+
+.comprobante--ticket .comprobante__numero {
+  min-width: 0;
+  text-align: center !important;
+}
+
+.comprobante--ticket .comprobante__fechas div {
+  justify-content: center !important;
+}
+
+.comprobante--ticket .comprobante__items th,
+.comprobante--ticket .comprobante__items td {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.comprobante--ticket .comprobante__items th.num:first-child,
+.comprobante--ticket .comprobante__items td.num:first-child {
+  width: 28px;
+}
+
+.comprobante--ticket .comprobante__partes {
+  text-align: left;
+  gap: 10px;
+}
+
+.comprobante--ticket .comprobante__items th:nth-child(3),
+.comprobante--ticket .comprobante__items td:nth-child(3) {
+  display: none;
+}
+
+.comprobante--ticket .comprobante__totales {
+  max-width: none;
+}
+
+.comprobante--ticket .comprobante__anulado {
+  font-size: 32px;
+}
+
+/* ==========================================================
+   TABLET ≥ 768px
+   ========================================================== */
+@media (min-width: 768px) {
+  .comprobante {
+    padding: 44px 48px;
+  }
+
+  .comprobante__cabecera {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+
+  .comprobante__numero {
+    min-width: 230px;
+    text-align: right;
+  }
+
+  .comprobante__fechas div {
+    justify-content: flex-end;
+  }
+
+  .comprobante__partes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================================
+   IMPRESIÓN
+   ========================================================== */
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .comprobante-barra {
+    display: none;
+  }
+
+  .comprobante {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .comprobante:not(.comprobante--ticket) .comprobante__cabecera {
+    grid-template-columns: 1fr auto;
+  }
+
+  .comprobante:not(.comprobante--ticket) .comprobante__numero {
+    text-align: right;
+  }
+
+  .comprobante:not(.comprobante--ticket) .comprobante__partes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .comprobante__items tr {
+    break-inside: avoid;
+  }
+}

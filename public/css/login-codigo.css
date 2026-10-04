@@ -1,0 +1,45 @@
+/* ==========================================================
+   LOGIN CON CÓDIGO — Pedir el código por email
+   (la tarjeta .codigo se comparte con verificar-codigo.css)
+   Mobile first · Tablet ≥ 768px
+   ========================================================== */
+
+.codigo {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 72px;
+}
+
+.codigo__tarjeta {
+  width: 100%;
+  max-width: 460px;
+}
+
+.codigo__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: var(--hueso);
+  color: var(--acento);
+}
+
+.codigo__sep {
+  margin: 0 8px;
+  color: var(--gris-400);
+}
+
+@media (min-width: 768px) {
+  .codigo {
+    padding-top: 24px;
+  }
+
+  .codigo__tarjeta {
+    padding: 44px 48px;
+    background: var(--blanco);
+    border: 1px solid var(--gris-200);
+  }
+}

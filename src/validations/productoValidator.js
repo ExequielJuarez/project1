@@ -6,9 +6,14 @@ module.exports = [
   body("categoria")
     .custom(async (valor) => (await productoService.categorias()).includes(valor) || Promise.reject())
     .withMessage("Elegí una categoría"),
-  body("color")
-    .custom(async (valor) => (await productoService.colores()).some((c) => c.valor === valor) || Promise.reject())
-    .withMessage("Elegí un color"),
+  // Uno o varios colores (el primero marcado es el principal)
+  body("colores")
+    .custom(async (valor) => {
+      const elegidos = productoService.listaDeColores(valor);
+      const existentes = (await productoService.colores()).map((c) => c.valor);
+      return (elegidos.length > 0 && elegidos.every((v) => existentes.includes(v))) || Promise.reject();
+    })
+    .withMessage("Elegí al menos un color"),
   body("precio").isFloat({ min: 1 }).withMessage("Ingresá un precio mayor a 0"),
   body("costo")
     .isFloat({ min: 0 })

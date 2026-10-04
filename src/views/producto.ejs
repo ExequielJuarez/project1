@@ -92,18 +92,23 @@
 
         <p class="info__resumen"><%= p.resumen %></p>
 
-        <!-- Variantes de color -->
+        <!-- Variantes de color: solo los colores en que se vende este producto -->
+        <% if (p.colores.length) { %>
         <div class="opcion">
-          <p class="opcion__titulo">Color: <span id="colorElegido"><%= p.colorInfo.nombre %></span></p>
+          <p class="opcion__titulo">
+            Color: <span id="colorElegido"><%= p.colores[0].nombre %></span>
+            <% if (p.colores.length > 1) { %><small class="opcion__cuantos"><%= p.colores.length %> colores disponibles</small><% } %>
+          </p>
           <div class="opcion__colores">
-            <% colores.forEach(c => { %>
+            <% p.colores.forEach((c, n) => { %>
               <label class="swatch" title="<%= c.nombre %>">
-                <input type="radio" name="color" value="<%= c.nombre %>" <%= c.valor === p.color ? 'checked' : '' %>>
+                <input type="radio" name="color" value="<%= c.nombre %>" aria-label="<%= c.nombre %>" <%= n === 0 ? 'checked' : '' %>>
                 <span class="swatch__muestra" style="--muestra: <%= c.hex %>"></span>
               </label>
             <% }) %>
           </div>
         </div>
+        <% } %>
 
         <!-- Cantidad + agregar -->
         <div class="compra" id="compra">

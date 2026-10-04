@@ -93,12 +93,9 @@
     <ul class="nav__lista contenedor">
       <li class="<%= locals.navActivo === 'inicio' ? 'nav__item--activo' : '' %>"><a href="/">Inicio</a></li>
       <li class="<%= locals.navActivo === 'catalogo' ? 'nav__item--activo' : '' %>"><a href="/catalogo">Catálogo</a></li>
-      <li><a href="#">Categoría 1</a></li>
-      <li><a href="#">Categoría 2</a></li>
-      <li><a href="#">Personalizados</a></li>
-      <li><a href="#">Combos</a></li>
-      <li><a href="#">Accesorios</a></li>
-      <li><a href="#">Contacto</a></li>
+      <% ['Mates', 'Termos', 'Bombillas', 'Bolsos materos', 'Combos', 'Yerbas'].forEach(cat => { %>
+        <li class="<%= locals.navActivo === cat ? 'nav__item--activo' : '' %>"><a href="/catalogo?categoria=<%= encodeURIComponent(cat) %>"><%= cat %></a></li>
+      <% }) %>
       <li class="nav__item--movil"><a href="/favoritos">Favoritos<% if ((locals.favoritosIds || []).length) { %> <small>(<%= favoritosIds.length %>)</small><% } %></a></li>
     </ul>
   </nav>

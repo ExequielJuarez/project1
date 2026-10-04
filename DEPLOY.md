@@ -38,6 +38,14 @@ DB_POOL_MAX=3
 - `NODE_ENV=production` oculta los usuarios de prueba del login y desactiva los modos demo
   (Google y pago simulado). Sin `MP_ACCESS_TOKEN`, la tienda solo ofrece transferencia.
 - `PORT` no hace falta: Render lo pone solo.
+- **Login:** para comprar hay que iniciar sesión. Para que funcionen los códigos por email
+  (`SMTP_*`) y "Continuar con Google" (`GOOGLE_*`, con
+  `GOOGLE_CALLBACK_URL=https://TU-APP.onrender.com/auth/google/callback`), seguí **ACCESO.md**.
+  Sin configurar, publicada solo se puede entrar con email y contraseña.
+- Opcional: `TIENDA_DIRECCION`, `TIENDA_TELEFONO`, `TIENDA_EMAIL` y `TIENDA_CUIT` salen en el
+  comprobante que imprime el admin.
+- Las fotos de los productos de `datos-prueba.sql` están en el repo (`public/img/productos`).
+  Las que subas desde el panel en Render se borran al reiniciar el servicio (ver más abajo).
 
 ## 4. Usuarios y roles
 

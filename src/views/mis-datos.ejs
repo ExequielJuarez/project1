@@ -80,7 +80,9 @@
       <details class="clave-desplegable" <%= abrir === 'clave' || hayErroresClave ? 'open' : '' %>>
         <summary class="btn btn--linea btn--chico"><%= perfil.tieneClave ? 'Cambiar contraseña' : 'Crear contraseña' %></summary>
         <form action="/mi-cuenta/clave" method="POST" class="clave-form" id="formClave" novalidate>
-          <% if (perfil.tieneClave) { %>
+          <% if (perfil.tieneClave && recuperando) { %>
+            <p class="clave-recupero">Entraste con un código: elegí tu contraseña nueva, no hace falta la anterior.</p>
+          <% } else if (perfil.tieneClave) { %>
             <%- include('partials/campo-clave', { nombre: 'actual', etiqueta: 'Contraseña actual', autocomplete: 'current-password', errores: erroresClave }) %>
           <% } %>
           <%- include('partials/campo-clave', { nombre: 'nueva', etiqueta: 'Contraseña nueva', autocomplete: 'new-password', errores: erroresClave }) %>

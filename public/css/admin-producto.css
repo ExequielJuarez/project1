@@ -147,6 +147,19 @@
   border: 1px solid var(--gris-400);
 }
 
+/* Varios colores: uno al lado del otro y bajan de línea si no entran */
+.lista-colores {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  column-gap: 12px;
+}
+
+.lista-colores > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* Zona de borrado */
 .zona-peligro {
   display: flex;

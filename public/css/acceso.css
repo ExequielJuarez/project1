@@ -24,14 +24,10 @@
 .acceso__panel-imagen {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: repeating-linear-gradient(45deg, transparent 0 18px, rgba(255, 255, 255, 0.04) 18px 19px);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  color: var(--gris-600);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.42;
 }
 
 .acceso__panel-texto {
@@ -224,6 +220,48 @@
   background: var(--negro);
 }
 
+/* Botones con ícono (Google y código por email) */
+.boton-google,
+.boton-codigo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.boton-google__logo {
+  flex-shrink: 0;
+  padding: 2px;
+  background: #fff;
+  border-radius: 50%;
+  box-sizing: content-box;
+}
+
+/* Aviso cuando se llega desde el checkout */
+.aviso-compra {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  background: var(--hueso);
+  border-left: 3px solid var(--acento);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--gris-900);
+}
+
+.aviso-compra svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--acento);
+}
+
+.aviso-compra strong {
+  display: block;
+  color: var(--negro);
+}
+
 .acceso__registro {
   margin-top: 26px;
   padding-top: 22px;
@@ -266,10 +304,6 @@
     background: var(--negro);
   }
 
-  .acceso__panel-imagen {
-    align-items: flex-start;
-    padding-top: 40px;
-  }
 
   .acceso__form {
     max-width: none;
@@ -293,10 +327,6 @@
     padding: 56px;
   }
 
-  .acceso__panel-imagen {
-    align-items: center;
-    padding-top: 0;
-  }
 
   .acceso__form {
     max-width: 460px;

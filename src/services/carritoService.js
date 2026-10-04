@@ -29,7 +29,8 @@ async function agregar(session, { id, cantidad = 1, color = null }) {
   if (producto.stock <= 0) return { ok: false, mensaje: "Este producto no tiene stock por ahora" };
 
   const carrito = obtener(session);
-  const colorFinal = color || producto.colorInfo?.nombre || null;
+  // Solo se acepta un color en el que se venda el producto (si no, el principal)
+  const colorFinal = (producto.colores.find((c) => c.nombre === color) || producto.colores[0])?.nombre || null;
   const clave = `${producto.id}-${colorFinal || "unico"}`;
   const existente = carrito.items.find((i) => i.clave === clave);
   const suma = Math.max(1, Number(cantidad) || 1);

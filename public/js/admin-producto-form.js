@@ -6,7 +6,7 @@
 // ==========================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  const { $, formatoPrecio } = window.Admin;
+  const { $, $$, api, mostrarToast, formatoPrecio } = window.Admin;
 
   // Si el foco va al botón de enviar no validamos en el blur: el mensaje de error
   // correría el botón y el clic se perdería. El submit valida todo igual.
@@ -168,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const reglas = {
     nombre: [(v) => v.trim().length >= 3 && v.trim().length <= 90, "El nombre debe tener entre 3 y 90 caracteres"],
     categoria: [(v) => v !== "", "Elegí una categoría"],
-    color: [(v) => v !== "", "Elegí un color"],
     precio: [(v) => parseFloat(v) >= 1, "Ingresá un precio mayor a 0"],
     costo: [
       (v) => v !== "" && parseFloat(v) >= 0 && parseFloat(v) <= (parseFloat(campo("precio").value) || 0),
@@ -194,12 +193,90 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("input", () => input.closest(".campo").classList.contains("campo--error") && validar(nombre));
   });
 
+  // ---------- Colores (uno o varios) ----------
+  const cajaColores = $("#colores");
+  const marcados = () => $$('input[name="colores"]:checked', cajaColores);
+
+  function contarColores() {
+    const n = marcados().length;
+    $("#cuentaColores").textContent = n
+      ? `${n} ${n === 1 ? "color elegido" : "colores elegidos"} · principal: ${marcados()[0].closest(".color-opcion").textContent.trim()}`
+      : "";
+  }
+
+  function validarColores() {
+    const ok = marcados().length > 0;
+    cajaColores.classList.toggle("campo--error", !ok);
+    $("#colores-error").textContent = ok ? "" : "Elegí al menos un color";
+    return ok;
+  }
+
+  cajaColores.addEventListener("change", (e) => {
+    if (e.target.name !== "colores") return;
+    contarColores();
+    if (cajaColores.classList.contains("campo--error")) validarColores();
+  });
+  contarColores();
+
+  // Agregar un color nuevo sin salir del formulario
+  const btnNuevo = $("#btnColorNuevo");
+  const camposNuevo = $("#colorNuevoCampos");
+  const nombreNuevo = $("#colorNuevoNombre");
+  const errorNuevo = $("#colorNuevoError");
+
+  btnNuevo.addEventListener("click", () => {
+    const abrir = camposNuevo.hidden;
+    camposNuevo.hidden = !abrir;
+    btnNuevo.setAttribute("aria-expanded", String(abrir));
+    if (abrir) nombreNuevo.focus();
+  });
+
+  async function guardarColorNuevo() {
+    errorNuevo.textContent = "";
+    const nombre = nombreNuevo.value.trim();
+    if (nombre.length < 2) {
+      errorNuevo.textContent = "Escribí el nombre del color";
+      return nombreNuevo.focus();
+    }
+    try {
+      const { color } = await api("/admin/colores", "POST", { nombre, hex: $("#colorNuevoHex").value });
+      let input = $(`input[name="colores"][value="${CSS.escape(color.valor)}"]`, cajaColores);
+      if (!input) {
+        const etiqueta = document.createElement("label");
+        etiqueta.className = "color-opcion";
+        etiqueta.innerHTML = '<input type="checkbox" name="colores"><span class="color-opcion__muestra"></span><span class="color-opcion__nombre"></span>';
+        input = etiqueta.querySelector("input");
+        input.value = color.valor;
+        etiqueta.querySelector(".color-opcion__muestra").style.setProperty("--muestra", color.hex);
+        etiqueta.querySelector(".color-opcion__nombre").textContent = color.nombre;
+        $("#listaColores").append(etiqueta);
+      }
+      input.checked = true;
+      nombreNuevo.value = "";
+      contarColores();
+      validarColores();
+      mostrarToast(color.nuevo ? `Color "${color.nombre}" agregado` : `"${color.nombre}" ya existía: quedó marcado`);
+    } catch (error) {
+      errorNuevo.textContent = error.message;
+    }
+  }
+
+  $("#btnGuardarColor").addEventListener("click", guardarColorNuevo);
+  // Enter en el nombre agrega el color (y no envía el formulario del producto)
+  nombreNuevo.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    guardarColorNuevo();
+  });
+
   form.addEventListener("submit", (e) => {
     const conError = Object.keys(reglas).filter((n) => !validar(n));
-    if (conError.length) {
+    const coloresOk = validarColores();
+    if (conError.length || !coloresOk) {
       e.preventDefault();
-      campo(conError[0]).focus();
-      campo(conError[0]).closest(".panel").scrollIntoView({ behavior: "smooth", block: "center" });
+      const primero = conError.length ? campo(conError[0]) : $('input[name="colores"]', cajaColores);
+      primero.focus();
+      primero.closest(".panel").scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     const boton = $("#btnGuardar");

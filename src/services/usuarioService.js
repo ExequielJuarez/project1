@@ -33,13 +33,14 @@ async function verificar(email, password) {
   return publico(usuario);
 }
 
-async function crear({ nombre, apellido, email, telefono = null, password = null, googleId = null, newsletter = false }) {
+// passwordHash: contraseña ya hasheada (registro confirmado con código por email)
+async function crear({ nombre, apellido, email, telefono = null, password = null, passwordHash = null, googleId = null, newsletter = false }) {
   const usuario = await db.Usuario.create({
     nombre,
     apellido: apellido || "",
     email,
     telefono: telefono || null,
-    password: password ? await bcrypt.hash(password, 10) : null,
+    password: passwordHash || (password ? await bcrypt.hash(password, 10) : null),
     googleId,
     newsletter,
   });
@@ -117,15 +118,19 @@ async function guardarDireccionSiFalta(id, datos) {
 }
 
 // Cambia (o crea, en cuentas de Google) la contraseña. Devuelve false si la actual no coincide.
-async function cambiarClave(id, actual, nueva) {
+// sinActual: entró con un código para recuperar la cuenta (no la recuerda)
+async function cambiarClave(id, actual, nueva, { sinActual = false } = {}) {
   const usuario = await db.Usuario.scope("conPassword").findByPk(id);
   if (!usuario) return false;
-  if (usuario.password && !(await bcrypt.compare(String(actual || ""), usuario.password))) return false;
+  if (!sinActual && usuario.password && !(await bcrypt.compare(String(actual || ""), usuario.password))) return false;
   await usuario.update({ password: await bcrypt.hash(nueva, 10) });
   return true;
 }
 
+const hashear = (password) => bcrypt.hash(String(password), 10);
+
 module.exports = {
+  hashear,
   publico,
   buscarPorId,
   buscarPorEmail,

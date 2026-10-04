@@ -407,41 +407,9 @@
   color: var(--negro);
 }
 
-/* Paginación */
-.paginacion {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  padding: 48px 0 64px;
-}
-
-.paginacion__num {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid transparent;
-  font-size: 14px;
-  transition: border-color var(--transicion);
-}
-
-.paginacion__num:hover {
-  border-color: var(--gris-400);
-}
-
-.paginacion__num.activo {
-  background: var(--negro);
-  color: var(--blanco);
-}
-
-.paginacion__sig {
-  margin-left: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+/* Aire al final del catálogo (antes lo daba la paginación) */
+.catalogo {
+  padding-bottom: 64px;
 }
 
 /* ==========================================================

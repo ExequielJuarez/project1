@@ -14,6 +14,7 @@ const favoritosController = require("../controllers/favoritosController");
 const pagosController = require("../controllers/pagosController");
 const cuentaController = require("../controllers/cuentaController");
 const soloLogueados = require("../middlewares/soloLogueados");
+const loginParaComprar = require("../middlewares/loginParaComprar");
 const perfilValidator = require("../validations/perfilValidator");
 const claveValidator = require("../validations/claveValidator");
 
@@ -33,13 +34,19 @@ router.get("/catalogo", async (req, res) => {
     productoService.categorias(),
   ]);
 
+  // /catalogo?categoria=Mates (pestañas del menú): la categoría llega marcada en los filtros
+  const categoria = categorias.find((c) => c === req.query.categoria) || "";
+
   res.render("catalogo", {
-    titulo: busqueda ? `Resultados para “${busqueda}”` : "Catálogo",
+    titulo: busqueda ? `Resultados para “${busqueda}”` : categoria || "Catálogo",
     estilo: "catalogo",
-    navActivo: "catalogo",
+    navActivo: categoria || "catalogo",
     busqueda,
+    categoria,
     productos,
-    colores: colores.map((c) => ({ ...c, cantidad: productos.filter((p) => p.color === c.valor).length })),
+    colores: colores
+      .map((c) => ({ ...c, cantidad: productos.filter((p) => p.colores.some((x) => x.valor === c.valor)).length }))
+      .filter((c) => c.cantidad > 0),
     categorias: categorias.map((nombre) => ({ nombre, cantidad: productos.filter((p) => p.categoria === nombre).length })),
   });
 });
@@ -101,11 +108,11 @@ router.post("/favoritos/al-carrito", favoritosController.alCarrito);
 router.post("/favoritos/:id", favoritosController.alternar);
 router.delete("/favoritos", favoritosController.vaciar);
 
-// ── CHECKOUT ───────────────────────────────────────────────
-router.get("/checkout/datos", checkoutController.ver);
-router.post("/checkout/datos", checkoutValidator, checkoutController.guardar);
-router.get("/checkout/pago", checkoutController.verPago);
-router.post("/checkout/confirmar", checkoutController.confirmar);
+// ── CHECKOUT (solo con la sesión iniciada) ─────────────────
+router.get("/checkout/datos", loginParaComprar, checkoutController.ver);
+router.post("/checkout/datos", loginParaComprar, checkoutValidator, checkoutController.guardar);
+router.get("/checkout/pago", loginParaComprar, checkoutController.verPago);
+router.post("/checkout/confirmar", loginParaComprar, checkoutController.confirmar);
 
 // ── PAGOS (Mercado Pago) Y DETALLE DE UN PEDIDO ────────────
 router.get("/pedido/:numero", pagosController.detalle);
@@ -129,6 +136,13 @@ router.post("/login", soloInvitados, loginValidator, usuarioController.login);
 router.post("/logout", usuarioController.logout);
 router.get("/registro", soloInvitados, usuarioController.verRegistro);
 router.post("/registro", soloInvitados, registroValidator, usuarioController.registrar);
+
+// Código por email: entrar sin contraseña, recuperar la cuenta y confirmar el registro
+router.get("/login/codigo", soloInvitados, usuarioController.verPedirCodigo);
+router.post("/login/codigo", soloInvitados, usuarioController.pedirCodigo);
+router.get("/verificar", soloInvitados, usuarioController.verVerificar);
+router.post("/verificar", soloInvitados, usuarioController.confirmarCodigo);
+router.post("/verificar/reenviar", soloInvitados, usuarioController.reenviarCodigo);
 
 // Google (real si está configurado en .env, demo si no)
 router.get("/auth/google", soloInvitados, usuarioController.googleInicio);

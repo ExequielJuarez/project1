@@ -117,6 +117,11 @@
                       <div class="pedido-fila__ganancia"><dt>Ganancia</dt><dd><%= formatoPrecio(p.ganancia) %></dd></div>
                     </dl>
 
+                    <a href="/admin/pedidos/<%= p.numero %>/comprobante" target="_blank" rel="noopener"
+                       class="btn btn--linea btn--chico pedido-fila__imprimir">
+                      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                      Imprimir comprobante
+                    </a>
                     <% if (esperaTransferencia(p)) { %>
                       <button type="button" class="btn btn--solido btn--chico pedido-fila__confirmar" data-confirmar-transferencia
                               data-total="<%= formatoPrecio(p.total) %>">Confirmar transferencia</button>

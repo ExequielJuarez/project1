@@ -25,6 +25,7 @@ DROP TABLE IF EXISTS pedidos;
 DROP TABLE IF EXISTS favoritos;
 DROP TABLE IF EXISTS especificaciones;
 DROP TABLE IF EXISTS producto_imagenes;
+DROP TABLE IF EXISTS producto_colores;
 DROP TABLE IF EXISTS productos;
 DROP TABLE IF EXISTS colores;
 DROP TABLE IF EXISTS categorias;
@@ -123,6 +124,23 @@ CREATE TABLE producto_imagenes (
   PRIMARY KEY (id),
   KEY idx_imagenes_producto (producto_id, orden),
   CONSTRAINT fk_imagenes_producto FOREIGN KEY (producto_id) REFERENCES productos (id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- producto_colores: colores en los que se vende cada producto
+-- (el cliente elige uno en la ficha). productos.color_id guarda
+-- el principal, que es el primero de esta lista.
+-- ----------------------------------------------------------
+CREATE TABLE producto_colores (
+  producto_id  INT UNSIGNED      NOT NULL,
+  color_id     SMALLINT UNSIGNED NOT NULL,
+  orden        SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (producto_id, color_id),
+  KEY idx_producto_colores_color (color_id),
+  CONSTRAINT fk_pcolores_producto FOREIGN KEY (producto_id) REFERENCES productos (id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_pcolores_color FOREIGN KEY (color_id) REFERENCES colores (id)
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const precio = Number(t.dataset.precio);
       const pasa =
         (!f.categorias.length || f.categorias.includes(t.dataset.categoria)) &&
-        (!f.colores.length || f.colores.includes(t.dataset.color)) &&
+        (!f.colores.length || (t.dataset.colores || "").split(" ").some((c) => f.colores.includes(c))) &&
         precio >= f.min &&
         precio <= f.max;
 
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ...f.colores.map((v) => ({
         tipo: "color",
         valor: v,
-        texto: v.charAt(0).toUpperCase() + v.slice(1),
+        texto: $(`input[name="color"][value="${CSS.escape(v)}"]`)?.closest("label").title || v,
       })),
     ];
     if (f.min || f.max !== Infinity) {
@@ -108,6 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   [precioMin, precioMax].forEach((i) => i.addEventListener("input", aplicarFiltros));
   $("#btnLimpiar").addEventListener("click", limpiarFiltros);
+  // Si se llegó desde una pestaña del menú (?categoria=) ya hay un filtro marcado
+  if ($$('.filtros input[type="checkbox"]:checked').length) aplicarFiltros();
   $$("[data-limpiar]").forEach((b) => b.addEventListener("click", limpiarFiltros));
 
   // ---------- Orden ----------

@@ -1,0 +1,119 @@
+<%- include('../partials/head') %>
+
+<%
+  const p = pedido;
+  const nombresPagoComprobante = { pendiente: 'Pendiente', aprobado: 'Pagado', rechazado: 'Rechazado', reembolsado: 'Reembolsado' };
+  const fechaLarga = (f) => new Date(f).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const numeroComprobante = '0001-' + String(p.numero).padStart(8, '0');
+  const unidades = p.items.reduce((a, i) => a + i.cantidad, 0);
+%>
+
+  <!-- Barra de herramientas (no se imprime) -->
+  <div class="comprobante-barra" role="toolbar" aria-label="Opciones del comprobante">
+    <a href="/admin/pedidos?q=<%= p.numero %>" class="comprobante-barra__volver">← Volver a pedidos</a>
+    <div class="comprobante-barra__acciones">
+      <div class="formato" role="radiogroup" aria-label="Tamaño de impresión">
+        <label class="formato__opcion"><input type="radio" name="formato" value="a4" checked> Hoja A4</label>
+        <label class="formato__opcion"><input type="radio" name="formato" value="ticket"> Ticket 80 mm</label>
+      </div>
+      <button type="button" class="btn btn--solido" id="btnImprimir">Imprimir</button>
+    </div>
+  </div>
+
+  <main class="comprobante" id="comprobante">
+    <% if (p.estado === 'cancelado') { %>
+      <p class="comprobante__anulado" aria-label="Pedido cancelado">ANULADO</p>
+    <% } %>
+
+    <header class="comprobante__cabecera">
+      <div class="comprobante__marca">
+        <%- include('../partials/logo', { variante: 'horizontal', clase: 'comprobante__logo' }) %>
+        <ul class="comprobante__tienda">
+          <% if (tienda.direccion) { %><li><%= tienda.direccion %></li><% } %>
+          <% if (tienda.telefono) { %><li>Tel. <%= tienda.telefono %></li><% } %>
+          <% if (tienda.email) { %><li><%= tienda.email %></li><% } %>
+          <% if (tienda.web && !/localhost/.test(tienda.web)) { %><li><%= tienda.web %></li><% } %>
+          <% if (tienda.cuit) { %><li>CUIT <%= tienda.cuit %></li><% } %>
+        </ul>
+      </div>
+      <div class="comprobante__numero">
+        <p class="comprobante__tipo">Comprobante de compra</p>
+        <p class="comprobante__nro">N° <%= numeroComprobante %></p>
+        <dl class="comprobante__fechas">
+          <div><dt>Pedido</dt><dd>#<%= p.numero %></dd></div>
+          <div><dt>Fecha</dt><dd><%= fechaLarga(p.fecha) %></dd></div>
+          <% if (p.pagadoEn) { %><div><dt>Pagado</dt><dd><%= fechaLarga(p.pagadoEn) %></dd></div><% } %>
+        </dl>
+      </div>
+    </header>
+
+    <section class="comprobante__partes">
+      <div>
+        <h2 class="comprobante__subtitulo">Cliente</h2>
+        <p><strong><%= p.cliente %></strong></p>
+        <% if (p.dni) { %><p>DNI <%= p.dni %></p><% } %>
+        <% if (p.email) { %><p><%= p.email %></p><% } %>
+        <% if (p.telefono) { %><p>Tel. <%= p.telefono %></p><% } %>
+        <p><%= p.facturacion === 'facturaA' ? `Responsable inscripto · ${p.razonSocial} · CUIT ${p.cuit}` : 'Consumidor final' %></p>
+      </div>
+      <div>
+        <h2 class="comprobante__subtitulo"><%= p.entrega === 'retiro' ? 'Entrega' : 'Envío a' %></h2>
+        <% if (p.entrega === 'retiro') { %>
+          <p>Retira en el local</p>
+        <% } else { %>
+          <p><%= p.calle %> <%= p.altura %><%= p.piso ? `, ${p.piso}` : '' %></p>
+          <p><%= p.ciudad %>, <%= p.provincia %></p>
+          <p>CP <%= p.codigoPostal %></p>
+        <% } %>
+        <% if (p.notas) { %><p class="comprobante__nota">“<%= p.notas %>”</p><% } %>
+      </div>
+      <div>
+        <h2 class="comprobante__subtitulo">Pago</h2>
+        <p><%= p.medioPago === 'transferencia' ? 'Transferencia bancaria' : 'Tarjeta · Mercado Pago' %></p>
+        <% if (p.pagoDetalle) { %><p><%= p.pagoDetalle %></p><% } %>
+        <p>Estado: <strong><%= nombresPagoComprobante[p.pagoEstado] || p.pagoEstado %></strong></p>
+      </div>
+    </section>
+
+    <table class="comprobante__items">
+      <thead>
+        <tr>
+          <th scope="col" class="num">Cant.</th>
+          <th scope="col">Descripción</th>
+          <th scope="col" class="num">P. unit.</th>
+          <th scope="col" class="num">Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% p.items.forEach(i => { %>
+          <tr>
+            <td class="num"><%= i.cantidad %></td>
+            <td><%= i.nombre %><% if (i.color) { %><span class="comprobante__color"> · <%= i.color %></span><% } %></td>
+            <td class="num"><%= formatoPrecio(i.precio) %></td>
+            <td class="num"><%= formatoPrecio(i.precio * i.cantidad) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="comprobante__pie">
+      <p class="comprobante__unidades"><%= unidades %> <%= unidades === 1 ? 'unidad' : 'unidades' %></p>
+      <dl class="comprobante__totales">
+        <div><dt>Subtotal</dt><dd><%= formatoPrecio(p.subtotal) %></dd></div>
+        <% if (Number(p.descuento)) { %>
+          <div><dt>Descuento<%= p.cuponCodigo ? ` (${p.cuponCodigo})` : '' %><%= p.medioPago === 'transferencia' ? ' · transferencia' : '' %></dt><dd>-<%= formatoPrecio(p.descuento) %></dd></div>
+        <% } %>
+        <div><dt>Envío</dt><dd><%= Number(p.envio) ? formatoPrecio(p.envio) : 'Sin cargo' %></dd></div>
+        <div class="comprobante__total"><dt>Total</dt><dd><%= formatoPrecio(p.total) %></dd></div>
+      </dl>
+    </div>
+
+    <footer class="comprobante__legal">
+      <p>¡Gracias por tu compra!</p>
+      <p>Documento no válido como factura. Emitido el <%= fechaLarga(emitido) %></p>
+    </footer>
+  </main>
+
+  <script src="/js/admin-comprobante.js"></script>
+</body>
+</html>
