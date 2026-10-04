@@ -19,9 +19,11 @@
           <span class="placeholder__texto">(IMAGEN)</span>
         </span>
       <% } %>
-      <span class="placeholder placeholder--alt">
-        <span class="placeholder__texto">(IMAGEN 2)</span>
-      </span>
+      <%# Al pasar el mouse se ve la segunda foto (si el producto tiene) %>
+      <% const segunda = (p.imagenes || [])[1]; %>
+      <% if (p.imagen && segunda) { %>
+        <img class="tarjeta__foto tarjeta__foto--alt" src="<%= segunda.ruta %>" alt="" aria-hidden="true" loading="lazy">
+      <% } %>
     </a>
     <% const esFav = (locals.favoritosIds || []).includes(p.id); %>
     <button class="tarjeta__fav <%= esFav ? 'activo' : '' %>" data-fav-id="<%= p.id %>" aria-pressed="<%= esFav %>" aria-label="<%= esFav ? 'Quitar de favoritos' : 'Agregar a favoritos' %>">

@@ -706,14 +706,6 @@ ul {
   transition: opacity 0.5s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-.placeholder--alt {
-  opacity: 0;
-  background:
-    repeating-linear-gradient(45deg, transparent 0 14px, rgba(255, 255, 255, 0.05) 14px 15px),
-    var(--grafito);
-  color: var(--blanco);
-}
-
 .placeholder__texto {
   padding: 8px 14px;
   border: 1px dashed currentColor;
@@ -734,6 +726,12 @@ ul {
 
 .tarjeta:hover .tarjeta__foto {
   transform: scale(1.04);
+}
+
+/* Segunda foto: aparece encima al pasar el mouse */
+.tarjeta__foto--alt {
+  opacity: 0;
+  transition: opacity 0.5s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .tarjeta__etiqueta {
@@ -1493,11 +1491,11 @@ select.campo__control {
     transform: translateY(0);
   }
 
-  .tarjeta:hover .placeholder:not(.placeholder--alt) {
+  .tarjeta:hover .placeholder {
     transform: scale(1.04);
   }
 
-  .tarjeta:hover .placeholder--alt {
+  .tarjeta:hover .tarjeta__foto--alt {
     opacity: 1;
   }
 
