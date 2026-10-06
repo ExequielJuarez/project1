@@ -92,12 +92,12 @@
 
         <p class="info__resumen"><%= p.resumen %></p>
 
-        <!-- Variantes de color: solo los colores en que se vende este producto -->
-        <% if (p.colores.length) { %>
+        <!-- Variantes de color: solo si se vende en más de un color (con uno solo, ese va al carrito) -->
+        <% if (p.colores.length > 1) { %>
         <div class="opcion">
           <p class="opcion__titulo">
             Color: <span id="colorElegido"><%= p.colores[0].nombre %></span>
-            <% if (p.colores.length > 1) { %><small class="opcion__cuantos"><%= p.colores.length %> colores disponibles</small><% } %>
+            <small class="opcion__cuantos"><%= p.colores.length %> colores disponibles</small>
           </p>
           <div class="opcion__colores">
             <% p.colores.forEach((c, n) => { %>

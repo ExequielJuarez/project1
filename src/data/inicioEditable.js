@@ -101,7 +101,7 @@ const SECCIONES = {
           { nombre: "Mates", link: "/catalogo?categoria=Mates", frase: "Torpedos, imperiales y criollos forrados en cuero, con virola de alpaca.", imagen: "/img/productos/torpedo-argentino-1.jpg", fondo: "oscuro" },
           { nombre: "Bombillas", link: "/catalogo?categoria=Bombillas", frase: "Bombillones de alpaca cincelados a mano, con pico de bronce.", imagen: "/img/productos/bombillon-joyero.jpg", fondo: "oscuro" },
           { nombre: "Combos", link: "/catalogo?categoria=Combos", frase: "El equipo matero completo, listo para regalar o para salir.", imagen: "/img/productos/combo-del-10-1.jpg", fondo: "oscuro" },
-          { nombre: "Bolsos materos", link: "/catalogo?q=Hudson", frase: "Canastas y portabombillas para llevar el mate a todos lados.", imagen: "/img/productos/combo-linea-hudson-2.jpg", fondo: "medio" },
+          { nombre: "Bolsos materos", link: "/catalogo?categoria=Bolsos%20materos", frase: "Bolsos y canastas para llevar el mate a todos lados.", imagen: "/img/productos/combo-linea-hudson-2.jpg", fondo: "medio" },
         ],
       },
     },

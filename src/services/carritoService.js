@@ -29,8 +29,12 @@ async function agregar(session, { id, cantidad = 1, color = null }) {
   if (producto.stock <= 0) return { ok: false, mensaje: "Este producto no tiene stock por ahora" };
 
   const carrito = obtener(session);
-  // Solo se acepta un color en el que se venda el producto (si no, el principal)
-  const colorFinal = (producto.colores.find((c) => c.nombre === color) || producto.colores[0])?.nombre || null;
+  // Solo se acepta un color en el que se venda el producto (si no, el principal).
+  // Con un solo color (una yerba, un bombillón) no se guarda: no hay nada que elegir.
+  const colorFinal =
+    producto.colores.length > 1
+      ? (producto.colores.find((c) => c.nombre === color) || producto.colores[0]).nombre
+      : null;
   const clave = `${producto.id}-${colorFinal || "unico"}`;
   const existente = carrito.items.find((i) => i.clave === clave);
   const suma = Math.max(1, Number(cantidad) || 1);
