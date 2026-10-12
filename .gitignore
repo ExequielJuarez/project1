@@ -1,4 +1,9 @@
 node_modules/
 pnpm-lock.yaml
+.env
 # Imágenes subidas desde el panel admin (las fotos del catálogo sí van al repo)
 
+
+.env
+public/img/productos/producto-*
+public/img/inicio/subidas/*
