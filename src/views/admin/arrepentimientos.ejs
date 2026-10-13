@@ -1,0 +1,53 @@
+<%- include('../partials/admin-inicio') %>
+
+<% const fecha = (f) => new Date(f).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }); %>
+
+      <div class="admin-cabecera">
+        <div>
+          <p class="admin-cabecera__migas"><a href="/admin">Panel</a> / Arrepentimientos</p>
+          <h1 class="admin-cabecera__titulo">Arrepentimientos</h1>
+          <p class="admin-cabecera__bajada">
+            Pedidos de cancelación del <a href="/arrepentimiento" target="_blank" rel="noopener">Botón de arrepentimiento</a>.
+            El cliente ya recibió su código. Contactalo, coordiná la devolución y el reintegro, y después marcala como resuelta.
+          </p>
+        </div>
+      </div>
+
+      <% if (!lista.length) { %>
+        <div class="panel arr-vacio">Todavía no hay solicitudes.</div>
+      <% } else { %>
+        <ul class="arr-admin">
+          <% lista.forEach(a => { %>
+            <li class="panel arr-item arr-item--<%= a.estado %>">
+              <div class="arr-item__cabeza">
+                <span class="arr-item__codigo"><%= a.codigo %></span>
+                <span class="arr-item__estado"><%= a.estado === 'resuelta' ? 'Resuelta' : 'Pendiente' %></span>
+                <span class="arr-item__fecha"><%= fecha(a.fecha) %></span>
+              </div>
+              <dl class="arr-item__datos">
+                <div><dt>Pedido</dt><dd>
+                  <% if (a.pedidoId) { %>
+                    <a href="/admin/pedidos?q=<%= a.pedidoId %>">#<%= a.numeroPedido %></a>
+                  <% } else { %>
+                    #<%= a.numeroPedido %> <small class="arr-item__alerta">no coincide con un pedido de ese email: revisar</small>
+                  <% } %>
+                </dd></div>
+                <div><dt>Cliente</dt><dd><%= a.nombre %></dd></div>
+                <div><dt>Contacto</dt><dd><a href="mailto:<%= a.email %>"><%= a.email %></a><%= a.telefono ? ` · ${a.telefono}` : '' %></dd></div>
+                <% if (a.motivo) { %><div><dt>Motivo</dt><dd>“<%= a.motivo %>”</dd></div><% } %>
+                <% if (a.resueltaEn) { %><div><dt>Resuelta</dt><dd><%= fecha(a.resueltaEn) %></dd></div><% } %>
+              </dl>
+              <form action="/admin/arrepentimientos/<%= a.id %>?_method=PATCH" method="POST">
+                <input type="hidden" name="estado" value="<%= a.estado === 'resuelta' ? 'recibida' : 'resuelta' %>">
+                <button type="submit" class="btn btn--chico <%= a.estado === 'resuelta' ? 'btn--linea' : 'btn--solido' %>">
+                  <%= a.estado === 'resuelta' ? 'Volver a pendiente' : 'Marcar como resuelta' %>
+                </button>
+              </form>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+<%- include('../partials/admin-fin') %>
+</body>
+</html>

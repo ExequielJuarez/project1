@@ -25,55 +25,82 @@
 </section>
 
 <!-- ═════════════ FOOTER ═════════════ -->
+<% const t = locals.tienda || {}; %>
 <footer class="footer">
   <div class="contenedor footer__grilla">
     <div class="footer__marca">
       <%- include('logo', { variante: 'apilado', clase: 'logo-svg--footer' }) %>
-      <p>Breve descripción de la marca. Una o dos líneas que cuenten qué hacen y por qué.</p>
+      <p>Mates, bombillas y todo para la ronda, hechos a mano con materiales nobles. Enviamos a todo el país.</p>
+      <% if (t.instagram || t.facebook || t.tiktok) { %>
+        <div class="footer__redes">
+          <% if (t.instagram) { %><a href="<%= t.instagram %>" target="_blank" rel="noopener">Instagram</a><% } %>
+          <% if (t.facebook) { %><a href="<%= t.facebook %>" target="_blank" rel="noopener">Facebook</a><% } %>
+          <% if (t.tiktok) { %><a href="<%= t.tiktok %>" target="_blank" rel="noopener">TikTok</a><% } %>
+        </div>
+      <% } %>
     </div>
     <div>
       <h4>Tienda</h4>
       <ul>
-        <li><a href="/catalogo">Catálogo</a></li>
-        <li><a href="/catalogo?categoria=Mates">Mates</a></li>
-        <li><a href="/catalogo?categoria=Bombillas">Bombillas</a></li>
-        <li><a href="/catalogo?categoria=Combos">Combos</a></li>
-        <li><a href="/catalogo?categoria=Yerbas">Yerbas</a></li>
+        <% (locals.categoriasMenu || []).forEach(cat => { %>
+          <li><a href="<%= cat.url %>"><%= cat.nombre %></a></li>
+        <% }) %>
       </ul>
     </div>
     <div>
       <h4>Ayuda</h4>
       <ul>
-        <li><a href="#">Envíos</a></li>
-        <li><a href="#">Medios de pago</a></li>
-        <li><a href="#">Cambios y devoluciones</a></li>
-        <li><a href="#">Contacto</a></li>
+        <li><a href="/terminos#envios">Envíos</a></li>
+        <li><a href="/terminos#pagos">Medios de pago</a></li>
+        <li><a href="/cambios-y-devoluciones">Cambios y devoluciones</a></li>
+        <% if (t.whatsapp) { %>
+          <li><a href="<%= t.whatsapp %>" target="_blank" rel="noopener">Contacto por WhatsApp</a></li>
+        <% } else if (t.email) { %>
+          <li><a href="mailto:<%= t.email %>">Contacto</a></li>
+        <% } %>
       </ul>
     </div>
     <div>
-      <h4>Newsletter</h4>
-      <p>Novedades y descuentos, sin spam.</p>
-      <form class="newsletter" onsubmit="return false;">
-        <input type="email" placeholder="Tu email" aria-label="Email">
-        <button type="submit">→</button>
-      </form>
-      <div class="footer__redes">
-        <a href="#">(IG)</a>
-        <a href="#">(FB)</a>
-        <a href="#">(TK)</a>
-      </div>
+      <h4>Legales</h4>
+      <ul>
+        <li><a href="/terminos">Términos y condiciones</a></li>
+        <li><a href="/privacidad">Política de privacidad</a></li>
+        <li><a href="/cookies">Política de cookies</a></li>
+        <li><a href="/arrepentimiento" class="footer__arrepentimiento">Botón de arrepentimiento</a></li>
+      </ul>
     </div>
   </div>
   <div class="contenedor footer__legal">
-    <span>© <%= new Date().getFullYear() %> Santiago Mates. Todos los derechos reservados.</span>
-    <span class="footer__pagos">(VISA) (MASTER) (MP)</span>
+    <span>
+      © <%= new Date().getFullYear() %> <%= t.nombre || 'Santiago Mates' %>.
+      <% if (t.razonSocial) { %><%= t.razonSocial %><% if (t.cuit) { %> · CUIT <%= t.cuit %><% } %>.<% } %>
+      Todos los derechos reservados.
+    </span>
+    <span class="footer__oficiales">
+      <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los consumidores. Para reclamos ingrese aquí</a>
+      <% if (t.dataFiscal) { %>
+        <a href="<%= t.dataFiscal %>" target="_blank" rel="noopener">Data fiscal</a>
+      <% } %>
+    </span>
+    <span class="footer__pagos">Visa · Mastercard · Amex · Naranja · Mercado Pago · Transferencia</span>
   </div>
 </footer>
 
+<% if (t.whatsapp) { %>
 <!-- Botón flotante de WhatsApp -->
-<a href="#" class="whatsapp" aria-label="WhatsApp">
+<a href="<%= t.whatsapp %>" class="whatsapp" aria-label="Escribinos por WhatsApp" target="_blank" rel="noopener">
   <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3a9 9 0 00-7.8 13.5L3 21l4.6-1.2A9 9 0 1012 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2-1.4-2.3-2.3l.8-1-1-2L9.5 8z" fill="currentColor"/></svg>
 </a>
+<% } %>
+
+<!-- Aviso de cookies (solo usamos las necesarias: se muestra una vez) -->
+<div class="aviso-cookies" id="avisoCookies" role="region" aria-label="Aviso de cookies" hidden>
+  <p>
+    Usamos solo las cookies necesarias para que la tienda funcione (tu sesión y tu carrito). No usamos cookies de publicidad.
+    <a href="/cookies">Más información</a>
+  </p>
+  <button type="button" class="btn btn--solido btn--chico" id="aceptarCookies">Entendido</button>
+</div>
 
 <!-- Aviso al agregar al carrito -->
 <div class="toast" id="toast" role="status"></div>

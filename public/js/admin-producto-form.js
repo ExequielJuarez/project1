@@ -193,6 +193,84 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("input", () => input.closest(".campo").classList.contains("campo--error") && validar(nombre));
   });
 
+  // ---------- Subcategoría (depende de la categoría) ----------
+  const selectCategoria = campo("categoria");
+  const selectSub = $("#subcategoria");
+  const cajaSub = $("#campoSubcategoria");
+  const idsCategoria = JSON.parse(cajaSub.dataset.categorias || "{}");
+
+  // Muestra solo las subcategorías de la categoría elegida
+  function filtrarSubcategorias() {
+    const cat = selectCategoria.value;
+    let hay = 0;
+    $$("option[data-categoria]", selectSub).forEach((op) => {
+      const es = op.dataset.categoria === cat;
+      op.hidden = !es;
+      op.disabled = !es;
+      if (es) hay += 1;
+    });
+    // Si la elegida era de otra categoría, vuelve a "Sin subcategoría"
+    if (selectSub.selectedOptions[0]?.disabled) selectSub.value = "";
+    selectSub.disabled = !cat;
+    $("#btnSubNueva").hidden = !cat;
+    selectSub.options[0].textContent = !cat ? "Elegí primero la categoría" : hay ? "Sin subcategoría" : "Sin subcategoría (esta categoría no tiene)";
+  }
+  selectCategoria.addEventListener("change", filtrarSubcategorias);
+  filtrarSubcategorias();
+
+  // Crear una subcategoría sin salir del formulario
+  const camposSub = $("#subNuevaCampos");
+  const nombreSub = $("#subNuevaNombre");
+  const errorSub = $("#subcategoria-error");
+
+  $("#btnSubNueva").addEventListener("click", () => {
+    camposSub.hidden = !camposSub.hidden;
+    if (!camposSub.hidden) nombreSub.focus();
+  });
+
+  async function guardarSubcategoria() {
+    errorSub.textContent = "";
+    cajaSub.classList.remove("campo--error");
+    const nombre = nombreSub.value.trim();
+    const categoriaId = idsCategoria[selectCategoria.value];
+    if (!categoriaId) return (errorSub.textContent = "Elegí primero la categoría");
+    if (nombre.length < 2) {
+      errorSub.textContent = "Escribí el nombre de la subcategoría";
+      return nombreSub.focus();
+    }
+    let sub;
+    try {
+      ({ subcategoria: sub } = await api(`/admin/categorias/${categoriaId}/subcategorias`, "POST", { nombre }));
+    } catch (error) {
+      // Si ya existía, la elegimos igual
+      const existente = $$("option[data-categoria]", selectSub).find(
+        (op) => op.dataset.categoria === selectCategoria.value && op.textContent.trim().toLowerCase() === nombre.toLowerCase()
+      );
+      if (existente) {
+        selectSub.value = existente.value;
+        camposSub.hidden = true;
+        nombreSub.value = "";
+        return mostrarToast(`"${existente.textContent.trim()}" ya existía: quedó elegida`);
+      }
+      return (errorSub.textContent = error.message);
+    }
+    const op = new Option(sub.nombre, sub.id, true, true);
+    op.dataset.categoria = selectCategoria.value;
+    selectSub.append(op);
+    filtrarSubcategorias();
+    selectSub.value = String(sub.id);
+    camposSub.hidden = true;
+    nombreSub.value = "";
+    mostrarToast(`Subcategoría "${sub.nombre}" creada`);
+  }
+
+  $("#btnSubGuardar").addEventListener("click", guardarSubcategoria);
+  nombreSub.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    guardarSubcategoria();
+  });
+
   // ---------- Colores (uno o varios) ----------
   const cajaColores = $("#colores");
   const marcados = () => $$('input[name="colores"]:checked', cajaColores);

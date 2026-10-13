@@ -1,0 +1,30 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+  <main class="arr-listo contenedor">
+    <span class="arr-listo__icono" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="30" height="30"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <h1 class="arr__titulo">Recibimos tu solicitud</h1>
+    <p>Este es el código de identificación de tu pedido de arrepentimiento. Guardalo:</p>
+    <p class="arr-listo__codigo" id="codigoArr"><%= solicitud.codigo %></p>
+    <ul class="arr-listo__datos">
+      <li><strong>Pedido:</strong> #<%= solicitud.numeroPedido %></li>
+      <li><strong>A nombre de:</strong> <%= solicitud.nombre %> · <%= solicitud.email %></li>
+      <li><strong>Fecha:</strong> <%= new Date(solicitud.fecha).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) %></li>
+    </ul>
+    <p>
+      <% if (solicitud.emailEnviado) { %>
+        Te mandamos una copia a <strong><%= solicitud.email %></strong>.
+      <% } %>
+      Te vamos a contactar para coordinar la devolución del producto y el reintegro del dinero. La devolución no tiene costo para vos.
+    </p>
+    <div class="arr-listo__acciones">
+      <button type="button" class="btn btn--linea" onclick="window.print()">Imprimir</button>
+      <a href="/" class="btn btn--solido">Volver a la tienda</a>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

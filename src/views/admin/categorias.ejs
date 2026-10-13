@@ -1,0 +1,119 @@
+<%- include('../partials/admin-inicio') %>
+
+      <div class="admin-cabecera">
+        <div>
+          <p class="admin-cabecera__migas"><a href="/admin">Panel</a> / Categorías</p>
+          <h1 class="admin-cabecera__titulo">Categorías</h1>
+          <p class="admin-cabecera__bajada">
+            Las categorías son las pestañas del menú de la tienda. Cada una tiene sus
+            <strong>subcategorías</strong>, que son los filtros de esa sección (por ejemplo, Mates → Torpedos, Imperiales).
+          </p>
+        </div>
+      </div>
+
+      <!-- Nueva categoría -->
+      <section class="panel cat-nueva" aria-labelledby="tituloNuevaCategoria">
+        <h2 class="panel__titulo" id="tituloNuevaCategoria">Nueva categoría</h2>
+        <form action="/admin/categorias" method="POST" class="cat-form" data-validar-nombre data-max="60">
+          <label class="sr-only" for="nuevaCategoria">Nombre de la categoría</label>
+          <input class="campo__control" type="text" id="nuevaCategoria" name="nombre" maxlength="60" required
+                 placeholder="Ej: Accesorios" autocomplete="off">
+          <button type="submit" class="btn btn--solido btn--chico">Agregar categoría</button>
+          <p class="cat-form__error" role="alert"></p>
+        </form>
+      </section>
+
+      <!-- Categorías existentes -->
+      <ol class="cat-lista">
+        <% lista.forEach((c, n) => { %>
+          <li class="panel cat" id="categoria-<%= c.id %>">
+            <div class="cat__cabecera">
+              <div class="cat__orden" aria-label="Orden en el menú">
+                <form action="/admin/categorias/<%= c.id %>/mover?_method=PATCH" method="POST">
+                  <input type="hidden" name="direccion" value="-1">
+                  <button type="submit" class="cat__flecha" <%= n === 0 ? 'disabled' : '' %> aria-label="Subir <%= c.nombre %> en el menú" title="Subir en el menú">▲</button>
+                </form>
+                <form action="/admin/categorias/<%= c.id %>/mover?_method=PATCH" method="POST">
+                  <input type="hidden" name="direccion" value="1">
+                  <button type="submit" class="cat__flecha" <%= n === lista.length - 1 ? 'disabled' : '' %> aria-label="Bajar <%= c.nombre %> en el menú" title="Bajar en el menú">▼</button>
+                </form>
+              </div>
+
+              <div class="cat__titulo">
+                <h2 class="cat__nombre"><%= c.nombre %></h2>
+                <p class="cat__datos">
+                  <%= c.productos %> <%= c.productos === 1 ? 'producto' : 'productos' %> ·
+                  <a href="/categoria/<%= c.slug %>" target="_blank" rel="noopener">/categoria/<%= c.slug %> ↗</a>
+                </p>
+              </div>
+
+              <div class="cat__acciones">
+                <details class="cat__renombrar">
+                  <summary class="btn btn--linea btn--chico">Renombrar</summary>
+                  <form action="/admin/categorias/<%= c.id %>?_method=PATCH" method="POST" class="cat-form cat-form--flotante" data-validar-nombre data-max="60">
+                    <label class="sr-only" for="renombrarCat<%= c.id %>">Nuevo nombre</label>
+                    <input class="campo__control" type="text" id="renombrarCat<%= c.id %>" name="nombre" value="<%= c.nombre %>" maxlength="60" required>
+                    <button type="submit" class="btn btn--solido btn--chico">Guardar</button>
+                    <p class="cat-form__error" role="alert"></p>
+                  </form>
+                </details>
+
+                <% if (c.productos) { %>
+                  <button type="button" class="btn btn--linea btn--chico cat__borrar" disabled
+                          title="Tiene productos: pasalos a otra categoría para poder borrarla">Eliminar</button>
+                <% } else { %>
+                  <form action="/admin/categorias/<%= c.id %>?_method=DELETE" method="POST"
+                        data-confirmar="Se va a borrar la categoría “<%= c.nombre %>” y sus subcategorías. Deja de aparecer en el menú."
+                        data-confirmar-titulo="¿Eliminar categoría?">
+                    <button type="submit" class="btn btn--linea btn--chico cat__borrar">Eliminar</button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+
+            <!-- Subcategorías -->
+            <div class="cat__subs">
+              <p class="cat__subtitulo">Subcategorías <small>(filtros de esta sección)</small></p>
+              <% if (!c.subcategorias.length) { %>
+                <p class="cat__vacio">Todavía no tiene. Agregá la primera abajo.</p>
+              <% } else { %>
+                <ul class="subs">
+                  <% c.subcategorias.forEach(s => { %>
+                    <li class="sub">
+                      <span class="sub__nombre"><%= s.nombre %></span>
+                      <span class="sub__cantidad" title="Productos en esta subcategoría"><%= s.productos %></span>
+                      <details class="sub__editar">
+                        <summary aria-label="Renombrar <%= s.nombre %>" title="Renombrar">✎</summary>
+                        <form action="/admin/subcategorias/<%= s.id %>?_method=PATCH" method="POST" class="cat-form cat-form--flotante" data-validar-nombre data-max="40">
+                          <label class="sr-only" for="renombrarSub<%= s.id %>">Nuevo nombre</label>
+                          <input class="campo__control" type="text" id="renombrarSub<%= s.id %>" name="nombre" value="<%= s.nombre %>" maxlength="40" required>
+                          <button type="submit" class="btn btn--solido btn--chico">Guardar</button>
+                          <p class="cat-form__error" role="alert"></p>
+                        </form>
+                      </details>
+                      <form action="/admin/subcategorias/<%= s.id %>?_method=DELETE" method="POST" class="sub__borrar"
+                            data-confirmar="Se va a borrar “<%= s.nombre %>”.<%= s.productos ? ` ${s.productos} ${s.productos === 1 ? 'producto queda' : 'productos quedan'} en ${c.nombre}, sin subcategoría.` : '' %>"
+                            data-confirmar-titulo="¿Eliminar subcategoría?">
+                        <button type="submit" aria-label="Eliminar <%= s.nombre %>" title="Eliminar">✕</button>
+                      </form>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+
+              <form action="/admin/categorias/<%= c.id %>/subcategorias" method="POST" class="cat-form cat-form--sub" data-validar-nombre data-max="40">
+                <label class="sr-only" for="nuevaSub<%= c.id %>">Nueva subcategoría de <%= c.nombre %></label>
+                <input class="campo__control" type="text" id="nuevaSub<%= c.id %>" name="nombre" maxlength="40" required
+                       placeholder="Nueva subcategoría de <%= c.nombre %>" autocomplete="off">
+                <button type="submit" class="btn btn--linea btn--chico">+ Agregar</button>
+                <p class="cat-form__error" role="alert"></p>
+              </form>
+            </div>
+          </li>
+        <% }) %>
+      </ol>
+
+<%- include('../partials/admin-fin') %>
+<script src="/js/admin-categorias.js"></script>
+</body>
+</html>

@@ -58,7 +58,7 @@
             <span class="datos-resumen__etiqueta"><%= esRetiro ? 'Retiro' : 'Envío' %></span>
             <p>
               <% if (esRetiro) { %>
-                Retirás en el showroom · (DIRECCIÓN DEL SHOWROOM)
+                Retirás sin costo<%= tienda.direccion ? ` · ${tienda.direccion}` : ' · coordinamos día y horario con vos' %>
               <% } else { %>
                 <%= d.calle %> <%= d.numero %><%= d.piso ? `, ${d.piso}` : '' %><br>
                 <%= d.ciudad %>, <%= d.provincia %> (<%= d.codigoPostal %>)
@@ -130,7 +130,9 @@
       <p class="checkout-legal">
         <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
         Compra protegida. Si pagás con tarjeta y no terminás el pago, reservamos tu pedido <%= venceHoras %> hs
-        para que lo pagues más tarde desde la página del pedido. (LINK A TÉRMINOS Y CONDICIONES)
+        para que lo pagues más tarde desde la página del pedido. Al confirmar aceptás los
+        <a href="/terminos" target="_blank" rel="noopener">términos y condiciones</a>. Tenés 10 días para arrepentirte de la compra
+        (<a href="/arrepentimiento" target="_blank" rel="noopener">botón de arrepentimiento</a>).
       </p>
     </form>
   </main>

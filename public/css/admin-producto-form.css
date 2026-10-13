@@ -30,6 +30,40 @@
   gap: 16px;
 }
 
+/* Subcategoría (depende de la categoría) */
+.subcat-ayuda {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--gris-600);
+}
+
+.subcat-nueva {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--acento);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.subcat-nueva[hidden] {
+  display: none;
+}
+
+.subcat-campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.subcat-campos[hidden] {
+  display: none;
+}
+
 /* Colores disponibles (uno o varios) */
 .colores-admin {
   border: 0;

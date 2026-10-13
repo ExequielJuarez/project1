@@ -1,0 +1,66 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+  <div class="contenedor">
+    <nav class="migas migas--arr" aria-label="Ruta">
+      <a href="/">Inicio</a>
+      <span>/</span>
+      <span aria-current="page">Botón de arrepentimiento</span>
+    </nav>
+  </div>
+
+  <main class="arr contenedor">
+    <section class="arr__info">
+      <p class="arr__etiqueta">Ley 24.240 · Res. 424/2020</p>
+      <h1 class="arr__titulo">Botón de arrepentimiento</h1>
+      <p>
+        Si compraste por internet, tenés <strong>10 días corridos</strong> desde que recibiste el producto (o desde la compra,
+        lo último que ocurra) para cancelarla, <strong>sin costo y sin dar explicaciones</strong>.
+      </p>
+      <ul class="arr__pasos">
+        <li><span>1</span> Completá este formulario con el número de tu pedido.</li>
+        <li><span>2</span> Te damos un <strong>código de identificación</strong> de tu solicitud en el momento.</li>
+        <li><span>3</span> Te contactamos para coordinar la devolución (el envío lo pagamos nosotros).</li>
+        <li><span>4</span> Te devolvemos el total pagado por el mismo medio de pago.</li>
+      </ul>
+      <p class="arr__nota">
+        No aplica a productos personalizados ni a yerba u otros productos que no pueden devolverse una vez abiertos.
+        Más información en <a href="/cambios-y-devoluciones">Cambios y devoluciones</a>.
+      </p>
+    </section>
+
+    <section class="arr__form" aria-labelledby="tituloFormArr">
+      <h2 class="arr__subtitulo" id="tituloFormArr">Datos de la compra</h2>
+
+      <% if (errores.general) { %>
+        <div class="aviso aviso--error" role="alert"><%= errores.general.msg %></div>
+      <% } else if (Object.keys(errores).length) { %>
+        <div class="aviso aviso--error" role="alert" id="resumenErrores" tabindex="-1">Revisá los datos marcados.</div>
+      <% } %>
+
+      <form action="/arrepentimiento" method="POST" id="formArr" novalidate>
+        <%- include('partials/campo', { nombre: 'numeroPedido', etiqueta: 'Número de pedido', placeholder: 'Ej: 1024', attrs: 'inputmode="numeric" maxlength="10" required autocomplete="off"' }) %>
+        <p class="arr__ayuda">Lo encontrás en el email de tu compra o en <a href="/mi-cuenta/pedidos">Mis pedidos</a>.</p>
+        <%- include('partials/campo', { nombre: 'nombre', etiqueta: 'Nombre y apellido', attrs: 'maxlength="90" required autocomplete="name"' }) %>
+        <%- include('partials/campo', { nombre: 'email', etiqueta: 'Email (el de la compra)', tipo: 'email', attrs: 'maxlength="120" required autocomplete="email" autocapitalize="off"' }) %>
+        <%- include('partials/campo', { nombre: 'telefono', etiqueta: 'Teléfono', opcional: true, tipo: 'tel', attrs: 'maxlength="20" autocomplete="tel"' }) %>
+        <%- include('partials/campo', { nombre: 'motivo', etiqueta: 'Motivo', opcional: true, tipo: 'textarea', placeholder: 'No es obligatorio contarnos por qué', attrs: 'maxlength="500"' }) %>
+
+        <div class="campo <%= errores.confirmo ? 'campo--error' : '' %>">
+          <label class="check-simple">
+            <input type="checkbox" name="confirmo" value="1" id="confirmo" <%= datos.confirmo ? 'checked' : '' %>>
+            <span class="check-simple__caja"></span>
+            Quiero cancelar (revocar) esta compra.
+          </label>
+          <p class="campo__error" id="confirmo-error"><%= errores.confirmo ? errores.confirmo.msg : '' %></p>
+        </div>
+
+        <button type="submit" class="btn btn--solido arr__enviar" id="btnArr">Enviar solicitud</button>
+      </form>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script src="/js/arrepentimiento.js"></script>
+</body>
+</html>

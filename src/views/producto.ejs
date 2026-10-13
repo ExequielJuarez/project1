@@ -16,10 +16,12 @@
     <nav class="migas migas--producto" aria-label="Ruta">
       <a href="/">Inicio</a>
       <span>/</span>
-      <a href="/catalogo">Catálogo</a>
+      <a href="/categoria/<%= p.categoriaSlug %>"><%= p.categoria %></a>
       <span>/</span>
-      <a href="/catalogo"><%= p.categoria %></a>
-      <span>/</span>
+      <% if (p.subcategoria) { %>
+        <a href="/categoria/<%= p.categoriaSlug %>?sub=<%= p.subcategoriaSlug %>"><%= p.subcategoria %></a>
+        <span>/</span>
+      <% } %>
       <span aria-current="page"><%= p.nombre %></span>
     </nav>
   </div>
@@ -167,7 +169,7 @@
             <div class="acordeon__contenido">
               <p>Tarjetas de crédito y débito, transferencia bancaria y billeteras virtuales.</p>
               <p><strong><%= p.cuotas %> cuotas sin interés</strong> con todas las tarjetas bancarias.</p>
-              <p class="info__logos">(VISA) (MASTER) (AMEX) (MP)</p>
+              <p class="info__logos">Visa · Mastercard · Amex · Naranja · Mercado Pago</p>
             </div>
           </div>
           <div class="acordeon">
@@ -226,7 +228,7 @@
   <section class="relacionados contenedor">
     <div class="relacionados__cabecera">
       <h2 class="relacionados__titulo">También te puede gustar</h2>
-      <a href="/catalogo" class="relacionados__link">Ver todo →</a>
+      <a href="/categoria/<%= p.categoriaSlug %>" class="relacionados__link">Ver más de <%= p.categoria %> →</a>
     </div>
     <div class="relacionados__grilla">
       <% relacionados.forEach((r, i) => { %>

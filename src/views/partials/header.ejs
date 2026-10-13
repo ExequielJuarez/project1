@@ -21,7 +21,7 @@
       <span class="hamburguesa"></span>
     </button>
 
-    <form class="buscador" action="/catalogo" method="GET" role="search" data-buscador>
+    <form class="buscador" action="/buscar" method="GET" role="search" data-buscador>
       <input type="search" name="q" value="<%= locals.busqueda || '' %>" placeholder="Buscar productos…" aria-label="Buscar productos"
              autocomplete="off" maxlength="60" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugerencias">
       <button type="submit" aria-label="Buscar">
@@ -79,7 +79,7 @@
   </div>
 
   <div class="buscador-movil contenedor <%= locals.busqueda ? 'abierto' : '' %>" id="buscadorMovil">
-    <form class="buscador buscador--movil" action="/catalogo" method="GET" role="search" data-buscador>
+    <form class="buscador buscador--movil" action="/buscar" method="GET" role="search" data-buscador>
       <input type="search" name="q" value="<%= locals.busqueda || '' %>" placeholder="Buscar productos…" aria-label="Buscar productos"
              autocomplete="off" maxlength="60" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugerenciasMovil">
       <button type="submit" aria-label="Buscar">
@@ -92,9 +92,8 @@
   <nav class="nav" id="nav" aria-label="Principal">
     <ul class="nav__lista contenedor">
       <li class="<%= locals.navActivo === 'inicio' ? 'nav__item--activo' : '' %>"><a href="/">Inicio</a></li>
-      <li class="<%= locals.navActivo === 'catalogo' ? 'nav__item--activo' : '' %>"><a href="/catalogo">Catálogo</a></li>
-      <% ['Mates', 'Termos', 'Bombillas', 'Bolsos materos', 'Combos', 'Yerbas'].forEach(cat => { %>
-        <li class="<%= locals.navActivo === cat ? 'nav__item--activo' : '' %>"><a href="/catalogo?categoria=<%= encodeURIComponent(cat) %>"><%= cat %></a></li>
+      <% (locals.categoriasMenu || []).forEach(cat => { %>
+        <li class="<%= locals.navActivo === cat.slug ? 'nav__item--activo' : '' %>"><a href="<%= cat.url %>"><%= cat.nombre %></a></li>
       <% }) %>
       <li class="nav__item--movil"><a href="/favoritos">Favoritos<% if ((locals.favoritosIds || []).length) { %> <small>(<%= favoritosIds.length %>)</small><% } %></a></li>
     </ul>

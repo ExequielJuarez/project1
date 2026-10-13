@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const chipsActivos = $("#chipsActivos");
   const badgeFiltros = $("#badgeFiltros");
   const cantidadVisible = $("#cantidadVisible");
+  const campoGrupo = filtros.dataset.grupo || "categoria";
 
   // ---------- Panel de filtros (celular / tablet) ----------
   $("#btnFiltros").addEventListener("click", () => abrirPanel(filtros));
@@ -28,7 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function leerFiltros() {
     return {
-      categorias: $$('input[name="categoria"]:checked').map((i) => i.value),
+      // Filtro propio de la página: subcategorías (sección) o categorías (búsqueda)
+      grupo: $$(`input[name="${campoGrupo}"]:checked`).map((i) => i.value),
       colores: $$('input[name="color"]:checked').map((i) => i.value),
       min: parseFloat(precioMin.value) || 0,
       max: parseFloat(precioMax.value) || Infinity,
@@ -42,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tarjetas.forEach((t) => {
       const precio = Number(t.dataset.precio);
       const pasa =
-        (!f.categorias.length || f.categorias.includes(t.dataset.categoria)) &&
+        (!f.grupo.length || f.grupo.includes(t.dataset[campoGrupo])) &&
         (!f.colores.length || (t.dataset.colores || "").split(" ").some((c) => f.colores.includes(c))) &&
         precio >= f.min &&
         precio <= f.max;
@@ -53,12 +55,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     vacio.hidden = visibles > 0;
     cantidadVisible.textContent = visibles;
+    $("#cantidadPalabra").textContent = visibles === 1 ? "producto" : "productos";
     pintarChips(f);
+    marcarSubnav(f);
   }
+
+  // ---------- Accesos rápidos a las subcategorías (arriba del listado) ----------
+  // Sin recargar: marcan el filtro de esa subcategoría y actualizan la dirección
+  const linksSub = $$("[data-sub-link]");
+
+  function marcarSubnav(f) {
+    if (!linksSub.length) return;
+    const unica = f.grupo.length === 1 ? f.grupo[0] : f.grupo.length ? null : "";
+    linksSub.forEach((a) => a.classList.toggle("activo", a.dataset.subLink === unica));
+    const url = new URL(window.location.href);
+    if (unica) url.searchParams.set("sub", unica);
+    else url.searchParams.delete("sub");
+    history.replaceState(null, "", url);
+  }
+
+  linksSub.forEach((a) =>
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      $$(`input[name="${campoGrupo}"]`).forEach((i) => (i.checked = i.value === a.dataset.subLink));
+      aplicarFiltros();
+    })
+  );
 
   function pintarChips(f) {
     const chips = [
-      ...f.categorias.map((v) => ({ tipo: "categoria", valor: v, texto: v })),
+      ...f.grupo.map((v) => ({
+        tipo: campoGrupo,
+        valor: v,
+        texto: $(`input[name="${campoGrupo}"][value="${CSS.escape(v)}"]`)?.closest("label").querySelector(".check__texto").textContent || v,
+      })),
       ...f.colores.map((v) => ({
         tipo: "color",
         valor: v,

@@ -24,15 +24,16 @@ SET time_zone = '-03:00';
 
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE notificaciones;
+TRUNCATE TABLE arrepentimientos;
 TRUNCATE TABLE pedido_items;
 TRUNCATE TABLE pedidos;
 TRUNCATE TABLE favoritos;
 TRUNCATE TABLE especificaciones;
 TRUNCATE TABLE producto_imagenes;
 TRUNCATE TABLE producto_colores;
-TRUNCATE TABLE producto_colores;
 TRUNCATE TABLE productos;
 TRUNCATE TABLE colores;
+TRUNCATE TABLE subcategorias;
 TRUNCATE TABLE categorias;
 TRUNCATE TABLE cupones;
 TRUNCATE TABLE usuarios;
@@ -47,13 +48,30 @@ INSERT INTO usuarios (id, nombre, apellido, email, telefono, password, google_id
   (4, 'Super', 'Admin', 'super@tienda.com', NULL, '$2b$10$AhElj/1kwG2mSrQCEpRKI.eaaUIicEpYgvqxK2sckmrfVXodWJpke', NULL, 'superadmin', 0);
 
 -- ── Categorías y colores ────────────────────────────────
-INSERT INTO categorias (id, nombre, orden) VALUES
-  (1, 'Mates', 1),
-  (2, 'Termos', 2),
-  (3, 'Bombillas', 3),
-  (4, 'Bolsos materos', 4),
-  (5, 'Combos', 5),
-  (6, 'Yerbas', 6);
+INSERT INTO categorias (id, nombre, slug, orden) VALUES
+  (1, 'Mates', 'mates', 1),
+  (2, 'Termos', 'termos', 2),
+  (3, 'Bombillas', 'bombillas', 3),
+  (4, 'Bolsos materos', 'bolsos-materos', 4),
+  (5, 'Combos', 'combos', 5),
+  (6, 'Yerbas', 'yerbas', 6);
+
+-- Subcategorías: los filtros propios de cada sección
+INSERT INTO subcategorias (id, categoria_id, nombre, slug, orden) VALUES
+  (1, 1, 'Torpedos', 'torpedos', 1),
+  (2, 1, 'Imperiales', 'imperiales', 2),
+  (3, 1, 'Criollos', 'criollos', 3),
+  (4, 2, 'Clásicos', 'clasicos', 1),
+  (5, 2, 'Garrafas', 'garrafas', 2),
+  (6, 2, 'Compactos', 'compactos', 3),
+  (7, 3, 'Bombillones de alpaca', 'bombillones-de-alpaca', 1),
+  (8, 4, 'Cuero sintético', 'cuero-sintetico', 1),
+  (9, 4, 'Canastas', 'canastas', 2),
+  (10, 5, 'Con termo', 'con-termo', 1),
+  (11, 5, 'Sin termo', 'sin-termo', 2),
+  (12, 6, 'Uruguayas', 'uruguayas', 1),
+  (13, 6, 'Brasileras', 'brasileras', 2),
+  (14, 6, 'Argentinas', 'argentinas', 3);
 
 INSERT INTO colores (id, valor, nombre, hex, orden) VALUES
   (1, 'negro', 'Negro', '#1f1a17', 1),
@@ -68,148 +86,148 @@ INSERT INTO colores (id, valor, nombre, hex, orden) VALUES
   (10, 'celeste', 'Celeste', '#b9d3e3', 10);
 
 -- ── Productos (fotos en public/img/productos) ───────────
-INSERT INTO productos (id, nombre, categoria_id, color_id, precio, costo, stock, etiqueta, resumen, descripcion, destacados) VALUES
-  (1, 'Torpedo Argentino', 1, 1, 68000, 34000, 8, 'Más vendido', 'Nuestro titular: no es solo un mate. Forrado en cuero croco con virola de alpaca maciza y el sol de bronce cincelado.', 'El torpedo que no puede faltar en la ronda. Calabaza seleccionada, forrada en cuero croco y terminada a mano con virola de alpaca maciza al lacre.
+INSERT INTO productos (id, nombre, categoria_id, subcategoria_id, color_id, precio, costo, stock, etiqueta, resumen, descripcion, destacados) VALUES
+  (1, 'Torpedo Argentino', 1, 1, 1, 68000, 34000, 8, 'Más vendido', 'Nuestro titular: no es solo un mate. Forrado en cuero croco con virola de alpaca maciza y el sol de bronce cincelado.', 'El torpedo que no puede faltar en la ronda. Calabaza seleccionada, forrada en cuero croco y terminada a mano con virola de alpaca maciza al lacre.
 
 El aplique de bronce cincelado con el sol y la base de alpaca al lacre le dan firmeza y un acabado que dura toda la vida.', 'Virola de alpaca maciza al lacre
 Forrado en cuero croco
 Aplique de bronce cincelado
 Base de alpaca al lacre'),
-  (2, 'Torpedo Premium Argentina', 1, 1, 85000, 42000, 5, 'Exclusivo', 'Edición premium con el 10 en bronce: cuero croco, virola de alpaca cincelada y terminaciones de lujo.', 'Un torpedo pensado para los que viven la celeste y blanca. Forrado en cuero croco y coronado con una virola de alpaca cincelada a mano.
+  (2, 'Torpedo Premium Argentina', 1, 1, 1, 85000, 42000, 5, 'Exclusivo', 'Edición premium con el 10 en bronce: cuero croco, virola de alpaca cincelada y terminaciones de lujo.', 'Un torpedo pensado para los que viven la celeste y blanca. Forrado en cuero croco y coronado con una virola de alpaca cincelada a mano.
 
 El aplique de bronce con el número 10 lo convierte en una pieza de colección.', 'Aplique de bronce con el 10
 Forrado en cuero croco
 Virola de alpaca cincelada
 Pieza de colección'),
-  (3, 'Imperial Premium Argentina', 1, 1, 78000, 39000, 6, 'Nuevo', 'El clásico imperial con virola y guarda de alpaca, forrado en cuero croco y el sol de bronce.', 'El imperial de siempre, llevado a su versión más premium. Virola y guarda de alpaca trabajadas a mano y forrado en cuero croco.
+  (3, 'Imperial Premium Argentina', 1, 2, 1, 78000, 39000, 6, 'Nuevo', 'El clásico imperial con virola y guarda de alpaca, forrado en cuero croco y el sol de bronce.', 'El imperial de siempre, llevado a su versión más premium. Virola y guarda de alpaca trabajadas a mano y forrado en cuero croco.
 
 El aplique de bronce con el sol completa una pieza elegante para regalar o para disfrutar todos los días.', 'Virola y guarda de alpaca
 Forrado en cuero croco
 Aplique de bronce
 Hecho 100% a mano'),
-  (4, 'Torpedo Uruguayo', 1, 1, 62000, 30000, 10, NULL, 'Boca ancha al estilo uruguayo, con virola de alpaca cincelada y aro de bronce.', 'El torpedo uruguayo tiene boca ancha y cuerpo firme para cebar cómodo. Va forrado en cuero y lleva virola de alpaca cincelada.
+  (4, 'Torpedo Uruguayo', 1, 1, 1, 62000, 30000, 10, NULL, 'Boca ancha al estilo uruguayo, con virola de alpaca cincelada y aro de bronce.', 'El torpedo uruguayo tiene boca ancha y cuerpo firme para cebar cómodo. Va forrado en cuero y lleva virola de alpaca cincelada.
 
 El aro de bronce le da el contraste justo. Un mate para usar todos los días.', 'Virola de alpaca cincelada
 Aro de bronce
 Forrado en cuero
 Boca ancha'),
-  (5, 'Torpedo Roma de Calabaza', 1, 5, 74000, 36000, 4, 'Últimas unidades', 'Calabaza forrada en cuero repujado, virola de alpaca labrada y patitas de alpaca en la base.', 'El Torpedo Roma combina el cuero repujado con una virola de alpaca labrada que se luce en cada cebada.
+  (5, 'Torpedo Roma de Calabaza', 1, 1, 5, 74000, 36000, 4, 'Últimas unidades', 'Calabaza forrada en cuero repujado, virola de alpaca labrada y patitas de alpaca en la base.', 'El Torpedo Roma combina el cuero repujado con una virola de alpaca labrada que se luce en cada cebada.
 
 La base lleva patitas de alpaca, así el mate queda firme sobre la mesa.', 'Cuero repujado a mano
 Virola de alpaca labrada
 Base con patitas de alpaca
 Calabaza seleccionada'),
-  (6, 'Mate Exclusivo Criollo', 1, 4, 58000, 28000, 7, NULL, 'Bien de campo: base de cuero crudo con costura de tiento y virola de alpaca.', 'Un mate con alma criolla. La base va forrada en cuero crudo y cosida a mano con tiento, como se hacía siempre.
+  (6, 'Mate Exclusivo Criollo', 1, 3, 4, 58000, 28000, 7, NULL, 'Bien de campo: base de cuero crudo con costura de tiento y virola de alpaca.', 'Un mate con alma criolla. La base va forrada en cuero crudo y cosida a mano con tiento, como se hacía siempre.
 
 La virola de alpaca le da la terminación. Por ser cuero natural, cada pieza tiene su propio tono.', 'Base de cuero crudo
 Costura de tiento a mano
 Virola de alpaca
 Cada pieza es única'),
-  (7, 'Bombillón de Alpaca Tatuado', 3, 6, 45000, 22000, 12, 'Exclusivo', 'Bombillón de alpaca con el cuerpo tatuado a mano y pico de bronce.', 'Un bombillón de alpaca con el cuerpo grabado a mano, trazo por trazo.
+  (7, 'Bombillón de Alpaca Tatuado', 3, 7, 6, 45000, 22000, 12, 'Exclusivo', 'Bombillón de alpaca con el cuerpo tatuado a mano y pico de bronce.', 'Un bombillón de alpaca con el cuerpo grabado a mano, trazo por trazo.
 
 La paleta ancha filtra bien la yerba y el pico de bronce le da el toque final.', 'Alpaca de primera calidad
 Cuerpo tatuado a mano
 Pico de bronce
 Paleta ancha'),
-  (8, 'Bombillón de Alpaca Joyero', 3, 6, 52000, 25000, 8, NULL, 'Bombillón de alpaca con virola cincelada, terminación de joyería y pico de bronce.', 'El bombillón joyero lleva una virola cincelada con terminación de joyería.
+  (8, 'Bombillón de Alpaca Joyero', 3, 7, 6, 52000, 25000, 8, NULL, 'Bombillón de alpaca con virola cincelada, terminación de joyería y pico de bronce.', 'El bombillón joyero lleva una virola cincelada con terminación de joyería.
 
 Alpaca de primera y pico de bronce: una pieza para lucir en la ronda.', 'Alpaca de primera calidad
 Virola cincelada estilo joyero
 Pico de bronce
 Paleta ancha'),
-  (9, 'Bombillón de Alpaca Hoja', 3, 6, 48000, 23000, 10, NULL, 'Bombillón de alpaca con detalle de hoja cincelada y pico de bronce.', 'Un bombillón de alpaca con una hoja cincelada a mano en el cuerpo.
+  (9, 'Bombillón de Alpaca Hoja', 3, 7, 6, 48000, 23000, 10, NULL, 'Bombillón de alpaca con detalle de hoja cincelada y pico de bronce.', 'Un bombillón de alpaca con una hoja cincelada a mano en el cuerpo.
 
 Pico de bronce y paleta ancha que filtra bien: liviano, firme y para toda la vida.', 'Alpaca de primera calidad
 Detalle de hoja cincelada
 Pico de bronce
 Paleta ancha'),
-  (10, 'Combo Línea Hudson', 5, 7, 189000, 105000, 4, 'Nuevo', 'El equipo completo para llevar a todos lados: canasta, portabombilla, termo, mate y bombilla de acero Hudson.', 'La Línea Hudson es el equipo matero completo para salir. Trae la canasta Hudson acolchada, el portabombilla, el termo Hudson de acero y el mate con bombilla de acero.
+  (10, 'Combo Línea Hudson', 5, 10, 7, 189000, 105000, 4, 'Nuevo', 'El equipo completo para llevar a todos lados: canasta, portabombilla, termo, mate y bombilla de acero Hudson.', 'La Línea Hudson es el equipo matero completo para salir. Trae la canasta Hudson acolchada, el portabombilla, el termo Hudson de acero y el mate con bombilla de acero.
 
 Todo combinado en azul marino con detalles de cuero suela. Es ideal para regalar o para tener el mate siempre listo.', 'Canasta Hudson acolchada
 Termo Hudson de acero inoxidable
 Mate y bombilla de acero Hudson
 Portabombilla incluido'),
-  (11, 'Combo del 10', 5, 1, 165000, 90000, 5, 'Edición limitada', 'Para disfrutar cada previa: termo antiderrame del 10, mate imperial con alpaca premium y bombilla pico de loro.', 'El Combo del 10 es para los que viven el fútbol con un mate en la mano. Trae el termo antiderrame con el 10, el mate imperial con alpaca premium y la bombilla pico de loro.
+  (11, 'Combo del 10', 5, 10, 1, 165000, 90000, 5, 'Edición limitada', 'Para disfrutar cada previa: termo antiderrame del 10, mate imperial con alpaca premium y bombilla pico de loro.', 'El Combo del 10 es para los que viven el fútbol con un mate en la mano. Trae el termo antiderrame con el 10, el mate imperial con alpaca premium y la bombilla pico de loro.
 
 Va todo en negro con detalles en alpaca. Es un regalo que no falla.', 'Termo antiderrame del 10
 Mate imperial con alpaca premium
 Bombilla pico de loro
 Ideal para regalar'),
-  (12, 'Termo Stanley Mate System', 2, 1, 135000, 95000, 5, 'Nuevo', 'Termo Stanley de acero inoxidable con pico cebador y vaso de acero: el agua a punto durante toda la ronda.', 'Un termo de acero inoxidable con doble pared, pensado para el mate. El pico cebador deja caer el agua justa y no te quema la yerba.
+  (12, 'Termo Stanley Mate System', 2, 4, 1, 135000, 95000, 5, 'Nuevo', 'Termo Stanley de acero inoxidable con pico cebador y vaso de acero: el agua a punto durante toda la ronda.', 'Un termo de acero inoxidable con doble pared, pensado para el mate. El pico cebador deja caer el agua justa y no te quema la yerba.
 
 Trae un vaso de acero en la tapa y una manija firme. Viene en su caja, listo para regalar.', 'Acero inoxidable de doble pared
 Pico cebador para mate
 Vaso de acero incluido
 Manija lateral'),
-  (13, 'Termo Termolar R-Evolution', 2, 9, 72000, 48000, 6, NULL, 'Garrafa térmica Termolar de acero inoxidable con pico cebador y manija.', 'El R-Evolution de Termolar es una garrafa térmica de acero inoxidable que mantiene el agua caliente por horas.
+  (13, 'Termo Termolar R-Evolution', 2, 5, 9, 72000, 48000, 6, NULL, 'Garrafa térmica Termolar de acero inoxidable con pico cebador y manija.', 'El R-Evolution de Termolar es una garrafa térmica de acero inoxidable que mantiene el agua caliente por horas.
 
 Tiene pico cebador para el mate y una manija cómoda para llevarlo a todos lados.', 'Marca Termolar
 Acero inoxidable
 Pico cebador
 Manija lateral'),
-  (14, 'Termo Mate-Tereré', 2, 1, 58000, 38000, 8, NULL, 'Termo compacto para mate y tereré, con tapa de pico y aro dorado.', 'Un termo compacto y liviano que sirve para el mate caliente y para el tereré bien frío.
+  (14, 'Termo Mate-Tereré', 2, 6, 1, 58000, 38000, 8, NULL, 'Termo compacto para mate y tereré, con tapa de pico y aro dorado.', 'Un termo compacto y liviano que sirve para el mate caliente y para el tereré bien frío.
 
 La tapa con pico permite cebar sin derrames. Es ideal para llevar en la mochila.', 'Sirve para mate y tereré
 Tapa con pico cebador
 Compacto y liviano
 Detalle de aro dorado'),
-  (15, 'Bolso Matero Blanco', 4, 8, 65000, 38000, 4, 'Nuevo', 'Bolso matero de cuero sintético blanco con cierre y tira para colgar: entra el termo, el mate y la yerba.', 'Un bolso matero prolijo y canchero, en cuero sintético blanco con vivos negros.
+  (15, 'Bolso Matero Blanco', 4, 8, 8, 65000, 38000, 4, 'Nuevo', 'Bolso matero de cuero sintético blanco con cierre y tira para colgar: entra el termo, el mate y la yerba.', 'Un bolso matero prolijo y canchero, en cuero sintético blanco con vivos negros.
 
 Tiene cierre de punta a punta y una tira para llevarlo colgado. Entran el termo, el mate, la bombilla y el yerbero.', 'Cuero sintético blanco
 Cierre de punta a punta
 Tira para colgar
 Entra el equipo completo'),
-  (16, 'Canasta Matera Hudson', 4, 7, 75000, 45000, 5, NULL, 'La canasta acolchada de la Línea Hudson, sola: azul marino con detalles de cuero suela.', 'La misma canasta que viene en el Combo Línea Hudson, ahora por separado. Es acolchada, en azul marino, con manija y detalles de cuero suela.
+  (16, 'Canasta Matera Hudson', 4, 9, 7, 75000, 45000, 5, NULL, 'La canasta acolchada de la Línea Hudson, sola: azul marino con detalles de cuero suela.', 'La misma canasta que viene en el Combo Línea Hudson, ahora por separado. Es acolchada, en azul marino, con manija y detalles de cuero suela.
 
 Entran el termo, el mate y el yerbero, y va firme a todos lados.', 'Tela acolchada
 Detalles de cuero suela
 Manija firme
 Entra el equipo completo'),
-  (17, 'Combo Tradicional', 5, 1, 145000, 85000, 4, NULL, 'Mate imperial forrado en cuero, canasta de cuero premium, bombilla a elección y yerbero de cuero gamuzado.', 'El combo de siempre para arrancar con todo. Trae un mate imperial forrado en cuero, la canasta de cuero premium y el yerbero de cuero gamuzado.
+  (17, 'Combo Tradicional', 5, 11, 1, 145000, 85000, 4, NULL, 'Mate imperial forrado en cuero, canasta de cuero premium, bombilla a elección y yerbero de cuero gamuzado.', 'El combo de siempre para arrancar con todo. Trae un mate imperial forrado en cuero, la canasta de cuero premium y el yerbero de cuero gamuzado.
 
 La bombilla la elegís vos: escribinos al comprar cuál preferís.', 'Mate imperial forrado en cuero
 Canasta de cuero premium
 Bombilla a elección
 Yerbero de cuero gamuzado'),
-  (18, 'Combo Campestre', 5, 3, 160000, 95000, 4, NULL, 'Torpedo imperial de calabaza, canasta “Sol de Mayo”, bombilla a elección, yerbero de cuero y yerba Rei Verde 1 kg.', 'Un combo con aire de campo: mate torpedo imperial de calabaza forrado en cuero y canasta de cuero premium con el diseño “Sol de Mayo”.
+  (18, 'Combo Campestre', 5, 11, 3, 160000, 95000, 4, NULL, 'Torpedo imperial de calabaza, canasta “Sol de Mayo”, bombilla a elección, yerbero de cuero y yerba Rei Verde 1 kg.', 'Un combo con aire de campo: mate torpedo imperial de calabaza forrado en cuero y canasta de cuero premium con el diseño “Sol de Mayo”.
 
 Suma yerbero de cuero, bombilla a elección y un paquete de yerba Rei Verde tradicional de 1 kg.', 'Mate torpedo imperial de calabaza
 Canasta de cuero “Sol de Mayo”
 Yerbero de cuero
 Yerba Rei Verde 1 kg'),
-  (19, 'Combo Pasión Futbolera', 5, 1, 210000, 125000, 3, 'Edición limitada', 'Mochila térmica pelota, termo, mate imperial y bombillón de alpaca, todo edición “Campeón del Mundo”.', 'Para los que siguen festejando. Trae la mochila térmica reforzada con diseño de pelota y el termo edición “Campeón del Mundo”.
+  (19, 'Combo Pasión Futbolera', 5, 10, 1, 210000, 125000, 3, 'Edición limitada', 'Mochila térmica pelota, termo, mate imperial y bombillón de alpaca, todo edición “Campeón del Mundo”.', 'Para los que siguen festejando. Trae la mochila térmica reforzada con diseño de pelota y el termo edición “Campeón del Mundo”.
 
 Se completa con el mate imperial y el bombillón de alpaca de la misma edición.', 'Mochila térmica reforzada (pelota)
 Termo “Campeón del Mundo”
 Mate imperial “Campeón del Mundo”
 Bombillón de alpaca'),
-  (20, 'Combo Total Black', 5, 1, 230000, 140000, 3, 'Exclusivo', 'Termo System Quantium, canasta de cuero premium, imperial en cuero, yerbero y azucarero, y bombilla pico de loro.', 'Todo en negro, de punta a punta. Trae el termo “System Quantium”, la canasta de cuero premium y un imperial forrado en cuero.
+  (20, 'Combo Total Black', 5, 10, 1, 230000, 140000, 3, 'Exclusivo', 'Termo System Quantium, canasta de cuero premium, imperial en cuero, yerbero y azucarero, y bombilla pico de loro.', 'Todo en negro, de punta a punta. Trae el termo “System Quantium”, la canasta de cuero premium y un imperial forrado en cuero.
 
 Suma yerbero y azucarero a elección y una bombilla pico de loro también a elección.', 'Termo “System Quantium”
 Canasta de cuero premium
 Imperial forrado en cuero
 Yerbero, azucarero y bombilla a elección'),
-  (21, 'Yerba Mate Rojo “10” 500 g', 6, 4, 7500, 5000, 30, NULL, 'La edición especial del 10 de Mate Rojo (Mate Pampa), en paquete de 500 g.', 'Yerba mate Mate Rojo de Mate Pampa, en su edición especial con el 10.
+  (21, 'Yerba Mate Rojo “10” 500 g', 6, 14, 4, 7500, 5000, 30, NULL, 'La edición especial del 10 de Mate Rojo (Mate Pampa), en paquete de 500 g.', 'Yerba mate Mate Rojo de Mate Pampa, en su edición especial con el 10.
 
 Paquete de 500 g.', 'Edición especial “10”
 Mate Pampa · Mate Rojo
 Paquete de 500 g'),
-  (22, 'Yerba Verdecita Selección Especial', 6, 4, 8500, 6000, 25, NULL, 'Yerba elaborada despalada, padrón uruguayo: molienda fina y sabor intenso.', 'Verdecita Selección Especial es una yerba elaborada despalada, de padrón uruguayo.
+  (22, 'Yerba Verdecita Selección Especial', 6, 12, 4, 8500, 6000, 25, NULL, 'Yerba elaborada despalada, padrón uruguayo: molienda fina y sabor intenso.', 'Verdecita Selección Especial es una yerba elaborada despalada, de padrón uruguayo.
 
 Tiene molienda fina y sabor intenso, para los que toman mate bien cargado.', 'Elaborada despalada
 Padrón uruguayo
 Sabor intenso'),
-  (23, 'Yerba Rei Verde Export 500 g', 6, 4, 9500, 6800, 25, NULL, 'Rei Verde Export, “o sabor da tradição”: yerba brasileña de molienda fina en paquete de 500 g.', 'Rei Verde Export es una yerba mate brasileña de molienda fina y color verde intenso.
+  (23, 'Yerba Rei Verde Export 500 g', 6, 13, 4, 9500, 6800, 25, NULL, 'Rei Verde Export, “o sabor da tradição”: yerba brasileña de molienda fina en paquete de 500 g.', 'Rei Verde Export es una yerba mate brasileña de molienda fina y color verde intenso.
 
 Paquete de 500 g.', 'Yerba brasileña
 Molienda fina
 Paquete de 500 g'),
-  (24, 'Yerba Baldo 5 kg', 6, 4, 52000, 40000, 10, 'Más vendido', 'La clásica Baldo de padrón uruguayo en bolsa de 5 kg, para la ronda de todos los días.', 'Baldo es una de las yerbas de padrón uruguayo más elegidas: molienda fina y sabor fuerte.
+  (24, 'Yerba Baldo 5 kg', 6, 12, 4, 52000, 40000, 10, 'Más vendido', 'La clásica Baldo de padrón uruguayo en bolsa de 5 kg, para la ronda de todos los días.', 'Baldo es una de las yerbas de padrón uruguayo más elegidas: molienda fina y sabor fuerte.
 
 Viene en bolsa de 5 kg, que rinde para muchas rondas.', 'Padrón uruguayo
 Sabor fuerte
 Bolsa de 5 kg'),
-  (25, 'Yerba Canarias 1 kg', 6, 4, 14500, 10500, 20, NULL, 'Canarias Sabor Tradicional, la yerba uruguaya de siempre, en paquete de 1 kg.', 'Canarias Sabor Tradicional es la yerba uruguaya de siempre: molienda fina y sabor intenso.
+  (25, 'Yerba Canarias 1 kg', 6, 12, 4, 14500, 10500, 20, NULL, 'Canarias Sabor Tradicional, la yerba uruguaya de siempre, en paquete de 1 kg.', 'Canarias Sabor Tradicional es la yerba uruguaya de siempre: molienda fina y sabor intenso.
 
 Paquete de 1 kg.', 'Sabor tradicional
 Padrón uruguayo

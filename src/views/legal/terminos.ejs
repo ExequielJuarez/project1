@@ -1,0 +1,109 @@
+<p>
+  Estos términos regulan el uso de <strong><%= tienda.web || 'este sitio' %></strong> y las compras que hacés en él.
+  Al navegar, crear una cuenta o comprar, aceptás estas condiciones. Si no estás de acuerdo, por favor no uses el sitio.
+</p>
+
+<h2 id="quienes-somos">1. Quiénes somos</h2>
+<p>El sitio es operado por:</p>
+<ul>
+  <li><strong>Nombre comercial:</strong> <%= tienda.nombre %></li>
+  <li><strong>Titular / Razón social:</strong> <%- d(tienda.razonSocial, 'TIENDA_RAZON_SOCIAL') %></li>
+  <li><strong>CUIT:</strong> <%- d(tienda.cuit, 'TIENDA_CUIT') %></li>
+  <li><strong>Domicilio:</strong> <%- d(tienda.direccion, 'TIENDA_DIRECCION') %></li>
+  <li><strong>Email:</strong> <%- d(tienda.email, 'TIENDA_EMAIL') %><% if (tienda.telefono) { %> · <strong>Teléfono:</strong> <%= tienda.telefono %><% } %></li>
+</ul>
+
+<h2 id="cuenta">2. Cuenta de usuario</h2>
+<ul>
+  <li>Para comprar necesitás una cuenta. Podés crearla con tu email y una contraseña, con un código que te enviamos por email o con tu cuenta de Google.</li>
+  <li>Tenés que ser mayor de 18 años o contar con autorización de tus padres o tutores.</li>
+  <li>Los datos que cargues tienen que ser verdaderos y estar actualizados. Sos responsable de cuidar tu contraseña y de lo que se haga con tu cuenta.</li>
+  <li>Podemos suspender cuentas usadas de forma fraudulenta o que incumplan estos términos.</li>
+</ul>
+
+<h2 id="productos">3. Productos</h2>
+<ul>
+  <li>Muchos de nuestros productos son <strong>artesanales y hechos a mano</strong>. Por eso puede haber pequeñas diferencias de tono, veta, forma o terminación entre una unidad y otra, y respecto de las fotos. Esas diferencias no se consideran defectos.</li>
+  <li>Las fotos son ilustrativas. Las medidas y características se informan en la ficha de cada producto.</li>
+  <li>Todas las ofertas están sujetas al stock disponible. Si después de tu compra un producto no estuviera disponible, te avisamos y te devolvemos el dinero completo o te ofrecemos un cambio, a tu elección.</li>
+</ul>
+
+<h2 id="precios">4. Precios</h2>
+<ul>
+  <li>Los precios están en <strong>pesos argentinos</strong> e incluyen IVA.</li>
+  <li>El precio que vale es el que figura al momento de confirmar la compra. Los precios y promociones pueden cambiar sin aviso, pero nunca afectan una compra ya confirmada.</li>
+  <li>Pagando por transferencia bancaria tenés un <strong>10% de descuento</strong>. Los cupones de descuento no son acumulables entre sí, salvo que se indique lo contrario.</li>
+  <li>Si hubiera un error evidente en un precio publicado (por ejemplo, un valor claramente irrisorio), te vamos a contactar para ofrecerte confirmar la compra al precio correcto o cancelarla con la devolución total de lo pagado.</li>
+</ul>
+
+<h2 id="pagos">5. Medios de pago</h2>
+<ul>
+  <li><strong>Tarjetas de crédito y débito, y dinero en cuenta:</strong> se procesan a través de <strong>Mercado Pago</strong>. Los datos de tu tarjeta los maneja Mercado Pago y nunca pasan por nuestros servidores. Las cuotas disponibles se informan al pagar.</li>
+  <li><strong>Transferencia bancaria:</strong> al confirmar el pedido te mostramos los datos para transferir. Preparamos el pedido cuando verificamos que la transferencia se acreditó.</li>
+  <li>Los pedidos con tarjeta que no se pagan quedan reservados por 48 horas. Pasado ese plazo se cancelan solos y el stock vuelve a estar disponible.</li>
+</ul>
+
+<h2 id="envios">6. Envíos y retiro</h2>
+<ul>
+  <li>Enviamos a todo el país. El costo se calcula en el carrito según el código postal. El envío es <strong>gratis en compras desde $150.000</strong>.</li>
+  <li>Los plazos de entrega son estimados y empiezan a contar desde que el pago está acreditado. Pueden variar por causas ajenas a nosotros (demoras del correo, feriados, clima, etc.).</li>
+  <li>También podés <strong>retirar sin costo</strong><% if (tienda.direccion) { %> en <%= tienda.direccion %><% } %>, coordinando día y horario con nosotros.</li>
+  <li>Al recibir el paquete, revisalo. Si llega dañado o abierto, avisanos dentro de las 48 horas con fotos para que lo resolvamos.</li>
+</ul>
+
+<h2 id="arrepentimiento">7. Derecho de arrepentimiento</h2>
+<p>
+  Como compraste a distancia (por internet), tenés derecho a <strong>revocar la compra dentro de los 10 días corridos</strong>
+  contados desde que recibiste el producto o desde que se celebró el contrato, lo último que ocurra, sin dar explicaciones
+  y sin costo, según el artículo 34 de la Ley 24.240 de Defensa del Consumidor y los artículos 1110 y siguientes del
+  Código Civil y Comercial de la Nación.
+</p>
+<ul>
+  <li>Podés hacerlo desde el <a href="/arrepentimiento">Botón de arrepentimiento</a>, que está siempre visible en el pie del sitio, o escribiéndonos.</li>
+  <li>Te enviamos un código de identificación de tu solicitud dentro de las 24 horas (Resolución 424/2020 de la Secretaría de Comercio Interior).</li>
+  <li>El producto tiene que estar en las mismas condiciones en que lo recibiste. Los gastos de devolución corren por nuestra cuenta.</li>
+  <li>Te devolvemos el total pagado por el mismo medio de pago.</li>
+  <li>No aplica a productos <strong>personalizados</strong> (por ejemplo, con grabado de nombres o fechas) ni a productos que por su naturaleza no pueden devolverse, como yerba o alimentos abiertos (artículo 1116 del Código Civil y Comercial).</li>
+</ul>
+<p>Más detalles en <a href="/cambios-y-devoluciones">Cambios y devoluciones</a>.</p>
+
+<h2 id="garantia">8. Garantía</h2>
+<p>
+  Los productos nuevos tienen una <strong>garantía legal de 6 meses</strong> por defectos de fabricación, según el artículo 11
+  de la Ley 24.240. La garantía no cubre el desgaste natural por uso, golpes, caídas, ni el mal uso o mal cuidado
+  (por ejemplo, no curar el mate o dejarlo con yerba húmeda por días).
+</p>
+
+<h2 id="propiedad">9. Propiedad intelectual</h2>
+<p>
+  La marca, el logo, los textos, las fotos y el diseño del sitio pertenecen a <%= tienda.nombre %> o se usan con autorización.
+  No pueden copiarse ni usarse sin permiso por escrito.
+</p>
+
+<h2 id="responsabilidad">10. Uso del sitio</h2>
+<ul>
+  <li>Hacemos lo posible para que el sitio funcione siempre, pero puede haber interrupciones por mantenimiento o problemas técnicos.</li>
+  <li>No está permitido usar el sitio para fines ilícitos, intentar acceder sin permiso a cuentas o sistemas, ni cargar contenido que perjudique a otros.</li>
+</ul>
+
+<h2 id="datos">11. Datos personales</h2>
+<p>
+  Tratamos tus datos según la Ley 25.326 de Protección de Datos Personales. Te explicamos qué datos usamos y para qué
+  en la <a href="/privacidad">Política de privacidad</a> y en la <a href="/cookies">Política de cookies</a>.
+</p>
+
+<h2 id="cambios-terminos">12. Cambios en estos términos</h2>
+<p>
+  Podemos actualizar estos términos. La versión vigente es la publicada en esta página, con su fecha de actualización.
+  Los cambios no afectan las compras ya confirmadas.
+</p>
+
+<h2 id="ley">13. Ley aplicable y reclamos</h2>
+<ul>
+  <li>Estos términos se rigen por las leyes de la República Argentina.</li>
+  <li>Ante cualquier problema, escribinos primero: vamos a intentar resolverlo rápido.</li>
+  <li>Como consumidor podés hacer tu reclamo ante la autoridad de defensa del consumidor:
+    <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los consumidores. Para reclamos ingrese aquí</a>.
+  </li>
+  <li>En caso de conflicto judicial, son competentes los tribunales del domicilio del consumidor (artículo 36 de la Ley 24.240).</li>
+</ul>

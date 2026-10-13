@@ -1,0 +1,222 @@
+/* ==========================================================
+   PÁGINAS LEGALES — Términos, privacidad, cookies, cambios
+   Mobile first · Tablet ≥ 768px · PC ≥ 1100px
+   ========================================================== */
+
+.migas--legal {
+  padding: 18px 0;
+}
+
+.legal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  padding-bottom: 72px;
+}
+
+/* ---------- Índice de páginas ---------- */
+.legal__lateral {
+  padding: 18px;
+  background: var(--blanco);
+  border: 1px solid var(--gris-200);
+}
+
+.legal__lateral-titulo {
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gris-600);
+}
+
+.legal__paginas {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legal__paginas a {
+  display: block;
+  padding: 8px 10px;
+  font-size: 14px;
+  border-left: 2px solid transparent;
+  transition: background var(--transicion), border-color var(--transicion);
+}
+
+.legal__paginas a:hover {
+  background: var(--hueso);
+}
+
+.legal__paginas a.activo {
+  border-left-color: var(--acento);
+  background: var(--hueso);
+  font-weight: 600;
+}
+
+.legal__paginas .legal__arrepentimiento {
+  margin-top: 8px;
+  border: 1px solid var(--acento);
+  color: var(--acento);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ---------- Texto ---------- */
+.legal__texto {
+  min-width: 0;
+  max-width: 760px;
+  line-height: 1.7;
+  color: var(--gris-900);
+}
+
+.legal__etiqueta {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--acento);
+}
+
+.legal__titulo {
+  margin-top: 8px;
+  font-family: var(--fuente-titulos);
+  font-size: clamp(34px, 6vw, 52px);
+  font-weight: 500;
+  line-height: 1.05;
+  color: var(--negro);
+}
+
+.legal__fecha {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gris-600);
+}
+
+.legal__indice {
+  margin: 24px 0 8px;
+  padding: 16px 20px;
+  background: var(--hueso);
+  border: 1px solid var(--gris-200);
+}
+
+.legal__indice p {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.legal__texto .legal__indice ul {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.legal__indice a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal__texto h2 {
+  margin-top: 36px;
+  padding-top: 8px;
+  font-family: var(--fuente-titulos);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--negro);
+  scroll-margin-top: 120px;
+}
+
+.legal__texto h3 {
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.legal__texto p,
+.legal__texto ul,
+.legal__texto ol {
+  margin-top: 12px;
+}
+
+.legal__texto ul,
+.legal__texto ol {
+  padding-left: 22px;
+}
+
+.legal__texto li + li {
+  margin-top: 6px;
+}
+
+.legal__texto a:not(.btn) {
+  color: var(--acento);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.legal__destacado {
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: var(--hueso);
+  border-left: 3px solid var(--acento);
+}
+
+.legal__tabla {
+  width: 100%;
+  margin-top: 14px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.legal__tabla th,
+.legal__tabla td {
+  padding: 10px;
+  border: 1px solid var(--gris-200);
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal__tabla th {
+  background: var(--hueso);
+  font-weight: 700;
+}
+
+.legal__tabla-caja {
+  overflow-x: auto;
+}
+
+.legal__falta {
+  padding: 0 4px;
+  background: #fff3cd;
+  color: #7a5200;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.legal__boton {
+  margin-top: 18px;
+}
+
+/* ==========================================================
+   PC ≥ 1100px: índice fijo al costado
+   ========================================================== */
+@media (min-width: 1100px) {
+  .legal {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .legal__lateral {
+    position: sticky;
+    top: 140px;
+  }
+}

@@ -39,6 +39,8 @@ No borran datos.
 | `004-pagos-y-cuenta.sql` | Agrega a `pedidos` el estado del cobro (Mercado Pago) y a `usuarios` el DNI y la dirección guardada. La app también las agrega sola al arrancar |
 | `005-superadmin.sql` | Agrega el rol `superadmin` (edita la página de inicio). La app también lo agrega sola |
 | `006-varios-colores.sql` | Crea `producto_colores` (cada producto se vende en uno o varios colores) y le pasa a cada producto el color que tenía. La app también lo hace sola |
+| `007-subcategorias.sql` | Agrega `categorias.slug` (URLs `/categoria/mates`), crea `subcategorias` y `productos.subcategoria_id`. La app también lo hace sola |
+| `008-arrepentimientos.sql` | Crea `arrepentimientos` (solicitudes del Botón de arrepentimiento). La app también la crea sola |
 
 ## Tablas
 
@@ -50,6 +52,8 @@ No borran datos.
 | `productos` | Catálogo: precio, **costo** (para la ganancia), stock, etiqueta, textos | → `categorias`, → `colores` |
 | `producto_imagenes` | Fotos de cada producto (hasta 8). La de menor `orden` es la principal | → `productos` (se borran con el producto) |
 | `producto_colores` | Colores en que se vende cada producto (el cliente elige uno). El de menor `orden` es el principal (`productos.color_id`) | → `productos`, `colores` (se borran con el producto) |
+| `subcategorias` | Filtros de cada sección (Mates → Torpedos, Imperiales…). Se editan en Panel → Categorías | → `categorias` (se borran con la categoría); si se borra una, sus productos quedan sin subcategoría |
+| `arrepentimientos` | Solicitudes del Botón de arrepentimiento, con su código | — |
 | `especificaciones` | Ficha técnica de cada producto (clave / valor) | → `productos` (se borra con el producto) |
 | `favoritos` | Productos guardados por cada usuario | → `usuarios`, → `productos` |
 | `cupones` | Códigos de descuento (porcentaje, activo, vencimiento) | — |

@@ -1,0 +1,265 @@
+/* ==========================================================
+   ADMIN · CATEGORÍAS — Categorías del menú y sus subcategorías
+   (usa base.css + admin.css)
+   Mobile first · Tablet ≥ 768px
+   ========================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Formularios cortos (nombre + botón) ---------- */
+.cat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cat-form .campo__control {
+  height: 40px;
+}
+
+.cat-form__error {
+  font-size: 12px;
+  color: #b3261e;
+}
+
+.cat-form__error:empty {
+  display: none;
+}
+
+.cat-form--flotante {
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  top: calc(100% + 6px);
+  width: min(320px, calc(100vw - 48px));
+  margin: 0;
+  padding: 12px;
+  background: var(--blanco);
+  border: 1px solid var(--gris-200);
+  box-shadow: 0 12px 30px rgba(43, 24, 16, 0.14);
+}
+
+/* ---------- Lista de categorías ---------- */
+.cat-nueva {
+  margin-bottom: 16px;
+}
+
+.cat-lista {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cat__cabecera {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px 14px;
+  align-items: start;
+}
+
+.cat__orden {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cat__flecha {
+  width: 30px;
+  height: 26px;
+  border: 1px solid var(--gris-200);
+  background: var(--hueso);
+  color: var(--gris-900);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.cat__flecha:hover:not(:disabled) {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+.cat__flecha:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.cat__nombre {
+  font-family: var(--fuente-titulos);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.cat__datos {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--gris-600);
+  overflow-wrap: anywhere;
+}
+
+.cat__datos a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cat__acciones {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cat__renombrar {
+  position: relative;
+}
+
+.cat__renombrar summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.cat__renombrar summary::-webkit-details-marker {
+  display: none;
+}
+
+.cat__renombrar .cat-form--flotante {
+  left: 0;
+  right: auto;
+}
+
+.cat__borrar {
+  color: #b3261e;
+}
+
+.cat__borrar:disabled {
+  color: var(--gris-400);
+  cursor: not-allowed;
+}
+
+/* ---------- Subcategorías ---------- */
+.cat__subs {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--gris-200);
+}
+
+.cat__subtitulo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cat__subtitulo small {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--gris-600);
+}
+
+.cat__vacio {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--gris-600);
+}
+
+.subs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sub {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--gris-200);
+  background: var(--hueso);
+  font-size: 13px;
+}
+
+.sub__cantidad {
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--gris-200);
+  font-size: 11px;
+  text-align: center;
+}
+
+.sub__editar summary,
+.sub__borrar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: none;
+  color: var(--gris-600);
+  font-size: 13px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.sub__editar summary::-webkit-details-marker {
+  display: none;
+}
+
+.sub__editar summary:hover {
+  color: var(--acento);
+}
+
+.sub__borrar button:hover {
+  color: #b3261e;
+}
+
+.cat-form--sub {
+  margin-top: 12px;
+}
+
+/* ==========================================================
+   TABLET ≥ 768px
+   ========================================================== */
+@media (min-width: 768px) {
+  .cat-form {
+    grid-template-columns: minmax(0, 360px) auto;
+    justify-content: start;
+    align-items: center;
+  }
+
+  .cat-form__error {
+    grid-column: 1 / -1;
+  }
+
+  .cat-form--flotante {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .cat__cabecera {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .cat__acciones {
+    grid-column: auto;
+    justify-content: flex-end;
+  }
+}

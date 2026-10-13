@@ -225,6 +225,12 @@ npm ci --omit=dev
 pm2 restart tienda
 ```
 
+> **Cambios en la base:** al arrancar, la tienda agrega sola las tablas y columnas nuevas, sin borrar nada.
+> Las subcategorías de las secciones, por ejemplo, vienen en `database/migraciones/007` y `008`.
+> Si todavía tenés los **datos de prueba** y querés las subcategorías ya cargadas, corré
+> `npm run db:instalar` y después `pm2 restart tienda`. Ojo: borra todo, así que **no lo hagas con ventas reales**.
+> Con ventas reales, asigná las subcategorías desde **Panel → Categorías** y editando cada producto.
+
 ### Ver la base con MySQL Workbench desde tu PC
 Nueva conexión con estos datos:
 

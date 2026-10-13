@@ -202,7 +202,7 @@
     }
 
     function pintar({ productos, total }, q) {
-      const url = `/catalogo?q=${encodeURIComponent(q)}`;
+      const url = `/buscar?q=${encodeURIComponent(q)}`;
       caja.innerHTML = productos.length
         ? productos
             .map(
@@ -323,6 +323,26 @@
   // Mensaje que dejó el servidor para mostrar una sola vez
   const flash = $("#flash");
   if (flash) setTimeout(() => mostrarToast(flash.dataset.mensaje), 300);
+
+  // ---------- Aviso de cookies (se muestra una sola vez) ----------
+  const avisoCookies = $("#avisoCookies");
+  if (avisoCookies) {
+    let visto = false;
+    try {
+      visto = localStorage.getItem("avisoCookies") === "1";
+    } catch {
+      /* sin almacenamiento: se muestra igual y se cierra con el botón */
+    }
+    avisoCookies.hidden = visto;
+    $("#aceptarCookies").addEventListener("click", () => {
+      avisoCookies.hidden = true;
+      try {
+        localStorage.setItem("avisoCookies", "1");
+      } catch {
+        /* modo privado */
+      }
+    });
+  }
 
   window.Tienda = { $, $$, abrirPanel, cerrarPaneles, mostrarToast, api, actualizarContador, actualizarFavoritos, agregarAlCarrito };
 })();

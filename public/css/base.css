@@ -989,28 +989,6 @@ ul {
   color: var(--blanco);
 }
 
-.newsletter {
-  display: flex;
-  margin-top: 14px;
-  border-bottom: 1px solid var(--gris-600);
-}
-
-.newsletter input {
-  flex: 1;
-  min-width: 0;
-  height: 42px;
-  border: 0;
-  background: transparent;
-  color: var(--blanco);
-  outline: none;
-}
-
-.newsletter button {
-  padding: 0 6px;
-  color: var(--blanco);
-  font-size: 18px;
-}
-
 .footer__redes {
   display: flex;
   gap: 16px;
@@ -1030,7 +1008,66 @@ ul {
 }
 
 .footer__pagos {
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
+}
+
+.footer__arrepentimiento {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid var(--acento-claro);
+  color: var(--acento-claro);
+  font-weight: 600;
+}
+
+.footer__oficiales {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.footer__oficiales a,
+.footer__redes a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ==========================================================
+   AVISO DE COOKIES (solo cookies necesarias: aparece una vez)
+   ========================================================== */
+.aviso-cookies {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--negro);
+  color: var(--hueso);
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.aviso-cookies[hidden] {
+  display: none;
+}
+
+.aviso-cookies a {
+  color: var(--acento-claro);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.aviso-cookies .btn {
+  align-self: flex-end;
+  height: 40px;
+  padding: 0 18px;
+  font-size: 11px;
+  background: var(--acento);
+  border-color: var(--acento);
 }
 
 /* ==========================================================
@@ -1525,7 +1562,16 @@ select.campo__control {
 
   .footer__legal {
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: space-between;
+    gap: 8px 24px;
+  }
+
+  .aviso-cookies {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    max-width: 420px;
   }
 
   .whatsapp {
@@ -1624,7 +1670,7 @@ select.campo__control {
   }
 
   .footer__grilla {
-    grid-template-columns: 1.6fr 1fr 1fr 1.4fr;
+    grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
     gap: 48px;
     padding-top: 72px;
   }

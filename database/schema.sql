@@ -19,6 +19,7 @@ SET NAMES utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS contenido_inicio;
+DROP TABLE IF EXISTS arrepentimientos;
 DROP TABLE IF EXISTS notificaciones;
 DROP TABLE IF EXISTS pedido_items;
 DROP TABLE IF EXISTS pedidos;
@@ -28,6 +29,7 @@ DROP TABLE IF EXISTS producto_imagenes;
 DROP TABLE IF EXISTS producto_colores;
 DROP TABLE IF EXISTS productos;
 DROP TABLE IF EXISTS colores;
+DROP TABLE IF EXISTS subcategorias;
 DROP TABLE IF EXISTS categorias;
 DROP TABLE IF EXISTS cupones;
 DROP TABLE IF EXISTS usuarios;
@@ -68,9 +70,24 @@ CREATE TABLE usuarios (
 CREATE TABLE categorias (
   id      SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre  VARCHAR(60)       NOT NULL,
-  orden   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  slug    VARCHAR(60)       NOT NULL COMMENT 'para la URL: /categoria/bolsos-materos',
+  orden   SMALLINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'orden en el menú',
   PRIMARY KEY (id),
-  UNIQUE KEY uq_categorias_nombre (nombre)
+  UNIQUE KEY uq_categorias_nombre (nombre),
+  UNIQUE KEY uq_categorias_slug (slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- subcategorias: filtros propios de cada categoría (Mates → Torpedos, Imperiales…)
+CREATE TABLE subcategorias (
+  id            SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  categoria_id  SMALLINT UNSIGNED NOT NULL,
+  nombre        VARCHAR(40)       NOT NULL,
+  slug          VARCHAR(40)       NOT NULL,
+  orden         SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_subcategorias_slug (categoria_id, slug),
+  CONSTRAINT fk_subcategorias_categoria FOREIGN KEY (categoria_id) REFERENCES categorias (id)
+    ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE colores (
@@ -91,6 +108,7 @@ CREATE TABLE productos (
   id              INT UNSIGNED      NOT NULL AUTO_INCREMENT,
   nombre          VARCHAR(90)       NOT NULL,
   categoria_id    SMALLINT UNSIGNED NOT NULL,
+  subcategoria_id SMALLINT UNSIGNED NULL COMMENT 'opcional; si se borra la subcategoría queda en NULL',
   color_id        SMALLINT UNSIGNED NOT NULL,
   precio          DECIMAL(12, 2)    NOT NULL,
   costo           DECIMAL(12, 2)    NOT NULL DEFAULT 0,
@@ -104,10 +122,13 @@ CREATE TABLE productos (
   PRIMARY KEY (id),
   KEY idx_productos_categoria (categoria_id),
   KEY idx_productos_color (color_id),
+  KEY idx_productos_subcategoria (subcategoria_id),
   CONSTRAINT fk_productos_categoria FOREIGN KEY (categoria_id) REFERENCES categorias (id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_productos_color FOREIGN KEY (color_id) REFERENCES colores (id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_productos_subcategoria FOREIGN KEY (subcategoria_id) REFERENCES subcategorias (id)
+    ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT ck_productos_precio CHECK (precio > 0),
   CONSTRAINT ck_productos_costo CHECK (costo >= 0 AND costo <= precio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -302,4 +323,27 @@ CREATE TABLE contenido_inicio (
   PRIMARY KEY (id),
   CONSTRAINT fk_contenido_inicio_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- arrepentimientos: pedidos del "Botón de arrepentimiento"
+-- (Res. 424/2020 SCI). El cliente cancela una compra dentro de
+-- los 10 días y recibe un código de identificación.
+-- ----------------------------------------------------------
+CREATE TABLE arrepentimientos (
+  id             INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  codigo         VARCHAR(20)   NOT NULL COMMENT 'código que recibe el cliente, ej: ARR-7K2Q9M',
+  usuario_id     INT UNSIGNED  NULL,
+  pedido_id      INT UNSIGNED  NULL COMMENT 'el pedido, si el número y el email coinciden',
+  numero_pedido  VARCHAR(20)   NOT NULL COMMENT 'el número que escribió el cliente',
+  nombre         VARCHAR(90)   NOT NULL,
+  email          VARCHAR(120)  NOT NULL,
+  telefono       VARCHAR(20)   NULL,
+  motivo         VARCHAR(500)  NULL,
+  estado         ENUM('recibida', 'resuelta') NOT NULL DEFAULT 'recibida',
+  resuelta_en    DATETIME      NULL,
+  creado_en      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_arrepentimientos_codigo (codigo),
+  KEY idx_arrepentimientos_estado (estado, creado_en)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

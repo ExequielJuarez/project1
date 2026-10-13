@@ -11,6 +11,7 @@ const adminRouter = require("./routes/admin.Routes");
 const db = require("./model/database/models");
 const carritoService = require("./services/carritoService");
 const favoritoService = require("./services/favoritoService");
+const categoriaService = require("./services/categoriaService");
 
 // Render (y otros hostings) indican el puerto en PORT
 const puerto = Number(process.env.PORT) || 3000;
@@ -46,6 +47,8 @@ app.use(
 app.locals.formatoPrecio = (n) =>
   "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 app.locals.descuentoTransferencia = 0.1;
+// Datos de la tienda (razón social, CUIT, contacto…) para el pie y las páginas legales
+app.locals.tienda = require("./helpers/tienda")();
 // Estado de un pedido explicado para el cliente (Mis pedidos)
 Object.assign(app.locals, require("./helpers/situacionPedido"));
 // Roles: esAdmin(usuario) / esSuperAdmin(usuario) en las vistas
@@ -76,6 +79,9 @@ app.use(async (req, res, next) => {
   res.locals.usuarioLocal = req.session.usuarioLogueado || null;
   res.locals.cantidadCarrito = carritoService.cantidadTotal(req.session);
   res.locals.favoritosIds = await favoritoService.ids(req.session);
+  // Categorías del menú (pestañas) y a dónde lleva "Seguir comprando"
+  res.locals.categoriasMenu = await categoriaService.menu();
+  res.locals.urlProductos = res.locals.categoriasMenu[0]?.url || "/";
 
   // Mensaje de un solo uso (se muestra como aviso y se borra)
   res.locals.flash = req.session.flash || null;

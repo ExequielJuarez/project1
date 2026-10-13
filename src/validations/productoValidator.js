@@ -1,11 +1,20 @@
 const { body } = require("express-validator");
 const productoService = require("../services/productoService");
+const db = require("../model/database/models");
 
 module.exports = [
   body("nombre").trim().isLength({ min: 3, max: 90 }).withMessage("El nombre debe tener entre 3 y 90 caracteres"),
   body("categoria")
     .custom(async (valor) => (await productoService.categorias()).includes(valor) || Promise.reject())
     .withMessage("Elegí una categoría"),
+  // Subcategoría opcional: si viene, tiene que ser de la categoría elegida
+  body("subcategoria")
+    .optional({ values: "falsy" })
+    .custom(async (valor, { req }) => {
+      const sub = await db.Subcategoria.findByPk(Number(valor) || 0, { include: [{ association: "categoria" }] });
+      return (sub && sub.categoria?.nombre === req.body.categoria) || Promise.reject();
+    })
+    .withMessage("Esa subcategoría no es de la categoría elegida"),
   // Uno o varios colores (el primero marcado es el principal)
   body("colores")
     .custom(async (valor) => {

@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
       id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
       nombre: { type: DataTypes.STRING(90), allowNull: false },
       categoriaId: { type: DataTypes.SMALLINT.UNSIGNED, allowNull: false },
+      subcategoriaId: { type: DataTypes.SMALLINT.UNSIGNED, allowNull: true },
       colorId: { type: DataTypes.SMALLINT.UNSIGNED, allowNull: false },
       precio: { type: DataTypes.DECIMAL(12, 2), allowNull: false, validate: { min: 0.01 } },
       costo: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0, validate: { min: 0 } },
@@ -19,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Producto.associate = (db) => {
     Producto.belongsTo(db.Categoria, { as: "categoria", foreignKey: "categoriaId" });
+    Producto.belongsTo(db.Subcategoria, { as: "subcategoria", foreignKey: "subcategoriaId" });
     Producto.belongsTo(db.Color, { as: "color", foreignKey: "colorId" });
     // Todos los colores en los que se vende (el principal es colorId)
     Producto.belongsToMany(db.Color, {

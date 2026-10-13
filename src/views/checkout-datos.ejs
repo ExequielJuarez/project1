@@ -106,9 +106,8 @@
         </div>
 
         <div class="retiro" id="grupoRetiro" <%= esRetiro ? '' : 'hidden' %>>
-          <p class="retiro__titulo">(DIRECCIÓN DEL SHOWROOM)</p>
-          <p>(Barrio, Ciudad) · Lunes a viernes de 10 a 18 hs · Sábados de 10 a 14 hs</p>
-          <p>Te avisamos por email cuando tu pedido esté listo para retirar.</p>
+          <p class="retiro__titulo"><%= tienda.direccion || 'Retiro en nuestro local' %></p>
+          <p>Sin costo. Te avisamos cuando tu pedido esté listo y coordinamos día y horario para retirarlo.</p>
         </div>
       </fieldset>
 
@@ -144,7 +143,7 @@
       </div>
 
       <p class="checkout-legal">
-        Tus datos se usan solo para procesar tu pedido. (LINK A POLÍTICA DE PRIVACIDAD)
+        Tus datos se usan solo para procesar tu pedido. Ver la <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a>.
       </p>
     </form>
   </main>

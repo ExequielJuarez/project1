@@ -40,7 +40,7 @@
       </span>
       <h2 class="carrito-vacio__titulo">Tu carrito está vacío</h2>
       <p>Todavía no agregaste productos. Date una vuelta por el catálogo.</p>
-      <a href="/catalogo" class="btn btn--solido">Ir al catálogo</a>
+      <a href="<%= urlProductos %>" class="btn btn--solido">Ver productos</a>
     </div>
 
     <!-- Lista de productos -->
@@ -106,7 +106,7 @@
       </div>
 
       <div class="lista__acciones">
-        <a href="/catalogo" class="lista__link">← Seguir comprando</a>
+        <a href="<%= urlProductos %>" class="lista__link">← Seguir comprando</a>
         <button class="lista__link lista__link--vaciar" id="btnVaciar">Vaciar carrito</button>
       </div>
     </section>
@@ -211,7 +211,7 @@
     <section class="relacionados contenedor">
       <div class="relacionados__cabecera">
         <h2 class="relacionados__titulo">Completá tu compra</h2>
-        <a href="/catalogo" class="relacionados__link">Ver todo →</a>
+        <a href="<%= urlProductos %>" class="relacionados__link">Ver más →</a>
       </div>
       <div class="relacionados__grilla">
         <% recomendados.forEach((p, i) => { %>

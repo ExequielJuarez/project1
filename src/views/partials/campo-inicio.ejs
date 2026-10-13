@@ -110,7 +110,7 @@
              type="<%= def.tipo === 'numero' ? 'number' : 'text' %>"
              <%- def.tipo === 'numero' ? `min="0" max="${def.max}" step="1" inputmode="numeric"` : `maxlength="${def.max}"` %>
              <%- def.tipo === 'link' ? 'inputmode="url" spellcheck="false" autocapitalize="off"' : '' %>
-             placeholder="<%= def.placeholder || (def.tipo === 'link' ? '/catalogo o https://…' : '') %>"
+             placeholder="<%= def.placeholder || (def.tipo === 'link' ? '/categoria/mates o https://…' : '') %>"
              <% if (tieneOriginal) { %>data-original="<%= original %>"<% } %>
              <%- error ? 'aria-invalid="true"' : '' %>>
     <% } %>

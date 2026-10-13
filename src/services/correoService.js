@@ -78,4 +78,27 @@ async function enviarCodigo({ email, codigo, motivo, minutos }) {
   }
 }
 
-module.exports = { modo, enviarCodigo };
+// Email simple de texto (por ejemplo, la confirmación del arrepentimiento).
+// Devuelve true si se envió. Sin SMTP no hace nada (en desarrollo lo muestra en la consola).
+async function enviarTexto({ email, asunto, texto }) {
+  const m = modo();
+  if (m === "desactivado") return false;
+  if (m === "demo") {
+    console.log(`✉️  [modo demo] Email para ${email}: ${asunto}`);
+    return false;
+  }
+  try {
+    await obtenerTransporte().sendMail({
+      from: process.env.MAIL_FROM || `"${TIENDA()}" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: asunto,
+      text: `${texto}\n\n${TIENDA()}`,
+    });
+    return true;
+  } catch (error) {
+    console.error("No se pudo enviar el email:", error.message);
+    return false;
+  }
+}
+
+module.exports = { modo, enviarCodigo, enviarTexto };

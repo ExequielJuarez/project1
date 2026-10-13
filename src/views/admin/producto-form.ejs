@@ -38,8 +38,28 @@
           <section class="panel">
             <h2 class="panel__titulo">Información</h2>
             <div class="campos-admin">
-              <%- include('../partials/campo', { nombre: 'nombre', etiqueta: 'Nombre', clase: 'campo--completo', placeholder: 'Ej: Producto Madera Torneada a Mano', attrs: 'maxlength="90" required' }) %>
+              <%- include('../partials/campo', { nombre: 'nombre', etiqueta: 'Nombre', clase: 'campo--completo', placeholder: 'Ej: Torpedo Argentino', attrs: 'maxlength="90" required' }) %>
               <%- include('../partials/campo', { nombre: 'categoria', etiqueta: 'Categoría', tipo: 'select', opciones: categorias }) %>
+              <%
+                // Subcategoría: el navegador muestra solo las de la categoría elegida
+                const subElegida = String(d.subcategoria || "");
+              %>
+              <div class="campo <%= errores.subcategoria ? 'campo--error' : '' %>" id="campoSubcategoria"
+                   data-categorias="<%= JSON.stringify(Object.fromEntries(categoriasCompletas.map(c => [c.nombre, c.id]))) %>">
+                <label class="campo__label" for="subcategoria">Subcategoría <span class="campo__opcional">(opcional)</span></label>
+                <select class="campo__control" id="subcategoria" name="subcategoria" aria-describedby="subcategoria-error subcategoria-ayuda">
+                  <option value="">Sin subcategoría</option>
+                  <% categoriasCompletas.forEach(c => { c.subcategorias.forEach(s => { %>
+                    <option value="<%= s.id %>" data-categoria="<%= c.nombre %>" <%= subElegida === String(s.id) ? 'selected' : '' %>><%= s.nombre %></option>
+                  <% }) }) %>
+                </select>
+                <p class="subcat-ayuda" id="subcategoria-ayuda">Es el filtro de la sección. <button type="button" class="subcat-nueva" id="btnSubNueva">+ Crear una nueva</button></p>
+                <div class="subcat-campos" id="subNuevaCampos" hidden>
+                  <input type="text" id="subNuevaNombre" class="campo__control" maxlength="40" placeholder="Ej: Torpedos, Cuero, Canastas" aria-label="Nombre de la subcategoría nueva">
+                  <button type="button" class="btn btn--solido btn--chico" id="btnSubGuardar">Agregar</button>
+                </div>
+                <p class="campo__error" id="subcategoria-error"><%= errores.subcategoria ? errores.subcategoria.msg : '' %></p>
+              </div>
 <%
                 const elegidos = [].concat(d.colores || []);
                 // Los elegidos primero, en el orden guardado (el primero es el principal)

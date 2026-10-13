@@ -9,6 +9,9 @@ const admin = require("../controllers/adminController");
 const notificaciones = require("../controllers/notificacionesController");
 const subirImagenesInicio = require("../middlewares/subirImagenesInicio");
 const inicio = require("../controllers/inicioAdminController");
+const categorias = require("../controllers/categoriasAdminController");
+const arrepentimientos = require("../controllers/arrepentimientosAdminController");
+const arrepentimientoService = require("../services/arrepentimientoService");
 const multer = require("multer");
 
 // La vista previa recibe solo textos (las fotos nuevas se muestran desde el navegador)
@@ -19,6 +22,12 @@ const soloCampos = (req, res, next) =>
 
 // Todo el panel requiere un administrador (admin o superadmin)
 router.use(soloAdmin);
+
+// Solicitudes de arrepentimiento sin resolver (número en el menú lateral)
+router.use(async (req, res, next) => {
+  res.locals.arrepentimientosPendientes = await arrepentimientoService.pendientes();
+  next();
+});
 
 router.get("/", admin.dashboard);
 
@@ -32,6 +41,20 @@ router.put("/productos/:id", subirImagenes, productoValidator, admin.actualizar)
 router.delete("/productos/:id", admin.eliminar);
 router.patch("/productos/:id/stock", admin.ajustarStock);
 router.post("/colores", admin.crearColor);
+
+// ── Categorías y subcategorías (filtros de cada sección) ───
+router.get("/categorias", categorias.ver);
+router.post("/categorias", categorias.crearCategoria);
+router.patch("/categorias/:id", categorias.renombrarCategoria);
+router.patch("/categorias/:id/mover", categorias.moverCategoria);
+router.delete("/categorias/:id", categorias.borrarCategoria);
+router.post("/categorias/:id/subcategorias", categorias.crearSubcategoria);
+router.patch("/subcategorias/:id", categorias.renombrarSubcategoria);
+router.delete("/subcategorias/:id", categorias.borrarSubcategoria);
+
+// ── Botón de arrepentimiento ───────────────────────────────
+router.get("/arrepentimientos", arrepentimientos.ver);
+router.patch("/arrepentimientos/:id", arrepentimientos.cambiarEstado);
 
 // ── Pedidos ────────────────────────────────────────────────
 router.get("/pedidos", admin.pedidos);

@@ -10,7 +10,7 @@
         <div>
           <p class="admin-cabecera__migas"><a href="/admin">Panel</a> / <a href="/admin/productos">Productos</a> / #<%= String(p.id).padStart(4, '0') %></p>
           <h1 class="admin-cabecera__titulo"><%= p.nombre %></h1>
-          <p class="admin-cabecera__bajada"><%= p.categoria %> · <span class="stock-tag stock-tag--<%= claseStock %>"><%= textoStock %></span></p>
+          <p class="admin-cabecera__bajada"><%= p.categoria %><%= p.subcategoria ? ` › ${p.subcategoria}` : '' %> · <span class="stock-tag stock-tag--<%= claseStock %>"><%= textoStock %></span></p>
         </div>
         <div class="admin-cabecera__acciones">
           <a href="/producto/<%= p.id %>" class="btn btn--linea btn--chico btn--blanco" target="_blank" rel="noopener">Ver en la tienda ↗</a>
@@ -70,6 +70,7 @@
               <div><dt>Costo</dt><dd><%= formatoPrecio(p.costo) %></dd></div>
               <div><dt>Ganancia por unidad</dt><dd><strong><%= formatoPrecio(p.precio - p.costo) %></strong> (<%= formatoPorcentaje(margen) %>)</dd></div>
               <div><dt>Categoría</dt><dd><%= p.categoria %></dd></div>
+              <div><dt>Subcategoría</dt><dd><%= p.subcategoria || '—' %></dd></div>
               <div><dt><%= p.colores.length > 1 ? `Colores (${p.colores.length})` : 'Color' %></dt><dd class="lista-colores">
                 <% p.colores.forEach(c => { %><span><span class="punto-color" style="--muestra: <%= c.hex %>"></span><%= c.nombre %></span><% }) %>
               </dd></div>

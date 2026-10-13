@@ -3,6 +3,7 @@ const router = express.Router();
 
 const productoService = require("../services/productoService");
 const inicioService = require("../services/inicioService");
+const categoriaService = require("../services/categoriaService");
 const carritoController = require("../controllers/carritoController");
 const checkoutController = require("../controllers/checkoutController");
 const checkoutValidator = require("../validations/checkoutValidator");
@@ -14,6 +15,7 @@ const favoritosController = require("../controllers/favoritosController");
 const pagosController = require("../controllers/pagosController");
 const cuentaController = require("../controllers/cuentaController");
 const soloLogueados = require("../middlewares/soloLogueados");
+const legal = require("../controllers/legalController");
 const loginParaComprar = require("../middlewares/loginParaComprar");
 const perfilValidator = require("../validations/perfilValidator");
 const claveValidator = require("../validations/claveValidator");
@@ -25,30 +27,84 @@ router.get("/", async (req, res) => {
   res.render("inicio", { titulo: "Mates artesanales", estilo: "inicio", navActivo: "inicio", contenido });
 });
 
-// ── CATÁLOGO DE PRODUCTOS (y resultados de búsqueda con ?q=) ─
-router.get("/catalogo", async (req, res) => {
-  const busqueda = String(req.query.q || "").trim().slice(0, 60);
-  const [productos, colores, categorias] = await Promise.all([
-    productoService.listar({ q: busqueda }),
-    productoService.colores(),
-    productoService.categorias(),
-  ]);
+// ── LISTADOS DE PRODUCTOS ──────────────────────────────────
+// Cada categoría del menú tiene su página con sus propios filtros
+// (subcategorías, colores y precio): /categoria/mates?sub=torpedos
+// El buscador muestra resultados de todas: /buscar?q=torpedo
 
-  // /catalogo?categoria=Mates (pestañas del menú): la categoría llega marcada en los filtros
-  const categoria = categorias.find((c) => c === req.query.categoria) || "";
+// Arma la lista de colores con cuántos productos tiene cada uno (solo los que hay)
+async function coloresDe(productos) {
+  const colores = await productoService.colores();
+  return colores
+    .map((c) => ({ ...c, cantidad: productos.filter((p) => p.colores.some((x) => x.valor === c.valor)).length }))
+    .filter((c) => c.cantidad > 0);
+}
+
+router.get("/categoria/:slug", async (req, res, next) => {
+  const categoria = await categoriaService.porSlug(req.params.slug);
+  if (!categoria) return next(); // → página no encontrada
+
+  const productos = await productoService.listar({ categoriaId: categoria.id });
+  const subElegida = categoria.subcategorias.find((s) => s.slug === req.query.sub) || null;
 
   res.render("catalogo", {
-    titulo: busqueda ? `Resultados para “${busqueda}”` : categoria || "Catálogo",
+    titulo: categoria.nombre,
     estilo: "catalogo",
-    navActivo: categoria || "catalogo",
-    busqueda,
+    navActivo: categoria.slug,
+    modo: "categoria",
+    busqueda: "",
     categoria,
     productos,
-    colores: colores
-      .map((c) => ({ ...c, cantidad: productos.filter((p) => p.colores.some((x) => x.valor === c.valor)).length }))
-      .filter((c) => c.cantidad > 0),
-    categorias: categorias.map((nombre) => ({ nombre, cantidad: productos.filter((p) => p.categoria === nombre).length })),
+    colores: await coloresDe(productos),
+    // Filtro propio de la sección: sus subcategorías (solo las que tienen productos)
+    grupo: {
+      titulo: "Tipo",
+      campo: "sub",
+      opciones: categoria.subcategorias
+        .map((s) => ({
+          valor: s.slug,
+          nombre: s.nombre,
+          cantidad: productos.filter((p) => p.subcategoriaId === s.id).length,
+          marcado: subElegida?.id === s.id,
+        }))
+        .filter((o) => o.cantidad > 0),
+    },
+    subElegida,
   });
+});
+
+router.get("/buscar", async (req, res) => {
+  const busqueda = String(req.query.q || "").trim().slice(0, 60);
+  if (!busqueda) return res.redirect("/");
+
+  const [productos, menu] = await Promise.all([productoService.listar({ q: busqueda }), categoriaService.menu()]);
+  res.render("catalogo", {
+    titulo: `Resultados para “${busqueda}”`,
+    estilo: "catalogo",
+    navActivo: "",
+    modo: "busqueda",
+    busqueda,
+    categoria: null,
+    productos,
+    colores: await coloresDe(productos),
+    grupo: {
+      titulo: "Categoría",
+      campo: "categoria",
+      opciones: menu
+        .map((c) => ({ valor: c.nombre, nombre: c.nombre, cantidad: productos.filter((p) => p.categoria === c.nombre).length }))
+        .filter((o) => o.cantidad > 0),
+    },
+    subElegida: null,
+  });
+});
+
+// Direcciones viejas (/catalogo, /catalogo?q=…, /catalogo?categoria=Mates)
+router.get("/catalogo", async (req, res) => {
+  const q = String(req.query.q || "").trim();
+  if (q) return res.redirect(301, `/buscar?q=${encodeURIComponent(q)}`);
+  const menu = await categoriaService.menu();
+  const pedida = menu.find((c) => c.nombre === req.query.categoria);
+  res.redirect(pedida ? 301 : 302, (pedida || menu[0])?.url || "/");
 });
 
 // Sugerencias mientras se escribe en el buscador (JSON)
@@ -83,7 +139,7 @@ router.get("/producto/:id", async (req, res) => {
   res.render("producto", {
     titulo: producto.nombre,
     estilo: "producto",
-    navActivo: "catalogo",
+    navActivo: producto.categoriaSlug,
     producto,
     colores,
     relacionados,
@@ -129,6 +185,15 @@ router.get("/mi-cuenta/pedidos", soloLogueados, cuentaController.pedidos);
 router.get("/mi-cuenta/datos", soloLogueados, cuentaController.verDatos);
 router.post("/mi-cuenta/datos", soloLogueados, perfilValidator, cuentaController.guardarDatos);
 router.post("/mi-cuenta/clave", soloLogueados, claveValidator, cuentaController.cambiarClave);
+
+// ── LEGALES ────────────────────────────────────────────────
+router.get("/terminos", legal.pagina("terminos"));
+router.get("/privacidad", legal.pagina("privacidad"));
+router.get("/cookies", legal.pagina("cookies"));
+router.get("/cambios-y-devoluciones", legal.pagina("cambios"));
+// Botón de arrepentimiento (Res. 424/2020): sin necesidad de iniciar sesión
+router.get("/arrepentimiento", legal.verArrepentimiento);
+router.post("/arrepentimiento", legal.enviarArrepentimiento);
 
 // ── USUARIOS ───────────────────────────────────────────────
 router.get("/login", soloInvitados, usuarioController.verLogin);

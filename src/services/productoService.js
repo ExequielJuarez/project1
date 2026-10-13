@@ -18,10 +18,11 @@ const POR_DEFECTO = {
 };
 
 const incluir = [
-  { association: "categoria", attributes: ["id", "nombre"] },
+  { association: "categoria", attributes: ["id", "nombre", "slug"] },
   { association: "color", attributes: ["id", "valor", "nombre", "hex"] },
   { association: "imagenes", attributes: ["id", "ruta", "orden"] },
   { association: "colores", attributes: ["id", "valor", "nombre", "hex"], through: { attributes: ["orden"] } },
+  { association: "subcategoria", attributes: ["id", "nombre", "slug"], required: false },
 ];
 
 // Las fotos siempre ordenadas: la principal primero
@@ -44,6 +45,10 @@ function plano(p) {
     nombre: x.nombre,
     categoriaId: x.categoriaId,
     categoria: x.categoria?.nombre || "",
+    categoriaSlug: x.categoria?.slug || "",
+    subcategoriaId: x.subcategoriaId || null,
+    subcategoria: x.subcategoria?.nombre || "",
+    subcategoriaSlug: x.subcategoria?.slug || "",
     colorId: x.colorId,
     color: x.color?.valor || "",
     colorInfo: x.color || null,
@@ -64,7 +69,8 @@ function plano(p) {
 }
 
 // ── Consultas ───────────────────────────────────────────────
-async function listar({ q = "", categoria = "", stock = "", orden = "" } = {}) {
+// categoria: nombre (panel admin) · categoriaId: id (páginas de categoría de la tienda)
+async function listar({ q = "", categoria = "", categoriaId = null, stock = "", orden = "" } = {}) {
   const where = {};
   const texto = q.trim();
   if (texto) {
@@ -72,9 +78,11 @@ async function listar({ q = "", categoria = "", stock = "", orden = "" } = {}) {
     where[Op.or] = [
       { nombre: { [Op.like]: `%${texto}%` } },
       { "$categoria.nombre$": { [Op.like]: `%${texto}%` } },
+      { "$subcategoria.nombre$": { [Op.like]: `%${texto}%` } },
       ...(/^\d+$/.test(texto) ? [{ id: Number(texto) }] : []),
     ];
   }
+  if (categoriaId) where.categoriaId = categoriaId;
   if (stock === "sin") where.stock = 0;
   if (stock === "bajo") where.stock = { [Op.between]: [1, STOCK_BAJO] };
 
@@ -92,6 +100,7 @@ async function listar({ q = "", categoria = "", stock = "", orden = "" } = {}) {
       incluir[1],
       incluir[2],
       incluir[3],
+      incluir[4],
     ],
     order: [...(ordenes[orden] || [["id", "ASC"]]), ordenImagenes],
   });
@@ -119,8 +128,12 @@ async function relacionados(id, cantidad = 4) {
   const filas = await db.Producto.findAll({
     where: { id: { [Op.ne]: actual.id } },
     include: incluir,
-    // Primero los de la misma categoría
-    order: [[db.sequelize.literal(`categoria_id = ${Number(actual.categoriaId)}`), "DESC"], ["id", "ASC"]],
+    order: [
+      // Primero los de la misma subcategoría, después los de la misma categoría
+      [db.sequelize.literal(`\`Producto\`.\`subcategoria_id\` <=> ${actual.subcategoriaId ? Number(actual.subcategoriaId) : -1}`), "DESC"],
+      [db.sequelize.literal(`\`Producto\`.\`categoria_id\` = ${Number(actual.categoriaId)}`), "DESC"],
+      ["id", "ASC"],
+    ],
   });
   return filas.map(plano).slice(0, cantidad);
 }
@@ -202,10 +215,15 @@ async function datosParaGuardar(datos) {
     db.Color.findAll({ where: { valor: valores } }),
   ]);
   const colorIds = valores.map((v) => filasColor.find((c) => c.valor === v)?.id).filter(Boolean);
+  // Subcategoría opcional: solo vale si es de la categoría elegida
+  const subcategoria = datos.subcategoria
+    ? await db.Subcategoria.findOne({ where: { id: Number(datos.subcategoria) || 0, categoriaId: categoria.id } })
+    : null;
   return {
     colorIds,
     nombre: String(datos.nombre).trim(),
     categoriaId: categoria.id,
+    subcategoriaId: subcategoria ? subcategoria.id : null,
     colorId: colorIds[0],
     precio: Number(datos.precio),
     costo: Number(datos.costo),

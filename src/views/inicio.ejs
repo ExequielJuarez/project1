@@ -30,7 +30,7 @@
         <% if (c.portada.bajada) { %><p class="portada__bajada"><%- textoRico(c.portada.bajada) %></p><% } %>
         <div class="portada__acciones">
           <% if (c.portada.botonTexto) { %>
-            <a href="<%= c.portada.botonLink || '/catalogo' %>" class="btn btn--solido"><%= c.portada.botonTexto %></a>
+            <a href="<%= c.portada.botonLink || urlProductos %>" class="btn btn--solido"><%= c.portada.botonTexto %></a>
           <% } %>
           <% if (c.portada.secundarioTexto) { %>
             <a href="<%= c.portada.secundarioLink || '#' %>" class="portada__secundario"><%= c.portada.secundarioTexto %> <span aria-hidden="true"><%= String(c.portada.secundarioLink).startsWith('#') ? '↓' : '→' %></span></a>
@@ -94,7 +94,7 @@
       <ul class="colecciones__lista" id="colecciones">
         <% c.colecciones.items.forEach((col, i) => { %>
           <li class="coleccion coleccion--<%= col.fondo %>" data-revelar>
-            <a href="<%= col.link || '/catalogo' %>" class="coleccion__link">
+            <a href="<%= col.link || urlProductos %>" class="coleccion__link">
               <div class="coleccion__imagen">
                 <img src="<%= col.imagen %>" class="<%= foto(col.imagen) %>" alt="<%= col.nombre %>" width="400" height="500" loading="lazy">
               </div>
@@ -278,7 +278,7 @@
         <% if (c.cierre.etiqueta) { %><p class="seccion-etiqueta seccion-etiqueta--clara" data-revelar><%= c.cierre.etiqueta %></p><% } %>
         <h2 class="cierre__titulo" data-revelar><%- c.cierre.titulo.split("\n").map(textoRico).join("<br>") %></h2>
         <div class="cierre__acciones" data-revelar>
-          <% if (c.cierre.botonTexto) { %><a href="<%= c.cierre.botonLink || '/catalogo' %>" class="btn btn--claro"><%= c.cierre.botonTexto %></a><% } %>
+          <% if (c.cierre.botonTexto) { %><a href="<%= c.cierre.botonLink || urlProductos %>" class="btn btn--claro"><%= c.cierre.botonTexto %></a><% } %>
           <% if (c.cierre.secundarioTexto) { %><a href="<%= c.cierre.secundarioLink || '#' %>" class="cierre__link"><%= c.cierre.secundarioTexto %> →</a><% } %>
         </div>
       </div>

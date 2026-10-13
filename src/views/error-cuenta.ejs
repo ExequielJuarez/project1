@@ -7,7 +7,7 @@
     <p class="error-cuenta__texto"><%= mensaje %></p>
     <div class="error-cuenta__acciones">
       <% if (locals.general) { %>
-        <a href="/catalogo" class="btn btn--solido">Ver el catálogo</a>
+        <a href="<%= locals.urlProductos || '/' %>" class="btn btn--solido">Ver productos</a>
       <% } else if (locals.usuarioLocal) { %>
         <a href="/mi-cuenta/pedidos" class="btn btn--solido">Ir a mis pedidos</a>
       <% } else { %>

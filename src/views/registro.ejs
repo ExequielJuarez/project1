@@ -90,7 +90,7 @@
             <label class="check-simple">
               <input type="checkbox" name="terminos" id="terminos" value="1" <%= datos.terminos ? 'checked' : '' %> aria-describedby="terminos-error">
               <span class="check-simple__caja"></span>
-              <span>Acepto los <a href="#" data-proximamente>términos y condiciones</a> y la <a href="#" data-proximamente>política de privacidad</a></span>
+              <span>Acepto los <a href="/terminos" target="_blank" rel="noopener">términos y condiciones</a> y la <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a></span>
             </label>
             <p class="campo__error" id="terminos-error" aria-live="polite"><%= errorTerminos %></p>
           </div>

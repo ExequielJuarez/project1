@@ -81,7 +81,7 @@
                       <span class="mini"><% if (p.imagen) { %><img src="<%= p.imagen %>" alt=""><% } else { %>IMG<% } %></span>
                       <span class="producto-celda__texto">
                         <strong><%= p.nombre %></strong>
-                        <small>#<%= String(p.id).padStart(4, '0') %> · <%= p.categoria %></small>
+                        <small>#<%= String(p.id).padStart(4, '0') %> · <%= p.categoria %><%= p.subcategoria ? ` › ${p.subcategoria}` : '' %></small>
                       </span>
                     </a>
                   </td>

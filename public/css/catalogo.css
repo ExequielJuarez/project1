@@ -49,6 +49,42 @@
   text-underline-offset: 3px;
 }
 
+/* Accesos rápidos a las subcategorías de la sección */
+.subnav {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.subnav::-webkit-scrollbar {
+  display: none;
+}
+
+.subnav__item {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 1px solid var(--gris-200);
+  background: var(--blanco);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  transition: border-color var(--transicion), background var(--transicion), color var(--transicion);
+}
+
+.subnav__item:hover {
+  border-color: var(--negro);
+}
+
+.subnav__item.activo {
+  background: var(--negro);
+  border-color: var(--negro);
+  color: var(--blanco);
+}
+
 .hero__texto {
   max-width: 420px;
   margin-top: 12px;

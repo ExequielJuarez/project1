@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const productoService = require("../services/productoService");
 const pedidoService = require("../services/pedidoService");
 const pagoService = require("../services/pagoService");
+const categoriaService = require("../services/categoriaService");
 
 const CARPETA_PUBLICA = path.join(__dirname, "../../public");
 
@@ -20,7 +21,11 @@ async function base(req, extra) {
 }
 
 async function renderFormulario(res, req, { producto = null, datos, errores = {}, status = 200 }) {
-  const [categorias, colores] = await Promise.all([productoService.categorias(), productoService.colores()]);
+  const [categorias, colores, categoriasCompletas] = await Promise.all([
+    productoService.categorias(),
+    productoService.colores(),
+    categoriaService.listarCompletas(),
+  ]);
   res.status(status).render(
     "admin/producto-form",
     await base(req, {
@@ -31,6 +36,7 @@ async function renderFormulario(res, req, { producto = null, datos, errores = {}
       datos,
       errores,
       categorias,
+      categoriasCompletas,
       colores,
       MAX_IMAGENES: productoService.MAX_IMAGENES,
     })
@@ -128,7 +134,7 @@ module.exports = {
 
   // ── Productos: crear ───────────────────────────────────────
   async nuevo(req, res) {
-    await renderFormulario(res, req, { datos: { categoria: "", colores: [], stock: 0 } });
+    await renderFormulario(res, req, { datos: { categoria: "", subcategoria: "", colores: [], stock: 0 } });
   },
 
   async crear(req, res) {
@@ -148,7 +154,10 @@ module.exports = {
   async editar(req, res) {
     const producto = await productoService.obtener(req.params.id);
     if (!producto) return res.redirect("/admin/productos");
-    await renderFormulario(res, req, { producto, datos: { ...producto, colores: producto.colores.map((c) => c.valor) } });
+    await renderFormulario(res, req, {
+      producto,
+      datos: { ...producto, subcategoria: producto.subcategoriaId || "", colores: producto.colores.map((c) => c.valor) },
+    });
   },
 
   async actualizar(req, res) {
@@ -243,13 +252,7 @@ module.exports = {
       estilo: "admin-comprobante",
       pedido,
       // Datos de la tienda que salen en el encabezado (ver .env.example)
-      tienda: {
-        cuit: process.env.TIENDA_CUIT || "",
-        direccion: process.env.TIENDA_DIRECCION || "",
-        telefono: process.env.TIENDA_TELEFONO || "",
-        email: process.env.TIENDA_EMAIL || "",
-        web: (process.env.APP_URL || "").replace(/^https?:\/\//, "").replace(/\/$/, ""),
-      },
+      tienda: require("../helpers/tienda")(),
       emitido: new Date(),
     });
   },

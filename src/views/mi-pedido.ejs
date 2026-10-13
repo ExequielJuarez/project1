@@ -59,7 +59,7 @@
               </button>
             </form>
           <% } %>
-          <a href="/catalogo" class="btn btn--linea">Seguir comprando</a>
+          <a href="<%= urlProductos %>" class="btn btn--linea">Seguir comprando</a>
         </div>
         <% if (sePuedePagar && modoPago === 'demo') { %>
           <p class="detalle-estado__nota">Modo demostración: el pago se simula, no se cobra nada.</p>
@@ -155,7 +155,7 @@
           <h2 class="ficha__titulo"><%= p.entrega === 'retiro' ? 'Retiro' : 'Envío' %></h2>
           <% if (p.entrega === 'retiro') { %>
             <p>Retiro en el showroom</p>
-            <p>(DIRECCIÓN DEL SHOWROOM)</p>
+            <p><%= tienda.direccion || 'Te escribimos para coordinar día y horario de retiro.' %></p>
           <% } else { %>
             <p><%= p.calle %> <%= p.altura %><%= p.piso ? `, ${p.piso}` : '' %></p>
             <p><%= p.ciudad %>, <%= p.provincia %> (<%= p.codigoPostal %>)</p>

@@ -1,0 +1,53 @@
+<p>
+  Las cookies son pequeños archivos que un sitio guarda en tu navegador. Acá te contamos cuáles usamos y para qué.
+  <strong>En <%= tienda.nombre %> usamos solo las necesarias para que la tienda funcione:</strong> no usamos cookies de
+  publicidad ni de seguimiento.
+</p>
+
+<h2 id="que-usamos">1. Qué cookies y datos guardamos</h2>
+<div class="legal__tabla-caja">
+  <table class="legal__tabla">
+    <thead>
+      <tr><th scope="col">Nombre</th><th scope="col">Tipo</th><th scope="col">Para qué sirve</th><th scope="col">Duración</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>connect.sid</code></td>
+        <td>Cookie necesaria (propia)</td>
+        <td>Mantiene tu sesión iniciada, tu carrito y tus favoritos mientras navegás. Sin ella no se puede comprar.</td>
+        <td>Hasta que cerrás el navegador, o 30 días si elegiste "Mantener la sesión iniciada".</td>
+      </tr>
+      <tr>
+        <td><code>avisoCookies</code></td>
+        <td>Almacenamiento local (propio)</td>
+        <td>Recuerda que ya viste el aviso de cookies para no mostrártelo en cada página.</td>
+        <td>Hasta que borres los datos del sitio.</td>
+      </tr>
+      <tr>
+        <td>Preferencias del panel</td>
+        <td>Almacenamiento local (propio)</td>
+        <td>Solo para administradores: recuerda, por ejemplo, el tamaño elegido para imprimir comprobantes.</td>
+        <td>Hasta que borres los datos del sitio.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="terceros">2. Servicios de terceros</h2>
+<ul>
+  <li><strong>Google Fonts:</strong> cargamos las tipografías desde los servidores de Google, que pueden registrar tu dirección IP para entregarlas. No instalan cookies de seguimiento.</li>
+  <li><strong>Mercado Pago:</strong> cuando vas a pagar con tarjeta, el pago se hace en el sitio de Mercado Pago, que usa sus propias cookies según su política de privacidad.</li>
+  <li><strong>Google (inicio de sesión):</strong> si elegís "Continuar con Google", el inicio de sesión se hace en el sitio de Google, con sus propias cookies.</li>
+</ul>
+
+<h2 id="como-controlar">3. Cómo controlarlas</h2>
+<p>
+  Podés borrar o bloquear las cookies desde la configuración de tu navegador (Chrome, Firefox, Safari, Edge, etc.).
+  Tené en cuenta que, si bloqueás la cookie de sesión, no vas a poder iniciar sesión ni comprar.
+</p>
+
+<h2 id="mas-info">4. Más información</h2>
+<p>
+  Para saber cómo tratamos tus datos personales, leé la <a href="/privacidad">Política de privacidad</a>.
+  Si tenés dudas, escribinos a <%- d(tienda.email, 'TIENDA_EMAIL') %>.
+</p>
