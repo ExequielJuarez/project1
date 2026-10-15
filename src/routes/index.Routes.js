@@ -16,7 +16,6 @@ const pagosController = require("../controllers/pagosController");
 const cuentaController = require("../controllers/cuentaController");
 const soloLogueados = require("../middlewares/soloLogueados");
 const legal = require("../controllers/legalController");
-const loginParaComprar = require("../middlewares/loginParaComprar");
 const perfilValidator = require("../validations/perfilValidator");
 const claveValidator = require("../validations/claveValidator");
 
@@ -164,11 +163,11 @@ router.post("/favoritos/al-carrito", favoritosController.alCarrito);
 router.post("/favoritos/:id", favoritosController.alternar);
 router.delete("/favoritos", favoritosController.vaciar);
 
-// ── CHECKOUT (solo con la sesión iniciada) ─────────────────
-router.get("/checkout/datos", loginParaComprar, checkoutController.ver);
-router.post("/checkout/datos", loginParaComprar, checkoutValidator, checkoutController.guardar);
-router.get("/checkout/pago", loginParaComprar, checkoutController.verPago);
-router.post("/checkout/confirmar", loginParaComprar, checkoutController.confirmar);
+// ── CHECKOUT (con o sin cuenta) ────────────────────────────
+router.get("/checkout/datos", checkoutController.ver);
+router.post("/checkout/datos", checkoutValidator, checkoutController.guardar);
+router.get("/checkout/pago", checkoutController.verPago);
+router.post("/checkout/confirmar", checkoutController.confirmar);
 
 // ── PAGOS (Mercado Pago) Y DETALLE DE UN PEDIDO ────────────
 router.get("/pedido/:numero", pagosController.detalle);

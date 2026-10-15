@@ -237,31 +237,6 @@
   box-sizing: content-box;
 }
 
-/* Aviso cuando se llega desde el checkout */
-.aviso-compra {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin: 0 0 20px;
-  padding: 14px 16px;
-  background: var(--hueso);
-  border-left: 3px solid var(--acento);
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: var(--gris-900);
-}
-
-.aviso-compra svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-  color: var(--acento);
-}
-
-.aviso-compra strong {
-  display: block;
-  color: var(--negro);
-}
-
 .acceso__registro {
   margin-top: 26px;
   padding-top: 22px;

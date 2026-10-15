@@ -1,6 +1,6 @@
 # Inicio de sesión: Google y código por email
 
-Para comprar en la tienda hay que iniciar sesión. El cliente tiene tres formas de entrar:
+Se puede comprar como invitado o con una cuenta. El cliente que quiera cuenta tiene tres formas de entrar:
 
 1. **Email y contraseña.** Al crear la cuenta le mandamos un código para confirmar que el email es suyo.
 2. **Continuar con Google.**
@@ -76,6 +76,6 @@ GOOGLE_CALLBACK_URL=https://TU-TIENDA.onrender.com/auth/google/callback
 - En la sesión se guarda solo el *hash* del código, nunca el código.
 - **Registro:** la cuenta recién se crea cuando el cliente escribe el código. Hasta ese momento los datos esperan en la sesión, con la contraseña ya hasheada.
 - **Recuperar:** después del código el cliente entra a *Mis datos* y durante 30 minutos puede elegir una contraseña nueva sin escribir la anterior.
-- **Checkout:** `/checkout/*` exige sesión iniciada (`src/middlewares/loginParaComprar.js`). El carrito se conserva al iniciar sesión.
+- **Checkout:** se puede comprar como invitado o con sesión iniciada. Si inicia sesión, el carrito se conserva y los datos se completan solos.
 
 Archivos: `src/services/correoService.js`, `src/services/codigoService.js`, `src/controllers/usuarioController.js`, vistas `login-codigo.ejs` y `verificar-codigo.ejs`.

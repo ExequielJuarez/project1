@@ -26,8 +26,6 @@
               : 'Sin contraseña: escribí tu email y te mandamos un código de 6 números para entrar.' %>
       </p>
 
-      <%- include('partials/aviso-compra') %>
-
       <% if (!disponible) { %>
         <div class="aviso aviso--error" role="alert">Por ahora no podemos mandar códigos. Entrá con tu contraseña o con Google.</div>
       <% } %>

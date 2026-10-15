@@ -38,8 +38,6 @@
       <h1 class="acceso__titulo" id="tituloRegistro">Crear cuenta</h1>
       <p class="acceso__bajada">Te lleva menos de un minuto. Te vamos a mandar un código a tu email para confirmarlo.</p>
 
-      <%- include('partials/aviso-compra') %>
-
       <% if (googleDisponible) { %>
         <%- include('partials/boton-google', { volver, texto: 'Registrarme con Google', clase: 'registro__google' }) %>
 

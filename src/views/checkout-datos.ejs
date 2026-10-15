@@ -33,6 +33,13 @@
     <!-- Formulario -->
     <form class="checkout-form" id="formDatos" action="/checkout/datos" method="POST" novalidate>
 
+      <% if (!locals.usuarioLocal) { %>
+        <p class="checkout-cuenta">
+          ¿Ya tenés cuenta? <a href="/login?volver=<%= encodeURIComponent('/checkout/datos') %>">Iniciá sesión</a> y completamos tus datos.
+          Si no, seguí como invitado.
+        </p>
+      <% } %>
+
       <% if (hayErrores) { %>
         <div class="aviso aviso--error" role="alert" id="resumenErrores" tabindex="-1">
           <strong>Revisá estos datos:</strong>

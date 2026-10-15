@@ -36,10 +36,9 @@ function renderLogin(res, { req, datos = {}, errores = {}, errorGeneral = null, 
   });
 }
 
-// A dónde vuelve después de entrar y si venía de comprar (para el aviso)
+// A dónde vuelve después de entrar
 function destinoYCompra(req) {
-  const volver = destinoSeguro(req.query.volver || req.body?.volver);
-  return { volver, paraComprar: volver.startsWith("/checkout") };
+  return { volver: destinoSeguro(req.query.volver || req.body?.volver) };
 }
 
 function renderPedirCodigo(res, { req, motivo, datos = {}, errores = {}, errorGeneral = null, status = 200 }) {
