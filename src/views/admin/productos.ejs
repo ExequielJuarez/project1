@@ -40,7 +40,6 @@
         <select class="campo__control" name="orden" aria-label="Ordenar">
           <option value="nombre" <%= filtros.orden === 'nombre' ? 'selected' : '' %>>Nombre A–Z</option>
           <option value="precio-desc" <%= filtros.orden === 'precio-desc' ? 'selected' : '' %>>Mayor precio</option>
-          <option value="margen-desc" <%= filtros.orden === 'margen-desc' ? 'selected' : '' %>>Mayor margen</option>
           <option value="stock-asc" <%= filtros.orden === 'stock-asc' ? 'selected' : '' %>>Menos stock</option>
         </select>
         <noscript><button class="btn btn--solido btn--chico" type="submit">Filtrar</button></noscript>
@@ -66,14 +65,12 @@
                 <th>Producto</th>
                 <th class="num">Precio</th>
                 <th class="num">Costo</th>
-                <th class="num">Margen</th>
                 <th>Stock</th>
                 <th><span class="sr-only">Acciones</span></th>
               </tr>
             </thead>
             <tbody>
               <% lista.forEach(p => {
-                   const margen = (p.precio - p.costo) / p.precio;
                    const [claseStock, textoStock] = estadoStock(p.stock); %>
                 <tr data-id="<%= p.id %>">
                   <td data-label="Producto">
@@ -87,10 +84,6 @@
                   </td>
                   <td class="num" data-label="Precio"><%= formatoPrecio(p.precio) %></td>
                   <td class="num" data-label="Costo"><%= formatoPrecio(p.costo) %></td>
-                  <td class="num" data-label="Margen">
-                    <span class="margen"><%= formatoPorcentaje(margen) %></span>
-                    <small class="margen__monto"><%= formatoCompacto(p.precio - p.costo) %> c/u</small>
-                  </td>
                   <td data-label="Stock">
                     <div class="stock-ajuste" data-stock-id="<%= p.id %>">
                       <button type="button" class="stock-ajuste__btn" data-cambio="-1" aria-label="Restar 1 de stock">−</button>

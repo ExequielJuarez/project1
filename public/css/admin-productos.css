@@ -130,15 +130,6 @@
   color: var(--gris-600);
 }
 
-.margen {
-  font-weight: 700;
-}
-
-.margen__monto {
-  font-size: 11px;
-  color: var(--gris-600);
-}
-
 /* Ajuste rápido de stock */
 .stock-ajuste {
   display: inline-flex;
@@ -279,10 +270,6 @@
   .tabla--productos td[data-label="Stock"] .stock-tag {
     display: flex;
     margin-top: 4px;
-  }
-
-  .margen__monto {
-    display: block;
   }
 }
 
